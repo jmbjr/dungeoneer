@@ -26,6 +26,7 @@ color_light_wall = libtcod.Color(130, 110, 50)
 color_dark_ground = libtcod.Color(50, 50, 150)
 color_light_ground = libtcod.Color(200, 180, 50)
 
+MAX_ROOM_MONSTERS = 3 
 
 class Tile:
     #a tile of the map and its properties
@@ -109,31 +110,11 @@ def create_v_tunnel(y1, y2, x):
 
 def make_map():
     global map, player
-    #EXAMPLE 1: TWO PILLARS
-    #fill map with "unblocked" tiles
-    # map = [[Tile(False)
-    #     for y in range(MAP_HEIGHT) ]
-    #         for x in range(MAP_WIDTH) ]
-
-    # map[30][22].blocked = True
-    # map[30][22].block_sight = True
-    # map[50][22].blocked = True
-    # map[50][22].block_sight = True
-
-    #EXAMPLE 2: TWO ROOMS
     #fill map with "blocked" tiles
     map = [[ Tile(True)
         for y in range(MAP_HEIGHT) ]
             for x in range(MAP_WIDTH) ]
 
-    # #create two rooms
-    # room1 = Rect(20, 15, 10, 15)
-    # room2 = Rect(50, 15, 10, 15)
-    # create_room(room1)
-    # create_room(room2)
-    # create_h_tunnel(25, 55, 23)
-
-    #EXAMPLE 3: random rooms
     rooms = []
     num_rooms = 0
 
@@ -184,6 +165,25 @@ def make_map():
             #add to rooms list
             rooms.append(new_room)
             num_rooms +=1
+
+def place_objects(room):
+    #choose random number of monsters
+    num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
+
+    for i in range(num_monsters):
+        #choose random spot for this monster
+        x =  libtcod.random_get_int(0, room.x1, room.x2)
+        y =  libtcod.random_get_int(0, room.y1, room.y2)
+
+        if libtcod.random_get_int(0, 0, 100) < 80: #80% chance for orcs
+            #create orc
+            monster = Object(x, y, 'o', libtcod.desaturated_green)
+        else:
+            #create a troll
+            monster = Object(x, y, 'T', libtcod.darker_green)
+
+        objects.append(monster)
+
 
 def render_all():
     global color_light_wall, color_dark_wall
@@ -283,7 +283,7 @@ def flip_coin():
 ########################################################
 
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
+libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'DUNGEONEER!', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 
