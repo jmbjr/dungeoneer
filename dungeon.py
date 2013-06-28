@@ -1,25 +1,37 @@
 import libtcodpy as libtcod
 import math
+import textwrap
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 LIMIT_FPS = 20
 
 MAP_WIDTH = 80
-MAP_HEIGHT = 45
+MAP_HEIGHT = 40
 
+#GUI rendering
+BAR_WIDTH = 20
+PANEL_HEIGHT = SCREEN_HEIGHT - MAP_HEIGHT
+PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 
+#combat log
+MSG_X = BAR_WIDTH + 2
+MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
+MSG_HEIGHT = PANEL_HEIGHT - 1
+
+#room info
 ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
 MAX_ROOM_MONSTERS = 10 
 
-FOV_ALGO = 0 #default FOV algorithm
+FOV_ALGO = 2 #FOV_SHADOW
 FOV_LIGHT_WALLS = True
 TORCH_RADIUS = 10
 
 WALL_CHAR = '#'
 GROUND_CHAR  = '.'
+
 
 color_dark_wall = libtcod.Color(0, 0, 100)
 color_light_wall = libtcod.Color(130, 110, 50)
@@ -82,6 +94,9 @@ class Object:
         #if not map[self.x + dx][self.y + dy].blocked:
             self.x += dx
             self.y += dy
+            return True
+        else:
+            return False
 
     def draw(self):
         #only draw if in field of view of player
@@ -97,14 +112,33 @@ class Object:
 
     def move_towards(self, target_x, target_y):
         #vector from this object to the target, and distance
-        dx = target_x - self.x
-        dy = target_y - self.y
-        distance = get_distance(dx, dy)
-
+        dx1 = target_x - self.x
+        dy1 = target_y - self.y
+        #print str(target_x) + '/' + str(target_y) + '::' + str(self.x) + '/' + str(self.y)
+        distance = get_distance(dx1, dy1)
+        
         #normalize vector and round accordingly and convert to int
-        dx = int(round(dx / distance))
-        dy = int(round(dy / distance))
-        self.move(dx, dy)
+        dx = int(round(dx1 / distance))
+        dy = int(round(dy1 / distance))
+
+        #print str(dx) + '/' + str(dx1) + ', ' + str(dy) + '/' + str(dy) + ', ' + str(distance)
+        if not self.move(dx, dy):
+        #if monster didn't move. Try diagonal
+            if dx1 != 0:
+                dx = abs(dx1) / dx1
+            elif target_x < self.x:
+                dx = -1
+            else:
+                dx = 1
+
+            if dy != 0:
+                dy = abs(dy1) / dy1
+            elif target_y < self.y:
+                dy = -1
+            else:
+                dy = 1
+            #print 'trying diagonal:' +str(dx) + ', ' + str(dy) + ', ' + str(distance)
+            self.move(dx, dy)
 
     def distance_to(self, other):
         #return distance to another object
@@ -144,10 +178,10 @@ class Fighter:
 
         if damage > 0:
             #make target take some damage
-            print self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.'
+            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', libtcod.yellow)
             target.fighter.take_damage(damage)
         else:
-            print self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.'
+            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', libtcod.white)
 
 class BasicMonster:
     #AI for basic monster
@@ -156,7 +190,8 @@ class BasicMonster:
         monster = self.owner
         if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
             #move towards player if far enough away
-            print 'The ' + self.owner.name + ' clears its throat!'
+            if flip_coin() and flip_coin() and flip_coin():
+                 message ('The ' + self.owner.name + ' clears its throat!', monster.color)
             if monster.distance_to(player) >= 2:
                 monster.move_towards(player.x, player.y)
 
@@ -333,18 +368,49 @@ def render_all():
     #blit contents of con to root console
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
-    #show player's stats
-    libtcod.console_set_default_foreground(con, libtcod.white)
-    libtcod.console_print_ex(0, 1, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.LEFT, 'HP: ' + str(player.fighter.hp) + '/' + str(player.fighter.max_hp))
+    #show player's stats via GUI panel
+    libtcod.console_set_default_background(panel, libtcod.black)
+    libtcod.console_clear(panel)
+
+    #show player stats
+    render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
+
+    #print the game messages, one line at a time
+    y = 1
+    for (line, color) in game_msgs:
+        libtcod.console_set_default_foreground(panel, color)
+        libtcod.console_print_ex(panel, MSG_X, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
+        y += 1
+
+    #display names of objects under the mouse
+    libtcod.console_set_default_foreground(panel, libtcod.light_gray)
+    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse())
+
+    #blit panel to root console
+    libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
+
+def get_names_under_mouse():
+    global mouse
+    #return a string with the names of all objects under the mouse
+    (x, y) = (mouse.cx, mouse.cy)
+
+    #create list with the names of all objects at the mouse's coords and in FOV
+    names = [obj.name for obj in objects
+        if obj.x == x and obj.y == y and libtcod.map_is_in_fov(fov_map, obj.x, obj.y)]
+    
+    names = ', '.join(names) #join names separated by commas
+    return names.capitalize()
+
 
 def handle_keys():
     global fov_recompute
+    global key
 
     #for real-time, uncomment
     #key = libtcod.console_check_for_keypress()
 
     #for turn-based, uncomment
-    key = libtcod.console_wait_for_keypress(True)
+    #key = libtcod.console_wait_for_keypress(True)
     key_char = chr(key.c)
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
@@ -354,35 +420,41 @@ def handle_keys():
         return 'exit' #exit game
 
     if game_state == 'playing':
+        #rest
+        if key.vk == libtcod.KEY_KPDEC :
+            player_resting()
         #movement keys
-        if libtcod.console_is_key_pressed(libtcod.KEY_UP) or key_char == 'k' or libtcod.console_is_key_pressed(libtcod.KEY_KP8) :
+        elif key.vk == libtcod.KEY_UP or key_char == 'k' or key.vk == libtcod.KEY_KP8 :
             player_move_or_attack(0, -1)
 
-        elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN) or key_char == 'j' or libtcod.console_is_key_pressed(libtcod.KEY_KP2) :
+        elif key.vk == libtcod.KEY_DOWN or key_char == 'j' or key.vk == libtcod.KEY_KP2 :
             player_move_or_attack(0, 1)
 
-        elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT) or key_char == 'h' or libtcod.console_is_key_pressed(libtcod.KEY_KP4) :
+        elif key.vk == libtcod.KEY_LEFT or key_char == 'h' or key.vk == libtcod.KEY_KP4 :
             player_move_or_attack(-1, 0)
 
-        elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT) or key_char == 'l' or libtcod.console_is_key_pressed(libtcod.KEY_KP6) :
+        elif key.vk == libtcod.KEY_RIGHT or key_char == 'l' or key.vk == libtcod.KEY_KP6 :
             player_move_or_attack(1, 0)
 
         #handle diagonal. 11 oclock -> clockwise
-        elif key_char == 'y' or libtcod.console_is_key_pressed(libtcod.KEY_KP7) :
+        elif key_char == 'y' or key.vk == libtcod.KEY_KP7 :
             player_move_or_attack(-1, -1)
 
-        elif key_char == 'u' or libtcod.console_is_key_pressed(libtcod.KEY_KP9) :
+        elif key_char == 'u' or key.vk == libtcod.KEY_KP9 :
             player_move_or_attack(1, -1)
 
-        elif key_char == 'n' or libtcod.console_is_key_pressed(libtcod.KEY_KP3) :
+        elif key_char == 'n' or key.vk == libtcod.KEY_KP3 :
             player_move_or_attack(1, 1)
 
-        elif key_char == 'b' or libtcod.console_is_key_pressed(libtcod.KEY_KP1) :
+        elif key_char == 'b' or key.vk == libtcod.KEY_KP1 :
             player_move_or_attack(-1, 1)
 
         else:
-            return 'idle'
+            return 'no_action'
 
+def player_resting():
+    player.fighter.hp += 2
+    
 def player_move_or_attack(dx, dy):
     global fov_recompute
 
@@ -410,7 +482,7 @@ def flip_coin():
 def player_death(player):
     #the game has ended
     global game_state
-    print 'YOU DIED! YOU SUCK!'
+    message ('YOU DIED! YOU SUCK!', libtcod.red)
     game_state = 'dead'
 
     #turn player into corpse
@@ -420,7 +492,7 @@ def player_death(player):
 def monster_death(monster):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
-    print monster.name.capitalize() + ' is DEAD!'
+    message (monster.name.capitalize() + ' is DEAD!', libtcod.orange)
     monster.char = '%'
     monster.color = libtcod.dark_red
     monster.blocks = False
@@ -429,6 +501,35 @@ def monster_death(monster):
     monster.name = 'remains of ' + monster.name
     monster.send_to_back()
 
+def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
+    #render a bar (HP, exp, etc). first calc the width of the bar
+    bar_width = int(float(value) / maximum * total_width)
+
+    #render the background first
+    libtcod.console_set_default_background(panel, back_color)
+    libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+
+    #now render the bar on top
+    libtcod.console_set_default_background(panel, bar_color)
+    if bar_width > 0:
+        libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+
+    #lastly add text
+    libtcod.console_set_default_foreground(panel, libtcod.white)
+    libtcod.console_print_ex(panel, x + total_width/2, y, libtcod.BKGND_NONE, libtcod.CENTER, name + ': ' + str(value) + '/' + str(maximum))
+
+def message(new_msg, color = libtcod.white):
+    #split message if necessary
+    #print new_msg
+    new_msg_lines = textwrap.wrap(new_msg, MSG_WIDTH)
+
+    for line in new_msg_lines:
+        #if the buffer is full, remove the first line to make room for the new one
+        if len(game_msgs) == MSG_HEIGHT:
+            del game_msgs[0]
+
+        #add the new line as a tuple, with the txt and the color
+        game_msgs.append((line, color))
 
 ########################################################
 #init and main loop
@@ -437,17 +538,14 @@ def monster_death(monster):
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'DUNGEONEER!', False)
 libtcod.sys_set_fps(LIMIT_FPS)
-con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+con = libtcod.console_new(MAP_WIDTH,MAP_HEIGHT)
+panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
 fighter_component = Fighter(hp=30, defense=2, power=5, death_function=player_death)
 player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Bobb', libtcod.white, blocks=True, fighter=fighter_component)
 
-
-#npc = Object(SCREEN_WIDTH/2 -5, SCREEN_HEIGHT/2, '@', libtcod.yellow)  
-
-
 objects = [player]
-
+game_msgs = []
 
 make_map()
 
@@ -461,7 +559,19 @@ fov_recompute = True
 game_state = 'playing'
 player_action = None
 
+#mouse stuff
+mouse = libtcod.Mouse()
+key = libtcod.Key()
+
+#WECOME
+message('Welcome to Dungeoneer! Good Luck! Don\'t suck!', libtcod.blue)
+
+#limit FPS
+
+
 while not libtcod.console_is_window_closed():
+    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+
     #render the screen
     render_all()
 
@@ -477,7 +587,7 @@ while not libtcod.console_is_window_closed():
         break
 
     #give monsters a turn
-    if game_state == 'playing' and player_action != 'idle':
+    if game_state == 'playing' and player_action != 'no_action':
         for object in objects:
             if object.ai:
                 object.ai.take_turn()
