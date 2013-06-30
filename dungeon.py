@@ -19,11 +19,17 @@ MSG_X = BAR_WIDTH + 2
 MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
 MSG_HEIGHT = PANEL_HEIGHT - 1
 
+#items
+MAX_ROOM_ITEMS = 2
+MAX_NUM_ITEMS = 26
+INVENTORY_WIDTH = 50
+HEAL_AMOUNT = 5
+
 #room info
 ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
-MAX_ROOM_MONSTERS = 10 
+MAX_ROOM_MONSTERS = 8
 
 FOV_ALGO = 2 #FOV_SHADOW
 FOV_LIGHT_WALLS = True
@@ -71,7 +77,7 @@ class Rect:
 class Object:
     #this is a generic object: player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x, y, char, name, color, blocks = False, fighter = None, ai = None):
+    def __init__(self, x, y, char, name, color, blocks = False, fighter = None, ai = None, item = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -86,6 +92,10 @@ class Object:
         self.ai = ai
         if self.ai:
             self.ai.owner = self
+
+        self.item = item
+        if self.item: 
+            self.item.owner = self
 
 
     def move(self, dx, dy):
@@ -161,6 +171,12 @@ class Fighter:
         self.power = power  
         self.death_function=death_function
 
+    def heal(self, amount):
+        #heal by the given amount
+        self.hp += amount
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
     def take_damage(self, damage):
         #inflict dmg if possible
         if damage > 0:
@@ -198,6 +214,43 @@ class BasicMonster:
                 #close enough to attack (if the player is alive)
             elif player.fighter.hp > 0:
                 monster.fighter.attack(player)
+
+class Item:
+    def __init__(self, use_function=None):
+        self.use_function = use_function
+
+    def use(self):
+        #call the 'use_function' if defined
+        if self.use_function is None:
+            message('The ' + self.owner.name + ' cannot be used.')
+            return 'no_action'
+        else:
+            if self.use_function() != 'cancelled':
+                inventory.remove(self.owner) #destror after use, unless cancelled
+                return 'used'
+            else:
+                return 'no_action'
+    #an item that can be picked up and used
+    def pick_up(self):
+        #add to the player's inventory and remove from the map
+        if len(inventory) >= 26:
+            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', libtcod.dark_red)
+            return 'no_action'
+        else:
+            inventory.append(self.owner)
+            objects.remove(self.owner)
+            message('You picked up a ' + self.owner.name + '!', libtcod.green)
+            return 'picked_up'
+
+def cast_heal():
+    #heal the player
+    if player.fighter.hp == player.fighter.max_hp:
+        message('You are already at full health.', libtcod.red)
+        return 'cancelled'
+
+    message('You feel better', libtcod.light_violet)
+    player.fighter.heal(HEAL_AMOUNT)
+
 
 def is_blocked(x, y):
     #first test the map tile
@@ -300,8 +353,8 @@ def place_objects(room):
 
     for i in range(num_monsters):
         #choose random spot for this monster
-        x =  libtcod.random_get_int(0, room.x1, room.x2)
-        y =  libtcod.random_get_int(0, room.y1, room.y2)
+        x =  libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
+        y =  libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
 
         if not is_blocked(x, y):
             if libtcod.random_get_int(0, 0, 100) < 80: #80% chance for orcs
@@ -316,6 +369,23 @@ def place_objects(room):
                 monster = Object(x, y, 'T', 'TROLLY', libtcod.darker_green, blocks= True, fighter=fighter_component, ai=ai_component)
 
             objects.append(monster)
+
+    num_items = libtcod.random_get_int(0, 0, MAX_ROOM_ITEMS)
+
+    for i in range(num_items):
+        #choose random spot for this item
+        x = libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
+        y = libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
+
+        #only place it if the tile is not blocked
+        if not is_blocked(x, y):
+            #create a healing potion
+            item_component = Item(use_function = cast_heal)
+
+            item = Object(x, y, '!', 'healing potion', libtcod.violet, item = item_component)
+
+            objects.append(item)
+            item.send_to_back() #items appear below other objects
 
 def get_distance(dx, dy):
     return math.sqrt(dx ** 2 + dy ** 2)
@@ -401,7 +471,6 @@ def get_names_under_mouse():
     names = ', '.join(names) #join names separated by commas
     return names.capitalize()
 
-
 def handle_keys():
     global fov_recompute
     global key
@@ -450,6 +519,20 @@ def handle_keys():
             player_move_or_attack(-1, 1)
 
         else:
+            #test for other keys
+            if key_char == 'g':
+                #pick up an item
+                for object in objects: #look for items in the player's title
+                    if object.x == player.x and object.y == player.y and object.item:
+                        return object.item.pick_up()
+                        #break
+
+            if key_char == 'i':
+                #show inv. if an item is selected, use it
+                chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n')
+                if chosen_item is not None:
+                    return chosen_item.use()
+
             return 'no_action'
 
 def player_resting():
@@ -531,6 +614,62 @@ def message(new_msg, color = libtcod.white):
         #add the new line as a tuple, with the txt and the color
         game_msgs.append((line, color))
 
+def menu(header, options, width):
+    if len(options) > MAX_NUM_ITEMS: raise ValueError('Cannot have a menu with more than ' + MAX_NUM_ITEMS + ' options.')
+
+    #calculate total height of the header (after auto-wrap) and one line per option
+    header_height = libtcod.console_get_height_rect(con, 0, 0, width, SCREEN_HEIGHT, header)
+    height = len(options) + header_height
+
+    #create off-screen console that represents the menu's window
+    window = libtcod.console_new(width, height)
+
+    #print the header with auto-wrap
+    libtcod.console_set_default_foreground(window, libtcod.white)
+    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+
+    #print all the options
+    y = header_height
+    letter_index = ord('a')
+    for option_text in options:
+        text = '(' + chr(letter_index) + ') ' + option_text
+        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
+        y += 1
+        letter_index += 1
+
+    #blit contents of window to root console
+    x = SCREEN_WIDTH / 2 - width / 2
+    y = SCREEN_HEIGHT / 2 - height / 2
+    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
+
+    #present the root console to the player and wait for a keypress
+    libtcod.console_flush()
+    key = libtcod.console_wait_for_keypress(True)
+
+    #convert ASCII code to an index. if it's valid, return it
+    index = key.c - ord('a')
+    if index >= 0 and index < len(options):
+        return index
+    else:
+        return None
+
+
+def inventory_menu(header):
+    #show a menu with each item of the inventory as an option
+    if len(inventory) == 0:
+        options = ['Inventory is empty!']
+    else:
+        options = [item.name for item in inventory]
+
+    index = menu(header, options, INVENTORY_WIDTH)
+    
+    if (index is None or len(inventory) == 0) or index == 'ESC':
+        return None
+    else:
+        return inventory[index].item
+
+
+
 ########################################################
 #init and main loop
 ########################################################
@@ -546,6 +685,7 @@ player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Bobb', libtcod.white, blo
 
 objects = [player]
 game_msgs = []
+inventory = []
 
 make_map()
 
