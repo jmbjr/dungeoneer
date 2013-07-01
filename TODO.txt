@@ -1,0 +1,7 @@
+TODO:
+
+display list of items when players walk over tiles
+visual feedback on status of monsters (i.e. confused)
+ability to select monsters and tiles with keyboard
+visual feedback on which cells are selected via keyboard or mouse hovering
+visual feedback on success of cells

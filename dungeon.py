@@ -23,13 +23,21 @@ MSG_HEIGHT = PANEL_HEIGHT - 1
 MAX_ROOM_ITEMS = 2
 MAX_NUM_ITEMS = 26
 INVENTORY_WIDTH = 50
+
+#spell info
 HEAL_AMOUNT = 5
+LIGHTNING_DAMAGE = 25
+LIGHTNING_RANGE = 5
+FIREBALL_DAMAGE = 10
+FIREBALL_RADIUS = 3
+CONFUSE_NUM_TURNS = 10
+CONFUSE_RANGE = 8
 
 #room info
-ROOM_MAX_SIZE = 10
-ROOM_MIN_SIZE = 6
-MAX_ROOMS = 30
-MAX_ROOM_MONSTERS = 8
+ROOM_MAX_SIZE = 12
+ROOM_MIN_SIZE = 4
+MAX_ROOMS = 40
+MAX_ROOM_MONSTERS = 5
 
 FOV_ALGO = 2 #FOV_SHADOW
 FOV_LIGHT_WALLS = True
@@ -38,6 +46,11 @@ TORCH_RADIUS = 10
 WALL_CHAR = '#'
 GROUND_CHAR  = '.'
 
+#dice
+D6=[1,6]
+D4=[1,4]
+D8=[1,8]
+D10=[1,10]
 
 color_dark_wall = libtcod.Color(0, 0, 100)
 color_light_wall = libtcod.Color(130, 110, 50)
@@ -156,6 +169,10 @@ class Object:
         dy = other.y - self.y
         return get_distance(dx, dy)
 
+    def distance(self, x, y):
+        #return distance to some coord
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def send_to_back(self):
         #make this object be drawn first, so all others appear above it if they are in the same tile
         global objects
@@ -215,6 +232,22 @@ class BasicMonster:
             elif player.fighter.hp > 0:
                 monster.fighter.attack(player)
 
+class ConfusedMonster:
+    def __init__(self, old_ai, num_turns = CONFUSE_NUM_TURNS):
+        self.old_ai = old_ai
+        self.num_turns = num_turns
+
+    #AI for confused monster
+    def take_turn(self):
+        if self.num_turns > 0: #still confused
+            #move in random direction
+            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
+            self.num_turns -= 1
+
+        else:
+            self.owner.ai = self.old_ai
+            message('The ' + self.owner.name + ' is no longer confused', libtcod.red) 
+
 class Item:
     def __init__(self, use_function=None):
         self.use_function = use_function
@@ -242,6 +275,48 @@ class Item:
             message('You picked up a ' + self.owner.name + '!', libtcod.green)
             return 'picked_up'
 
+    def drop(self):
+        #add to the map and remove from the player's inventory. also, place it at the player's coordinates
+        objects.append(self.owner)
+        inventory.remove(self.owner)
+        self.owner.x = player.x
+        self.owner.y = player.y
+        message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
+
+def cast_confusion():
+    ##find nearest enemy and confuse it
+    #monster = closest_monster(CONFUSE_RANGE)
+    #if monster is None:
+    #    message ('No enemy is close enough to confuse', libtcod.red)
+    #    return 'cancelled'
+
+    #ask player for target to confuse
+    message('Left-click an enemy to confuse. Right-click or ESC to cancel', libtcod.light_cyan)
+    monster = target_monster(CONFUSE_RANGE)
+    if monster is None:
+        return 'cancelled'
+
+    #replace monster's AI with confuse
+    old_ai = monster.ai
+    monster.ai = ConfusedMonster(old_ai)
+    monster.ai.owner = monster #tell the new component who owns it
+    message('The ' + monster.name + ' is confused!', libtcod.light_green)
+
+def cast_fireball():
+    #ask the player for a target tile to throw a fireball at
+    message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', libtcod.light_cyan)
+    (x,y) = target_tile()
+    if x is None: 
+        return 'cancelled'
+    else:
+        message('The fireball explodes', libtcod.orange)
+
+    theDmg = roll_dice([[FIREBALL_DAMAGE/2, FIREBALL_DAMAGE*2]])[0]
+    for obj in objects: #damage all fighters within range
+        if obj.distance(x,y) <= FIREBALL_RADIUS and obj.fighter:
+            message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', libtcod.orange)
+            obj.fighter.take_damage(theDmg)
+
 def cast_heal():
     #heal the player
     if player.fighter.hp == player.fighter.max_hp:
@@ -251,6 +326,31 @@ def cast_heal():
     message('You feel better', libtcod.light_violet)
     player.fighter.heal(HEAL_AMOUNT)
 
+def cast_lightning():
+    #find nearest enemy (within range) and damage it
+    monster = closest_monster(LIGHTNING_RANGE)
+    if monster is None:
+        message('No enemy is close enough to strike', libtcod.red)
+        return 'cancelled'
+
+    theDmg = roll_dice([[LIGHTNING_DAMAGE/2, LIGHTNING_DAMAGE]])[0]
+
+    message('A lightning bolt strikes the ' + monster.name + '! \n DMG = ' + str(theDmg) + ' HP.', libtcod.light_blue)
+    monster.fighter.take_damage(theDmg)
+
+def closest_monster(max_range):
+    #find closest enemy up to max range in the player's FOV
+    closest_enemy = None
+    closest_dist = max_range + 1 #start with slightly higher than max range
+
+    for object in objects:
+        if object.fighter and not object == player and libtcod.map_is_in_fov(fov_map, object.x, object.y):
+            #calculate the distance between this and the player
+            dist = player.distance_to(object)
+            if dist < closest_dist:
+                closest_enemy = object
+                closest_dist = dist
+    return closest_enemy
 
 def is_blocked(x, y):
     #first test the map tile
@@ -379,10 +479,29 @@ def place_objects(room):
 
         #only place it if the tile is not blocked
         if not is_blocked(x, y):
-            #create a healing potion
-            item_component = Item(use_function = cast_heal)
+            #create an item
+            roll = roll_dice([[0,100]])[0]
 
-            item = Object(x, y, '!', 'healing potion', libtcod.violet, item = item_component)
+            if roll < 70:
+                #healing potion
+                item_component = Item(use_function = cast_heal)
+                item = Object(x, y, '!', 'healing potion', libtcod.red, item = item_component)
+                print 'Healing Potion'
+            elif roll < 70+10:
+                #lightning scroll
+                item_component = Item(use_function = cast_lightning)
+                item = Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, item = item_component)
+                print 'Lightning Scroll'
+            elif roll < 70+10+10:
+                #fireball scroll
+                item_component = Item(use_function=cast_fireball)
+                item = Object(x, y, '?', 'scroll of fireball', libtcod.red, item = item_component)
+                print 'Fireball Scroll'
+            else:
+                #confusion scroll
+                item_component = Item(use_function = cast_confusion)
+                item = Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, item = item_component)
+                print 'Confusion Scroll'
 
             objects.append(item)
             item.send_to_back() #items appear below other objects
@@ -533,6 +652,12 @@ def handle_keys():
                 if chosen_item is not None:
                     return chosen_item.use()
 
+            if key_char == 'd':
+                #show the inventory. if item is selected, drop it
+                chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n')
+                if chosen_item is not None:
+                    chosen_item.drop()
+
             return 'no_action'
 
 def player_resting():
@@ -561,6 +686,15 @@ def player_move_or_attack(dx, dy):
 
 def flip_coin():
     return (libtcod.random_get_int(0,0,1))
+
+def roll_dice(dicelist):
+    dice=[]
+    #print dicelist
+    for [die_low, die_high] in dicelist:
+        roll = libtcod.random_get_int(0,die_low,die_high)
+        dice.append(roll)
+
+    return [sum(dice), dice]
 
 def player_death(player):
     #the game has ended
@@ -653,7 +787,6 @@ def menu(header, options, width):
     else:
         return None
 
-
 def inventory_menu(header):
     #show a menu with each item of the inventory as an option
     if len(inventory) == 0:
@@ -668,7 +801,34 @@ def inventory_menu(header):
     else:
         return inventory[index].item
 
+def target_tile(max_range = None):
+    #return the position of a tile left-clicked in player's FOV (optionally in a range) or (None, None) if right-clicked
+    global key, mouse
+    while True:
+        #render screen. this erases the inv and shows the names of objects under the mouse
+        libtcod.console_flush()
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+        render_all()
 
+        (x, y) = (mouse.cx, mouse.cy)
+
+        if (mouse.lbutton_pressed and libtcod.map_is_in_fov(fov_map, x, y) and (max_range is None or player.distance(x,y) <= max_range)):
+            return (x, y)
+
+        if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
+            return (None, None)
+
+def target_monster(max_range = None):
+    #returns a clicked monster inside FOV up to a range, or None if right-clicked
+    while True:
+        (x, y) = target_tile(max_range)
+        if x is None: #player cancelled
+            return None
+
+        #return the first clicked monster, otherwise continue looping
+        for obj in objects:
+            if obj.x == x and obj.y == y and obj.fighter and obj != player:
+                return obj
 
 ########################################################
 #init and main loop
@@ -705,9 +865,6 @@ key = libtcod.Key()
 
 #WECOME
 message('Welcome to Dungeoneer! Good Luck! Don\'t suck!', libtcod.blue)
-
-#limit FPS
-
 
 while not libtcod.console_is_window_closed():
     libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
