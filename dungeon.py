@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 import math
 import textwrap
+import shelve
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -283,6 +284,128 @@ class Item:
         self.owner.y = player.y
         message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
 
+def main_menu():
+    img = libtcod.image_load('menu_background.png')
+
+    while not libtcod.console_is_window_closed():
+        #show the background image, at twice the regular console resolution
+        libtcod.image_blit_2x(img, 0, 0, 0)
+
+        #show game title and credits
+        libtcod.console_set_default_foreground(0, libtcod.light_yellow)
+        libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 4, libtcod.BKGND_NONE, libtcod.CENTER, 'Dungeoneer!')
+        libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
+
+        #show options and wait for the player's choice
+        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
+
+        if choice == 0: #new game
+            new_game()
+            play_game()
+        if choice == 1: #load last game
+            #try:
+            load_game()
+            #except:
+            #    msgbox('\n No saved game to load. \n', 24)
+            #    continue
+            play_game()
+        elif choice == 2: #quit
+            save_game()
+            break
+
+def msgbox(text, width = 50):
+    menu(text, [], width) #use menu as a sort-of message box
+
+def new_game():
+    global player, inventory, game_msgs, game_state
+
+    #create object representing the player
+    fighter_component = Fighter(hp=30, defense=2, power=5, death_function=player_death)
+    player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Bobb', libtcod.white, blocks=True, fighter=fighter_component)
+
+    #generate map (at this point it's not drawn to screen)
+    make_map()
+    initialize_fov()
+
+    game_state = 'playing'
+    inventory = []
+
+    #create the list of the game messages and their colors, starts empty
+    game_msgs = []
+
+    #a warm welcoming message!
+    message('Welcome to Dungeoneer! Good Luck! Don\'t suck!', libtcod.blue)
+
+def initialize_fov():
+    global fov_recompute, fov_map
+    fov_recompute = True
+
+    #create FOV map according to the generated map
+    fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
+    for y in range(MAP_HEIGHT):
+        for x in range(MAP_WIDTH):
+            libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
+
+    libtcod.console_clear(con)
+
+def save_game(filename='savegame'):
+    #open a new empty shelve (or overwrite old one) to write the game data
+    file = shelve.open(filename, 'n')
+    file['map'] = map
+    file['objects'] = objects
+    file['player_index'] = objects.index(player) #index of player in the objects list
+    file['inventory'] = inventory
+    file['game_msgs'] = game_msgs
+    file['game_state'] = game_state
+    file.close()
+
+def load_game(filename='savegame'):
+    global map, objects, player, inventory, game_msgs, game_state
+    
+    file = shelve.open(filename, 'r')
+    map = file['map']
+    objects = file['objects'] 
+    player = objects[file['player_index']]  #get index of player in the objects list
+    inventory = file['inventory']
+    game_msgs = file['game_msgs']
+    game_state = file['game_state']
+    file.close()
+
+    initialize_fov()
+
+def play_game():
+    global key, mouse
+
+    player_action = None
+
+    #mouse stuff
+    mouse = libtcod.Mouse()
+    key = libtcod.Key()    
+
+    while not libtcod.console_is_window_closed():
+        #render the screen
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+
+        #render the screen
+        render_all()
+
+        libtcod.console_flush()
+
+        #erase objects from old position, before they move
+        for object in objects:
+            object.clear()
+
+        #handle keys and exit game if needed
+        player_action = handle_keys()
+        if player_action == 'exit':
+            break
+
+        #give monsters a turn
+        if game_state == 'playing' and player_action != 'no_action':
+            for object in objects:
+                if object.ai:
+                    object.ai.take_turn()
+
 def cast_confusion():
     ##find nearest enemy and confuse it
     #monster = closest_monster(CONFUSE_RANGE)
@@ -387,7 +510,10 @@ def create_v_tunnel(y1, y2, x):
         map[x][y].block_sight = False
 
 def make_map():
-    global map, player
+    global map, objects
+
+    objects = [player]
+
     #fill map with "blocked" tiles
     map = [[ Tile(True)
         for y in range(MAP_HEIGHT) ]
@@ -486,22 +612,22 @@ def place_objects(room):
                 #healing potion
                 item_component = Item(use_function = cast_heal)
                 item = Object(x, y, '!', 'healing potion', libtcod.red, item = item_component)
-                print 'Healing Potion'
+                #print 'Healing Potion'
             elif roll < 70+10:
                 #lightning scroll
                 item_component = Item(use_function = cast_lightning)
                 item = Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, item = item_component)
-                print 'Lightning Scroll'
+                #print 'Lightning Scroll'
             elif roll < 70+10+10:
                 #fireball scroll
                 item_component = Item(use_function=cast_fireball)
                 item = Object(x, y, '?', 'scroll of fireball', libtcod.red, item = item_component)
-                print 'Fireball Scroll'
+                #print 'Fireball Scroll'
             else:
                 #confusion scroll
                 item_component = Item(use_function = cast_confusion)
                 item = Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, item = item_component)
-                print 'Confusion Scroll'
+                #print 'Confusion Scroll'
 
             objects.append(item)
             item.send_to_back() #items appear below other objects
@@ -753,6 +879,8 @@ def menu(header, options, width):
 
     #calculate total height of the header (after auto-wrap) and one line per option
     header_height = libtcod.console_get_height_rect(con, 0, 0, width, SCREEN_HEIGHT, header)
+    if header == '':
+        header_height = 0
     height = len(options) + header_height
 
     #create off-screen console that represents the menu's window
@@ -779,6 +907,9 @@ def menu(header, options, width):
     #present the root console to the player and wait for a keypress
     libtcod.console_flush()
     key = libtcod.console_wait_for_keypress(True)
+
+    if key.vk == libtcod.KEY_ENTER and key.lalt: # full screen
+        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
     #convert ASCII code to an index. if it's valid, return it
     index = key.c - ord('a')
@@ -840,51 +971,5 @@ libtcod.sys_set_fps(LIMIT_FPS)
 con = libtcod.console_new(MAP_WIDTH,MAP_HEIGHT)
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
-fighter_component = Fighter(hp=30, defense=2, power=5, death_function=player_death)
-player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Bobb', libtcod.white, blocks=True, fighter=fighter_component)
+main_menu()
 
-objects = [player]
-game_msgs = []
-inventory = []
-
-make_map()
-
-#create FOV map according to the generated map
-fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
-for y in range(MAP_HEIGHT):
-    for x in range(MAP_WIDTH):
-        libtcod.map_set_properties(fov_map, x, y, not map[x][y].block_sight, not map[x][y].blocked)
-
-fov_recompute = True
-game_state = 'playing'
-player_action = None
-
-#mouse stuff
-mouse = libtcod.Mouse()
-key = libtcod.Key()
-
-#WECOME
-message('Welcome to Dungeoneer! Good Luck! Don\'t suck!', libtcod.blue)
-
-while not libtcod.console_is_window_closed():
-    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-
-    #render the screen
-    render_all()
-
-    libtcod.console_flush()
-
-    #erase objects from old position, before they move
-    for object in objects:
-        object.clear()
-
-    #handle keys and exit game if needed
-    player_action = handle_keys()
-    if player_action == 'exit':
-        break
-
-    #give monsters a turn
-    if game_state == 'playing' and player_action != 'no_action':
-        for object in objects:
-            if object.ai:
-                object.ai.take_turn()

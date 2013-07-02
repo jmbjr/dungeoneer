@@ -4,4 +4,6 @@ display list of items when players walk over tiles
 visual feedback on status of monsters (i.e. confused)
 ability to select monsters and tiles with keyboard
 visual feedback on which cells are selected via keyboard or mouse hovering
-visual feedback on success of cells
+visual feedback on success of spells
+slow down keypress input when bringing up menu
+when hitting esc to go to the main menu, need a resume button or prompt player to save before quitting
