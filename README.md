@@ -13,10 +13,16 @@ namely, put SDL.dll and libtcod-mingw.dll in the same directory as the .py and .
 To move, use arrow keys, num pad, or hjklyubn
 
 Pick up items with 'g'
+
 Check character status with 'c'
+
 Open the Inventory with 'i'
+
 Drop items with 'd'
+
 Go down the stairs with '>' (you can't come back up!)
+
+
 
 There's a few other super secret debug keys as well!
 
