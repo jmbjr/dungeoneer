@@ -7,3 +7,15 @@ visual feedback on which cells are selected via keyboard or mouse hovering
 visual feedback on success of spells
 slow down keypress input when bringing up menu
 when hitting esc to go to the main menu, need a resume button or prompt player to save before quitting
+
+add more IRC folks to MeFightRogues
+shmup
+cortex
+Bismarck
+pahalial
+helicomatic
+vanarsena
+
+add game dev folks
+niteowl
+specialK
