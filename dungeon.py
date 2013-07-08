@@ -23,11 +23,11 @@ MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
 MSG_HEIGHT = PANEL_HEIGHT - 1
 
 #items
-MAX_NUM_ITEMS = 26
+MAX_NUM_ITEMS = 30
 INVENTORY_WIDTH = 50
 
 #spell info
-HEAL_AMOUNT = 40
+HEAL_AMOUNT = 50
 LIGHTNING_DAMAGE = 25
 LIGHTNING_RANGE = 5
 FIREBALL_DAMAGE = 25
@@ -36,7 +36,7 @@ CONFUSE_NUM_TURNS = 10
 CONFUSE_RANGE = 8
 
 #room info
-ROOM_MAX_SIZE = 12
+ROOM_MAX_SIZE = 15
 ROOM_MIN_SIZE = 4
 MAX_ROOMS = 40
 
@@ -325,16 +325,16 @@ def check_level_up():
         choice = None
         while choice == None: #keep asking till a choice is made
             choice = menu('Level up! Choose a stat to raise:\n', 
-                ['Constitution (+20 HP, from ' + str(player.fighter.max_hp) + ')',
-                'Strength (+1 attack, from ' + str(player.fighter.power) + ')', 
-                'Agility (+1 defense, from ' + str(player.fighter.defense) + ')'], LEVEL_SCREEN_WIDTH)
+                ['Constitution (+25 HP, from ' + str(player.fighter.max_hp) + ')',
+                'Strength (+2 attack, from ' + str(player.fighter.power) + ')', 
+                'Agility (+2 defense, from ' + str(player.fighter.defense) + ')'], LEVEL_SCREEN_WIDTH)
 
         if choice == 0:
-            player.fighter.max_hp += 20
+            player.fighter.max_hp += 25
         elif choice == 1:
-            player.fighter.power += 1
+            player.fighter.power += 2
         elif choice ==2:
-            player.fighter.defense += 1
+            player.fighter.defense += 2
 
         player.fighter.hp = player.fighter.max_hp
 
@@ -347,7 +347,7 @@ def main_menu():
 
         #show game title and credits
         libtcod.console_set_default_foreground(0, libtcod.light_yellow)
-        libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 4, libtcod.BKGND_NONE, libtcod.CENTER, 'Dungeoneer!')
+        libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 4, libtcod.BKGND_NONE, libtcod.CENTER, 'MeFightRogues!')
         libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
 
         #show options and wait for the player's choice
@@ -374,8 +374,8 @@ def new_game():
     global player, inventory, game_msgs, game_state, dungeon_level
 
     #create object representing the player
-    fighter_component = Fighter(hp=100, defense=1, power=4, xp=0, death_function=player_death)
-    player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Bobb', libtcod.white, blocks=True, fighter=fighter_component)
+    fighter_component = Fighter(hp=100, defense=3, power=6, xp=0, death_function=player_death)
+    player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
 
     player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -388,9 +388,10 @@ def new_game():
 
     #create the list of the game messages and their colors, starts empty
     game_msgs = []
+    player.game_turns = 0
 
     #a warm welcoming message!
-    message('Welcome to Dungeoneer! Good Luck! Don\'t suck!', libtcod.blue)
+    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', libtcod.blue)
 
 def initialize_fov():
     global fov_recompute, fov_map
@@ -648,24 +649,39 @@ def from_dungeon_level(table):
 
 def place_objects(room):
     #choose random number of monsters
-    max_monsters = from_dungeon_level([[2, 1], [3, 4], [5, 6]])
+    max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]])
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
     #max number monsters per room
 
     #chance of each monster
     monster_chances = {}
-    monster_chances['orc'] = 75 #orc always shows up, even if all other monsters have 0 chance
-    monster_chances['troll'] = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
+    monster_chances['johnstein']    = 75 #orc always shows up, even if all other monsters have 0 chance
+    monster_chances['greynaab']     = from_dungeon_level([[60, 1], [35, 3], [10, 5]])
+    monster_chances['jerbear']      = from_dungeon_level([[50, 1], [30, 3], [15, 5]])
+    monster_chances['zombiesheep']  = from_dungeon_level([[40, 1], [25, 3], [20, 5]])
+    monster_chances['odiv']         = from_dungeon_level([[25, 2], [30, 4], [40, 6]])
+    monster_chances['slitherrr']    = from_dungeon_level([[20, 2], [30, 4], [50, 6]])
+    monster_chances['neckro']       = from_dungeon_level([[15, 2], [30, 4], [60, 6]])
+    monster_chances['chan']         = from_dungeon_level([[25, 3], [30, 5], [40, 7]])
+    monster_chances['ashandarei']   = from_dungeon_level([[20, 3], [30, 5], [50, 7]])
+    monster_chances['zureal']       = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
+    monster_chances['demiurge']     = from_dungeon_level([[25, 4], [30, 6], [40, 8]])
+    monster_chances['hargrimm']     = from_dungeon_level([[20, 4], [30, 6], [50, 8]])
+    monster_chances['frisco']       = from_dungeon_level([[15, 4], [30, 6], [60, 8]])
+    monster_chances['toomuchpete']  = from_dungeon_level([[25, 5], [30, 7], [40, 9]])
+    monster_chances['flatluigi']    = from_dungeon_level([[20, 5], [30, 7], [50, 9]])
+    monster_chances['spanktrunk']   = from_dungeon_level([[15, 5], [30, 7], [60, 9]])
+    monster_chances['stavros']      = from_dungeon_level([[100, 10]])
 
     max_items = from_dungeon_level([[1, 1], [2, 4]])
     num_items = libtcod.random_get_int(0, 0, max_items)
     
     #chance of each item (by default they have chance of 0 at level 1 which goes up)
     item_chances = {}
-    item_chances['heal'] = 35 #healing potion always shows up even if all other items have 0 chance
-    item_chances['lightning'] = from_dungeon_level([[25, 4]])
-    item_chances['fireball'] = from_dungeon_level([[25, 6]])
-    item_chances['confuse'] = from_dungeon_level([[25, 2]])
+    item_chances['heal'] = 70 #healing potion always shows up even if all other items have 0 chance
+    item_chances['lightning'] = from_dungeon_level([[10, 1], [25, 3], [50, 5]])
+    item_chances['fireball'] = from_dungeon_level([[10, 1], [25, 3], [50, 5]])
+    item_chances['confuse'] = from_dungeon_level([[10, 1], [25, 3], [50, 5]])
 
     #monster_chances = {'orc':75, 'troll':25}
     #item_chances = {'heal':60, 'lightning':10, 'fireball':10, 'confuse':10}
@@ -678,16 +694,80 @@ def place_objects(room):
         if not is_blocked(x, y):
             choice = random_choice(monster_chances)
 
-            if choice == 'orc':
-                #create orc
-                fighter_component = Fighter(hp=20, defense=0, power=4, xp=35, death_function=monster_death)
+            if choice == 'johnstein':
+                fighter_component = Fighter(hp=10, defense=0, power=2, xp=20, death_function=monster_death)
                 ai_component = BasicMonster()
-                monster = Object(x, y, 'o', 'orcy', libtcod.desaturated_green, blocks=True, fighter=fighter_component, ai=ai_component)
-            elif choice == 'troll':
-                #create a troll
-                fighter_component = Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
+                monster = Object(x, y, 'J', 'johnstein', libtcod.white, blocks=True, fighter=fighter_component, ai=ai_component)
+            
+            elif choice == 'greynaab':
+                fighter_component = Fighter(hp=20, defense=1, power=4, xp=40, death_function=monster_death)
                 ai_component = BasicMonster()
-                monster = Object(x, y, 'T', 'TROLLY', libtcod.darker_green, blocks= True, fighter=fighter_component, ai=ai_component)
+                monster = Object(x, y, 'g', 'greynaab', libtcod.light_blue, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'jerbear':
+                fighter_component = Fighter(hp=25, defense=1, power=5, xp=50, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'j', 'jerbear', libtcod.green, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'zombiesheep':
+                fighter_component = Fighter(hp=30, defense=2, power=6, xp=60, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'z', 'zombiesheep', libtcod.yellow, blocks= True, fighter=fighter_component, ai=ai_component)
+            
+            elif choice == 'odiv':
+                fighter_component = Fighter(hp=25, defense=2, power=5, xp=60, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'o', 'odiv', libtcod.darker_orange, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'slitherrr':
+                fighter_component = Fighter(hp=30, defense=2, power=6, xp=70, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 's', 'slitherrr', libtcod.darker_green, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'neckro':
+                fighter_component = Fighter(hp=35, defense=3, power=7, xp=80, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'n', 'neckro', libtcod.lighter_blue, blocks= True, fighter=fighter_component, ai=ai_component)
+            
+            elif choice == 'chan':
+                fighter_component = Fighter(hp=30, defense=3, power=6, xp=80, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'c', 'chan', libtcod.darker_red, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'ashandarei':
+                fighter_component = Fighter(hp=35, defense=3, power=7, xp=90, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'a', 'ashandarei', libtcod.darker_yellow, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'zureal':
+                fighter_component = Fighter(hp=40, defense=4, power=8, xp=100, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'z', 'zureal', libtcod.dark_green, blocks= True, fighter=fighter_component, ai=ai_component)
+            
+            elif choice == 'demiurge':
+                fighter_component = Fighter(hp=35, defense=4, power=7, xp=100, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'd', 'demiurge', libtcod.darker_violet, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'hargrimm':
+                fighter_component = Fighter(hp=40, defense=4, power=8, xp=125, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'h', 'hargrimm', libtcod.lighter_green, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'frisco':
+                fighter_component = Fighter(hp=45, defense=5, power=9, xp=150, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'f', 'frisco', libtcod.lighter_red, blocks= True, fighter=fighter_component, ai=ai_component)
+            
+            elif choice == 'toomuchpete':
+                fighter_component = Fighter(hp=40, defense=5, power=8, xp=150, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 't', 'toomuchpete', libtcod.light_blue, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'flatluigi':
+                fighter_component = Fighter(hp=50, defense=5, power=9, xp=200, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'f', 'flatluigi', libtcod.light_orange, blocks= True, fighter=fighter_component, ai=ai_component)
+            elif choice == 'spanktrunk':
+                fighter_component = Fighter(hp=60, defense=6, power=10, xp=250, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 's', 'spanktrunk', libtcod.red, blocks= True, fighter=fighter_component, ai=ai_component)
+            
+            elif choice == 'stavros':
+                fighter_component = Fighter(hp=99, defense=10, power=5, xp=500, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = Object(x, y, 'S', 'Stavros the Wonder Chicken', libtcod.light_cyan, blocks= True, fighter=fighter_component, ai=ai_component)
             else:
                 print 'ERROR!'
                 break
@@ -789,6 +869,7 @@ def render_all():
     #show player stats
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
     libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level' + str(dungeon_level))
+    libtcod.console_print_ex(panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(player.game_turns))
 
     #print the game messages, one line at a time
     y = 1
@@ -818,7 +899,7 @@ def get_names_under_mouse():
 
 def handle_keys():
     global fov_recompute
-    global key
+    global key, player
 
     #for real-time, uncomment
     #key = libtcod.console_check_for_keypress()
@@ -870,6 +951,7 @@ def handle_keys():
                 #pick up an item
                 for object in objects: #look for items in the player's title
                     if object.x == player.x and object.y == player.y and object.item:
+                        player.game_turns +=1
                         return object.item.pick_up()
                         #break
 
@@ -877,12 +959,14 @@ def handle_keys():
                 #show inv. if an item is selected, use it
                 chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n')
                 if chosen_item is not None:
+                    player.game_turns +=1
                     return chosen_item.use()
 
             if key_char == 'd':
                 #show the inventory. if item is selected, drop it
                 chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n')
                 if chosen_item is not None:
+                    player.game_turns +=1
                     chosen_item.drop()
 
             if key_char == 'c':
@@ -892,9 +976,23 @@ def handle_keys():
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(player.fighter.max_hp) +
                     '\nAttack: ' + str(player.fighter.power) + '\nDefense: ' + str(player.fighter.defense), CHARACTER_SCREEN_WIDTH)
 
+            if key_char == 'x':
+                #level up
+                msgbox('You start to meditate!', CHARACTER_SCREEN_WIDTH)
+                level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
+                player.fighter.xp = level_up_xp
+                check_level_up()
+                player.game_turns +=1       
+
+            if key_char == 'z':
+                #go down stairs, if the player is on them
+                msgbox('You start digging at your feet!', CHARACTER_SCREEN_WIDTH)
+                next_level()           
+
             if key_char == '>':
                 #go down stairs, if the player is on them
                 if stairs.x == player.x and stairs.y == player.y:
+                    player.game_turns +=1
                     next_level()
 
             return 'no_action'
@@ -908,10 +1006,12 @@ def next_level():
     initialize_fov()
 
 def player_resting():
+    global player
     player.fighter.hp += 2
+    player.game_turns += 1
     
 def player_move_or_attack(dx, dy):
-    global fov_recompute
+    global fov_recompute, player
 
     #the coords the player is moving-to/attacking
     x = player.x + dx
@@ -927,8 +1027,10 @@ def player_move_or_attack(dx, dy):
     #attack if target found. else, move
     if target is not None:
         player.fighter.attack(target)
+        player.game_turns +=1
     else:
         player.move(dx, dy)
+        player.game_turns +=1
         fov_recompute = True
 
 def flip_coin():
@@ -1089,7 +1191,7 @@ def target_monster(max_range = None):
 ########################################################
 
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'DUNGEONEER!', False)
+libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'MeFightRogues!', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 con = libtcod.console_new(MAP_WIDTH,MAP_HEIGHT)
 panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
