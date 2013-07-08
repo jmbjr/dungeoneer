@@ -23,15 +23,14 @@ MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
 MSG_HEIGHT = PANEL_HEIGHT - 1
 
 #items
-MAX_ROOM_ITEMS = 2
 MAX_NUM_ITEMS = 26
 INVENTORY_WIDTH = 50
 
 #spell info
-HEAL_AMOUNT = 5
+HEAL_AMOUNT = 40
 LIGHTNING_DAMAGE = 25
 LIGHTNING_RANGE = 5
-FIREBALL_DAMAGE = 10
+FIREBALL_DAMAGE = 25
 FIREBALL_RADIUS = 3
 CONFUSE_NUM_TURNS = 10
 CONFUSE_RANGE = 8
@@ -40,7 +39,6 @@ CONFUSE_RANGE = 8
 ROOM_MAX_SIZE = 12
 ROOM_MIN_SIZE = 4
 MAX_ROOMS = 40
-MAX_ROOM_MONSTERS = 5
 
 FOV_ALGO = 2 #FOV_SHADOW
 FOV_LIGHT_WALLS = True
@@ -64,7 +62,7 @@ color_light_wall = libtcod.Color(130, 110, 50)
 color_dark_ground = libtcod.Color(50, 50, 150)
 color_light_ground = libtcod.Color(25, 25, 25)
 
-class Tile:
+class Tile(object):
     #a tile of the map and its properties
     def __init__(self, blocked, block_sight = None):
         self.blocked = blocked
@@ -76,7 +74,7 @@ class Tile:
         if block_sight is None: block_sight = blocked
         self.block_sight = block_sight
 
-class Rect:
+class Rect(object):
     #a rectangle on the map. used to characterize a room
     def __init__(self, x, y, w, h):
         self.x1 = x
@@ -94,7 +92,7 @@ class Rect:
         return (self.x1 <= other.x2 and self.x2 >= other.x1 and
                 self.y1 <= other.y2 and self.y2 >= other.y1)
 
-class Object:
+class Object(object):
     #this is a generic object: player, monster, item, stairs
     #always represented by a character on the screen
     def __init__(self, x, y, char, name, color, blocks = False, always_visible = False, fighter = None, ai = None, item = None):
@@ -187,7 +185,7 @@ class Object:
         objects.remove(self)
         objects.insert(0, self)
 
-class Fighter:
+class Fighter(object):
     #combat-related properties and methods (monster, player, NPC, etc)
     def __init__(self, hp, defense, power, xp, death_function=None):
         self.max_hp = hp
@@ -227,7 +225,7 @@ class Fighter:
         else:
             message (self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', libtcod.white)
 
-class BasicMonster:
+class BasicMonster(object):
     #AI for basic monster
     def take_turn(self):
         #basic monsters can see you if you can see them
@@ -243,7 +241,7 @@ class BasicMonster:
             elif player.fighter.hp > 0:
                 monster.fighter.attack(player)
 
-class ConfusedMonster:
+class ConfusedMonster(object):
     def __init__(self, old_ai, num_turns = CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
         self.num_turns = num_turns
@@ -259,7 +257,7 @@ class ConfusedMonster:
             self.owner.ai = self.old_ai
             message('The ' + self.owner.name + ' is no longer confused', libtcod.red) 
 
-class Item:
+class Item(object):
     def __init__(self, use_function=None):
         self.use_function = use_function
 
@@ -293,6 +291,28 @@ class Item:
         self.owner.x = player.x
         self.owner.y = player.y
         message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
+
+def random_choice(chances_dict):
+    #choose one option from dict of chances and return key
+    chances = chances_dict.values()
+    strings = chances_dict.keys()
+
+    return strings[random_choice_index(chances)]
+
+def random_choice_index(chances): #choose one option from list of chances. return index
+    #the dice will land on some number between 1 and sum of the chances
+    dice = libtcod.random_get_int(0, 1, sum(chances))
+
+    #go through all chances, keeping the sum so far
+    running_sum = 0
+    choice = 0
+    for w in chances:
+        running_sum += w
+
+        #see if the dice landed in the part that corresponds with this choice
+        if dice <= running_sum:
+            return choice
+        choice +=1
 
 def check_level_up():
     #see if the player's experience is enough to level-up
@@ -354,7 +374,7 @@ def new_game():
     global player, inventory, game_msgs, game_state, dungeon_level
 
     #create object representing the player
-    fighter_component = Fighter(hp=30, defense=2, power=5, xp=0, death_function=player_death)
+    fighter_component = Fighter(hp=100, defense=1, power=4, xp=0, death_function=player_death)
     player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Bobb', libtcod.white, blocks=True, fighter=fighter_component)
 
     player.level = 1
@@ -615,13 +635,40 @@ def make_map():
             num_rooms +=1
 
     #create stairs at the center of the last room
-    stairs = Object(new_x, new_y, '<', 'stairs', libtcod.white, always_visible = True)
+    stairs = Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
     objects.append(stairs)
     stairs.send_to_back() #so it's drawn below the monsters
 
+def from_dungeon_level(table):
+        #returns a value that depends on level. table specifies what value occurs after each level. default = 0
+        for (value, level) in reversed(table):
+            if dungeon_level >= level:
+                return value
+        return 0
+
 def place_objects(room):
     #choose random number of monsters
-    num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
+    max_monsters = from_dungeon_level([[2, 1], [3, 4], [5, 6]])
+    num_monsters = libtcod.random_get_int(0, 0, max_monsters)
+    #max number monsters per room
+
+    #chance of each monster
+    monster_chances = {}
+    monster_chances['orc'] = 75 #orc always shows up, even if all other monsters have 0 chance
+    monster_chances['troll'] = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
+
+    max_items = from_dungeon_level([[1, 1], [2, 4]])
+    num_items = libtcod.random_get_int(0, 0, max_items)
+    
+    #chance of each item (by default they have chance of 0 at level 1 which goes up)
+    item_chances = {}
+    item_chances['heal'] = 35 #healing potion always shows up even if all other items have 0 chance
+    item_chances['lightning'] = from_dungeon_level([[25, 4]])
+    item_chances['fireball'] = from_dungeon_level([[25, 6]])
+    item_chances['confuse'] = from_dungeon_level([[25, 2]])
+
+    #monster_chances = {'orc':75, 'troll':25}
+    #item_chances = {'heal':60, 'lightning':10, 'fireball':10, 'confuse':10}
 
     for i in range(num_monsters):
         #choose random spot for this monster
@@ -629,20 +676,23 @@ def place_objects(room):
         y =  libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
 
         if not is_blocked(x, y):
-            if libtcod.random_get_int(0, 0, 100) < 80: #80% chance for orcs
+            choice = random_choice(monster_chances)
+
+            if choice == 'orc':
                 #create orc
-                fighter_component = Fighter(hp=10, defense=0, power=3, xp=35, death_function=monster_death)
+                fighter_component = Fighter(hp=20, defense=0, power=4, xp=35, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = Object(x, y, 'o', 'orcy', libtcod.desaturated_green, blocks=True, fighter=fighter_component, ai=ai_component)
-            else:
+            elif choice == 'troll':
                 #create a troll
-                fighter_component = Fighter(hp=16, defense=1, power=4, xp=100, death_function=monster_death)
+                fighter_component = Fighter(hp=30, defense=2, power=8, xp=100, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = Object(x, y, 'T', 'TROLLY', libtcod.darker_green, blocks= True, fighter=fighter_component, ai=ai_component)
+            else:
+                print 'ERROR!'
+                break
 
             objects.append(monster)
-
-    num_items = libtcod.random_get_int(0, 0, MAX_ROOM_ITEMS)
 
     for i in range(num_items):
         #choose random spot for this item
@@ -652,28 +702,31 @@ def place_objects(room):
         #only place it if the tile is not blocked
         if not is_blocked(x, y):
             #create an item
-            roll = roll_dice([[0,100]])[0]
-
-            if roll < 70:
+            #roll = roll_dice([[0,100]])[0]
+            choice = random_choice(item_chances)
+            if choice == 'heal':
                 #healing potion
                 item_component = Item(use_function = cast_heal)
                 item = Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
                 #print 'Healing Potion'
-            elif roll < 70+10:
+            elif choice == 'lightning':
                 #lightning scroll
                 item_component = Item(use_function = cast_lightning)
                 item = Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
                 #print 'Lightning Scroll'
-            elif roll < 70+10+10:
+            elif choice == 'fireball':
                 #fireball scroll
                 item_component = Item(use_function=cast_fireball)
                 item = Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
                 #print 'Fireball Scroll'
-            else:
+            elif choice == 'confuse':
                 #confusion scroll
                 item_component = Item(use_function = cast_confusion)
                 item = Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
                 #print 'Confusion Scroll'
+            else:
+                print 'ERROR!'
+                break
 
             objects.append(item)
             item.send_to_back() #items appear below other objects
@@ -839,7 +892,7 @@ def handle_keys():
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(player.fighter.max_hp) +
                     '\nAttack: ' + str(player.fighter.power) + '\nDefense: ' + str(player.fighter.defense), CHARACTER_SCREEN_WIDTH)
 
-            if key_char == '<':
+            if key_char == '>':
                 #go down stairs, if the player is on them
                 if stairs.x == player.x and stairs.y == player.y:
                     next_level()
