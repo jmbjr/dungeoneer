@@ -3,127 +3,133 @@ import math
 import textwrap
 import shelve
 
-CHARACTER_SCREEN_WIDTH = 30
-LEVEL_SCREEN_WIDTH = 40
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
-LIMIT_FPS = 20
+from globals import *
+from objects import Rect, Tile
+from constants import *
+from ui import *
+from gamestuff import *
+from entities import *
 
-MAP_WIDTH = 80
-MAP_HEIGHT = 40
+class Item(object):
+    def __init__(self, use_function=None):
+        self.use_function = use_function
 
-#GUI rendering
-BAR_WIDTH = 20
-PANEL_HEIGHT = SCREEN_HEIGHT - MAP_HEIGHT
-PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+    def use(self):
+        #special case: if the object has the equipment component, the "use" action is to equip/dequip
+        if self.owner.equipment:
+            self.owner.equipment.toggle_equip()
+            return
 
-#combat log
-MSG_X = BAR_WIDTH + 2
-MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
-MSG_HEIGHT = PANEL_HEIGHT - 1
-
-#items
-MAX_NUM_ITEMS = 30
-INVENTORY_WIDTH = 50
-
-#spell info
-HEAL_AMOUNT = 50
-LIGHTNING_DAMAGE = 25
-LIGHTNING_RANGE = 5
-FIREBALL_DAMAGE = 25
-FIREBALL_RADIUS = 3
-CONFUSE_NUM_TURNS = 10
-CONFUSE_RANGE = 8
-
-#room info
-ROOM_MAX_SIZE = 15
-ROOM_MIN_SIZE = 4
-MAX_ROOMS = 40
-
-FOV_ALGO = 2 #FOV_SHADOW
-FOV_LIGHT_WALLS = True
-TORCH_RADIUS = 10
-
-WALL_CHAR = '#'
-GROUND_CHAR  = '.'
-
-#dice
-D6=[1,6]
-D4=[1,4]
-D8=[1,8]
-D10=[1,10]
-
-#player
-LEVEL_UP_BASE = 200
-LEVEL_UP_FACTOR = 150
-
-color_dark_wall = libtcod.Color(0, 0, 100)
-color_light_wall = libtcod.Color(130, 110, 50)
-color_dark_ground = libtcod.Color(50, 50, 150)
-color_light_ground = libtcod.Color(25, 25, 25)
-
-autoequip = True #need to add a game options class/structure
-
-class Equipment(object):
-    #an object that can be equipped, yielding bonuses. automatically adds the Item component
-    def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0):
-        self.slot = slot
-        self.power_bonus = power_bonus
-        self.defense_bonus = defense_bonus
-        self.max_hp_bonus = max_hp_bonus
-        self.is_equipped = False
-
-    def toggle_equip(self): #toggle equip/dequip status
-        if self.is_equipped:
-            self.dequip()
+        #call the 'use_function' if defined
+        if self.use_function is None:
+            message('The ' + self.owner.name + ' cannot be used.')
+            return 'no_action'
         else:
-            self.equip()
+            if self.use_function() != 'cancelled':
+                inventory.remove(self.owner) #destror after use, unless cancelled
+                return 'used'
+            else:
+                return 'no_action'
 
-    def equip(self):
-        #if the slot is already being used, dequip whatever is there
-        old_equipment = get_equipped_in_slot(self.slot)
-        if old_equipment is not None:
-            old_equipment.dequip()
+    #an item that can be picked up and used
+    def pick_up(self):
+        #add to the player's inventory and remove from the map
+        if len(inventory) >= 26:
+            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', libtcod.dark_red)
+            return 'no_action'
+        else:
+            inventory.append(self.owner)
+            objects.remove(self.owner)
+            message('You picked up a ' + self.owner.name + '!', libtcod.green)
+            return 'picked_up'
 
-        #equip object and show a message about it
-        self.is_equipped = True
-        message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', libtcod.light_green)
+        #special case: auto equip if the slot is unused
+        equipment = self.owner.equipment
+        if equipment and get_equipped_in_slot(equipment.slot) is None and AUTOEQUIP:
+            equipment.equip()
 
-    def dequip(self):
-        #dequip object and show a message about it
-        if not self.is_equipped: return
-        self.is_equipped = False
-        message('Unequipped ' + self.owner.name + ' from ' + self.slot + '.', libtcod.light_green)     
-           
-class Tile(object):
-    #a tile of the map and its properties
-    def __init__(self, blocked, block_sight = None):
-        self.blocked = blocked
+    def drop(self):
+        #add to the map and remove from the player's inventory. also, place it at the player's coordinates
+        objects.append(self.owner)
+        inventory.remove(self.owner)
+        self.owner.x = player.x
+        self.owner.y = player.y
+        message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
 
-        #all tiles start out unexplored
-        self.explored = False
+        #special case: if the object has the equip component, dequip before dropping it
+        if self.owner.equipment:
+            self.owner.equipment.dequip()
 
-        #by default, if a tile is blocked, it also blocks sight
-        if block_sight is None: block_sight = blocked
-        self.block_sight = block_sight
+class Fighter(object):
+    #combat-related properties and methods (monster, player, NPC, etc)
+    def __init__(self, hp, defense, power, xp, death_function=None):
+        self.base_max_hp = hp
+        self.hp = hp
+        self.xp = xp
+        self.base_defense = defense
+        self.base_power = power
+        self.death_function=death_function
 
-class Rect(object):
-    #a rectangle on the map. used to characterize a room
-    def __init__(self, x, y, w, h):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + w
-        self.y2 = y + h
+    @property
+    def power(self):
+        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner))
+        return self.base_power + bonus
 
-    def center(self):
-        center_x = (self.x1 + self.x2)/2
-        center_y = (self.y1 + self.y2)/2
-        return (center_x, center_y)
+    @property
+    def defense(self):
+        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner))
+        return self.base_defense + bonus
 
-    def intersect(self, other):
-        #returns True if this rect intersects with another one
-        return (self.x1 <= other.x2 and self.x2 >= other.x1 and
-                self.y1 <= other.y2 and self.y2 >= other.y1)
+    @property
+    def max_hp(self):
+        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner))
+        return self.base_max_hp + bonus
+
+    def heal(self, amount):
+        #heal by the given amount
+        self.hp += amount
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
+    def take_damage(self, damage):
+        #inflict dmg if possible
+        if damage > 0:
+            self.hp -= damage
+
+        #check for death and call death_function (if set)
+        if self.hp <= 0:
+            function = self.death_function
+            if function is not None:
+                function(self.owner)
+            if self.owner != player: #yield experience to the player
+                player.fighter.xp += self.xp
+
+    def attack(self, target):
+        #very simple formula for attack damage
+        damage = self.power - target.fighter.defense
+
+        if damage > 0:
+            #make target take some damage
+            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', libtcod.yellow)
+            target.fighter.take_damage(damage)
+        else:
+            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', libtcod.white)
+
+class BasicMonster(object):
+    #AI for basic monster
+    def take_turn(self):
+        #basic monsters can see you if you can see them
+        monster = self.owner
+        if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
+            #move towards player if far enough away
+            if flip_coin() and flip_coin() and flip_coin():
+                 message ('The ' + self.owner.name + ' clears its throat!', monster.color)
+            if monster.distance_to(player) >= 2:
+                monster.move_towards(player.x, player.y)
+
+                #close enough to attack (if the player is alive)
+            elif player.fighter.hp > 0:
+                monster.fighter.attack(player)
 
 class Object(object):
     #this is a generic object: player, monster, item, stairs
@@ -221,80 +227,8 @@ class Object(object):
 
     def send_to_back(self):
         #make this object be drawn first, so all others appear above it if they are in the same tile
-        global objects
         objects.remove(self)
         objects.insert(0, self)
-
-class Fighter(object):
-    #combat-related properties and methods (monster, player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, death_function=None):
-        self.base_max_hp = hp
-        self.hp = hp
-        self.xp = xp
-        self.base_defense = defense
-        self.base_power = power
-        self.death_function=death_function
-
-    @property
-    def power(self):
-        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner))
-        return self.base_power + bonus
-
-    @property
-    def defense(self):
-        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner))
-        return self.base_defense + bonus
-
-    @property
-    def max_hp(self):
-        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner))
-        return self.base_max_hp + bonus
-
-    def heal(self, amount):
-        #heal by the given amount
-        self.hp += amount
-        if self.hp > self.max_hp:
-            self.hp = self.max_hp
-
-    def take_damage(self, damage):
-        #inflict dmg if possible
-        if damage > 0:
-            self.hp -= damage
-
-        #check for death and call death_function (if set)
-        if self.hp <= 0:
-            function = self.death_function
-            if function is not None:
-                function(self.owner)
-            if self.owner != player: #yield experience to the player
-                player.fighter.xp += self.xp
-
-    def attack(self, target):
-        #very simple formula for attack damage
-        damage = self.power - target.fighter.defense
-
-        if damage > 0:
-            #make target take some damage
-            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', libtcod.yellow)
-            target.fighter.take_damage(damage)
-        else:
-            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', libtcod.white)
-
-class BasicMonster(object):
-    #AI for basic monster
-    def take_turn(self):
-        #basic monsters can see you if you can see them
-        monster = self.owner
-        if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
-            #move towards player if far enough away
-            if flip_coin() and flip_coin() and flip_coin():
-                 message ('The ' + self.owner.name + ' clears its throat!', monster.color)
-            if monster.distance_to(player) >= 2:
-                monster.move_towards(player.x, player.y)
-
-                #close enough to attack (if the player is alive)
-            elif player.fighter.hp > 0:
-                monster.fighter.attack(player)
 
 class ConfusedMonster(object):
     def __init__(self, old_ai, num_turns = CONFUSE_NUM_TURNS):
@@ -311,94 +245,6 @@ class ConfusedMonster(object):
         else:
             self.owner.ai = self.old_ai
             message('The ' + self.owner.name + ' is no longer confused', libtcod.red) 
-
-class Item(object):
-    def __init__(self, use_function=None):
-        self.use_function = use_function
-
-    def use(self):
-        #special case: if the object has the equipment component, the "use" action is to equip/dequip
-        if self.owner.equipment:
-            self.owner.equipment.toggle_equip()
-            return
-
-        #call the 'use_function' if defined
-        if self.use_function is None:
-            message('The ' + self.owner.name + ' cannot be used.')
-            return 'no_action'
-        else:
-            if self.use_function() != 'cancelled':
-                inventory.remove(self.owner) #destror after use, unless cancelled
-                return 'used'
-            else:
-                return 'no_action'
-
-    #an item that can be picked up and used
-    def pick_up(self):
-        #add to the player's inventory and remove from the map
-        if len(inventory) >= 26:
-            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', libtcod.dark_red)
-            return 'no_action'
-        else:
-            inventory.append(self.owner)
-            objects.remove(self.owner)
-            message('You picked up a ' + self.owner.name + '!', libtcod.green)
-            return 'picked_up'
-
-        #special case: auto equip if the slot is unused
-        equipment = self.owner.equipment
-        if equipment and get_equipped_in_slot(equipment.slot) is None and autoequip:
-            equipment.equip()
-
-    def drop(self):
-        #add to the map and remove from the player's inventory. also, place it at the player's coordinates
-        objects.append(self.owner)
-        inventory.remove(self.owner)
-        self.owner.x = player.x
-        self.owner.y = player.y
-        message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
-
-        #special case: if the object has the equip component, dequip before dropping it
-        if self.owner.equipment:
-            self.owner.equipment.dequip()
-
-def get_equipped_in_slot(slot): #returns the equipment in a slot, or None if it's empty
-    for obj in inventory:
-        if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
-            return obj.equipment
-    return None
-
-def random_choice(chances_dict):
-    #choose one option from dict of chances and return key
-    chances = chances_dict.values()
-    strings = chances_dict.keys()
-
-    return strings[random_choice_index(chances)]
-
-def get_all_equipped(obj): #returns list of equipped items
-    if obj == player:
-        equipped_list = []
-        for item in inventory:
-            if item.equipment and item.equipment.is_equipped:
-                equipped_list.append(item.equipment)
-        return equipped_list
-    else:
-        return [] #other objects have no equipment
-
-def random_choice_index(chances): #choose one option from list of chances. return index
-    #the dice will land on some number between 1 and sum of the chances
-    dice = libtcod.random_get_int(0, 1, sum(chances))
-
-    #go through all chances, keeping the sum so far
-    running_sum = 0
-    choice = 0
-    for w in chances:
-        running_sum += w
-
-        #see if the dice landed in the part that corresponds with this choice
-        if dice <= running_sum:
-            return choice
-        choice +=1
 
 def check_level_up():
     #see if the player's experience is enough to level-up
@@ -442,6 +288,7 @@ def main_menu():
         if choice == 0: #new game
             new_game()
             play_game()
+
         if choice == 1: #load last game
             try:
                 load_game()
@@ -460,7 +307,7 @@ def msgbox(text, width = 50):
     menu(text, [], width) #use menu as a sort-of message box
 
 def new_game():
-    global player, inventory, game_msgs, game_state, dungeon_level
+    global player, inventory, game_state, dungeon_level
 
     #create object representing the player
     fighter_component = Fighter(hp=100, defense=3, power=6, xp=0, death_function=player_death)
@@ -470,13 +317,13 @@ def new_game():
     #generate map (at this point it's not drawn to screen)
     dungeon_level = 1
     make_map()
+
     initialize_fov()
 
     game_state = 'playing'
     inventory = []
 
     #create the list of the game messages and their colors, starts empty
-    game_msgs = []
     player.game_turns = 0
 
     #initial equipment
@@ -531,8 +378,7 @@ def load_game(filename='savegame'):
     initialize_fov()
 
 def play_game():
-    global key, mouse
-
+    global key, mouse, objects
     player_action = None
 
     #mouse stuff
@@ -671,7 +517,6 @@ def make_map():
     global map, objects, stairs
 
     objects = [player]
-
     #fill map with "blocked" tiles
     map = [[ Tile(True)
         for y in range(MAP_HEIGHT) ]
@@ -744,6 +589,7 @@ def from_dungeon_level(table):
         return 0
 
 def place_objects(room):
+    global objects
     #choose random number of monsters
     max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]])
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
@@ -914,12 +760,9 @@ def place_objects(room):
             objects.append(item)
             item.send_to_back() #items appear below other objects
 
-def get_distance(dx, dy):
-    return math.sqrt(dx ** 2 + dy ** 2)
-
 def render_all():
-    global color_light_wall, color_dark_wall
-    global color_light_ground, color_dark_ground
+    global COLOR_LIGHT_WALL, COLOR_DARK_WALL
+    global color_light_ground, COLOR_DARK_GROUND
     global fov_recompute, fov_map
 
     if fov_recompute:
@@ -934,17 +777,17 @@ def render_all():
                 if not visible:
                     #tile not visible
                     if wall:
-                        color_wall_ground = color_dark_wall
+                        color_wall_ground = COLOR_DARK_WALL
                         char_wall_ground = WALL_CHAR
                     else:
-                        color_wall_ground = color_dark_ground
+                        color_wall_ground = COLOR_DARK_GROUND
                         char_wall_ground = GROUND_CHAR
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
                     map[x][y].explored = True
                     if wall:
-                        color_wall_ground = color_light_wall
+                        color_wall_ground = COLOR_LIGHT_WALL
                         char_wall_ground = WALL_CHAR
                     else:
                         color_wall_ground = color_light_ground
@@ -1136,8 +979,7 @@ def player_move_or_attack(dx, dy):
         player.game_turns +=1
         fov_recompute = True
 
-def flip_coin():
-    return (libtcod.random_get_int(0,0,1))
+
 
 def roll_dice(dicelist):
     dice=[]
@@ -1189,18 +1031,7 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     libtcod.console_set_default_foreground(panel, libtcod.white)
     libtcod.console_print_ex(panel, x + total_width/2, y, libtcod.BKGND_NONE, libtcod.CENTER, name + ': ' + str(value) + '/' + str(maximum))
 
-def message(new_msg, color = libtcod.white):
-    #split message if necessary
-    #print new_msg
-    new_msg_lines = textwrap.wrap(new_msg, MSG_WIDTH)
 
-    for line in new_msg_lines:
-        #if the buffer is full, remove the first line to make room for the new one
-        if len(game_msgs) == MSG_HEIGHT:
-            del game_msgs[0]
-
-        #add the new line as a tuple, with the txt and the color
-        game_msgs.append((line, color))
 
 def menu(header, options, width):
     if len(options) > MAX_NUM_ITEMS: raise ValueError('Cannot have a menu with more than ' + MAX_NUM_ITEMS + ' options.')
@@ -1300,7 +1131,6 @@ def target_monster(max_range = None):
 ########################################################
 #init and main loop
 ########################################################
-
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'MeFightRogues!', False)
 libtcod.sys_set_fps(LIMIT_FPS)
