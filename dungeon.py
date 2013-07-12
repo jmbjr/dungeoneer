@@ -3,62 +3,13 @@ import math
 import textwrap
 import shelve
 
-from globals import *
 from objects import Rect, Tile
 from constants import *
 from ui import *
 from gamestuff import *
 from entities import *
 
-class Item(object):
-    def __init__(self, use_function=None):
-        self.use_function = use_function
-
-    def use(self):
-        #special case: if the object has the equipment component, the "use" action is to equip/dequip
-        if self.owner.equipment:
-            self.owner.equipment.toggle_equip()
-            return
-
-        #call the 'use_function' if defined
-        if self.use_function is None:
-            message('The ' + self.owner.name + ' cannot be used.')
-            return 'no_action'
-        else:
-            if self.use_function() != 'cancelled':
-                inventory.remove(self.owner) #destror after use, unless cancelled
-                return 'used'
-            else:
-                return 'no_action'
-
-    #an item that can be picked up and used
-    def pick_up(self):
-        #add to the player's inventory and remove from the map
-        if len(inventory) >= 26:
-            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', libtcod.dark_red)
-            return 'no_action'
-        else:
-            inventory.append(self.owner)
-            objects.remove(self.owner)
-            message('You picked up a ' + self.owner.name + '!', libtcod.green)
-            return 'picked_up'
-
-        #special case: auto equip if the slot is unused
-        equipment = self.owner.equipment
-        if equipment and get_equipped_in_slot(equipment.slot) is None and AUTOEQUIP:
-            equipment.equip()
-
-    def drop(self):
-        #add to the map and remove from the player's inventory. also, place it at the player's coordinates
-        objects.append(self.owner)
-        inventory.remove(self.owner)
-        self.owner.x = player.x
-        self.owner.y = player.y
-        message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
-
-        #special case: if the object has the equip component, dequip before dropping it
-        if self.owner.equipment:
-            self.owner.equipment.dequip()
+class G(object): pass
 
 class Fighter(object):
     #combat-related properties and methods (monster, player, NPC, etc)
@@ -72,17 +23,17 @@ class Fighter(object):
 
     @property
     def power(self):
-        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner))
+        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner, G.player, G.inventory))
         return self.base_power + bonus
 
     @property
     def defense(self):
-        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner))
+        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner, G.player, G.inventory))
         return self.base_defense + bonus
 
     @property
     def max_hp(self):
-        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner))
+        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner, G.player, G.inventory))
         return self.base_max_hp + bonus
 
     def heal(self, amount):
@@ -101,8 +52,8 @@ class Fighter(object):
             function = self.death_function
             if function is not None:
                 function(self.owner)
-            if self.owner != player: #yield experience to the player
-                player.fighter.xp += self.xp
+            if self.owner != G.player: #yield experience to the player
+                G.player.fighter.xp += self.xp
 
     def attack(self, target):
         #very simple formula for attack damage
@@ -124,12 +75,12 @@ class BasicMonster(object):
             #move towards player if far enough away
             if flip_coin() and flip_coin() and flip_coin():
                  message ('The ' + self.owner.name + ' clears its throat!', monster.color)
-            if monster.distance_to(player) >= 2:
-                monster.move_towards(player.x, player.y)
+            if monster.distance_to(G.player) >= 2:
+                monster.move_towards(G.player.x, G.player.y)
 
                 #close enough to attack (if the player is alive)
-            elif player.fighter.hp > 0:
-                monster.fighter.attack(player)
+            elif G.player.fighter.hp > 0:
+                monster.fighter.attack(G.player)
 
 class Object(object):
     #this is a generic object: player, monster, item, stairs
@@ -227,48 +178,32 @@ class Object(object):
 
     def send_to_back(self):
         #make this object be drawn first, so all others appear above it if they are in the same tile
-        objects.remove(self)
-        objects.insert(0, self)
-
-class ConfusedMonster(object):
-    def __init__(self, old_ai, num_turns = CONFUSE_NUM_TURNS):
-        self.old_ai = old_ai
-        self.num_turns = num_turns
-
-    #AI for confused monster
-    def take_turn(self):
-        if self.num_turns > 0: #still confused
-            #move in random direction
-            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
-            self.num_turns -= 1
-
-        else:
-            self.owner.ai = self.old_ai
-            message('The ' + self.owner.name + ' is no longer confused', libtcod.red) 
+        G.objects.remove(self)
+        G.objects.insert(0, self)
 
 def check_level_up():
     #see if the player's experience is enough to level-up
-    level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
-    if player.fighter.xp >= level_up_xp:
-        player.level += 1
-        player.fighter.xp -=level_up_xp
-        message('You have reached level ' + str(player.level) + '!', libtcod.yellow)
+    level_up_xp = LEVEL_UP_BASE + G.player.level * LEVEL_UP_FACTOR
+    if G.player.fighter.xp >= level_up_xp:
+        G.player.level += 1
+        G.player.fighter.xp -=level_up_xp
+        message('You have reached level ' + str(G.player.level) + '!', libtcod.yellow)
 
         choice = None
         while choice == None: #keep asking till a choice is made
             choice = menu('Level up! Choose a stat to raise:\n', 
-                ['Constitution (+25 HP, from ' + str(player.fighter.max_hp) + ')',
-                'Strength (+2 attack, from ' + str(player.fighter.power) + ')', 
-                'Agility (+2 defense, from ' + str(player.fighter.defense) + ')'], LEVEL_SCREEN_WIDTH)
+                ['Constitution (+25 HP, from ' + str(G.player.fighter.max_hp) + ')',
+                'Strength (+2 attack, from ' + str(G.player.fighter.power) + ')', 
+                'Agility (+2 defense, from ' + str(G.player.fighter.defense) + ')'], LEVEL_SCREEN_WIDTH)
 
         if choice == 0:
-            player.fighter.base_max_hp += 25
+            G.player.fighter.base_max_hp += 25
         elif choice == 1:
-            player.fighter.base_power += 2
+            G.player.fighter.base_power += 2
         elif choice ==2:
-            player.fighter.base_defense += 2
+            G.player.fighter.base_defense += 2
 
-        player.fighter.hp = player.fighter.max_hp
+        G.player.fighter.hp = G.player.fighter.max_hp
 
 def main_menu():
     img = libtcod.image_load('menu_background.png')
@@ -307,13 +242,13 @@ def msgbox(text, width = 50):
     menu(text, [], width) #use menu as a sort-of message box
 
 def new_game():
-    global player, inventory, game_state, dungeon_level
+    global game_state, dungeon_level
 
     #create object representing the player
     fighter_component = Fighter(hp=100, defense=3, power=6, xp=0, death_function=player_death)
-    player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
+    G.player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
 
-    player.level = 1
+    G.player.level = 1
     #generate map (at this point it's not drawn to screen)
     dungeon_level = 1
     make_map()
@@ -321,16 +256,16 @@ def new_game():
     initialize_fov()
 
     game_state = 'playing'
-    inventory = []
+    G.inventory = []
 
     #create the list of the game messages and their colors, starts empty
-    player.game_turns = 0
+    G.player.game_turns = 0
 
     #initial equipment
     equipment_component = Equipment(slot='wrist', max_hp_bonus = 5)
     obj = Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
-    inventory.append(obj)
-    equipment_component.equip()
+    G.inventory.append(obj)
+    equipment_component.equip(G.inventory)
     obj.always_visible = True
 
     #a warm welcoming message!
@@ -352,33 +287,33 @@ def save_game(filename='savegame'):
     #open a new empty shelve (or overwrite old one) to write the game data
     file = shelve.open(filename, 'n')
     file['map'] = map
-    file['objects'] = objects
-    file['player_index'] = objects.index(player) #index of player in the objects list
-    file['inventory'] = inventory
+    file['objects'] = G.objects
+    file['player_index'] = G.objects.index(G.player) #index of player in the objects list
+    file['inventory'] = G.inventory
     file['game_msgs'] = game_msgs
     file['game_state'] = game_state
-    file['stairs_index'] = objects.index(stairs)
+    file['stairs_index'] = G.objects.index(stairs)
     file['dungeon_level'] = dungeon_level
     file.close()
 
 def load_game(filename='savegame'):
-    global map, objects, player, inventory, game_msgs, game_state, dungeon_level, stairs
+    global map, game_msgs, game_state, dungeon_level, stairs
     
     file = shelve.open(filename, 'r')
     map = file['map']
-    objects = file['objects'] 
-    player = objects[file['player_index']]  #get index of player in the objects list
-    inventory = file['inventory']
+    G.objects = file['objects'] 
+    G.player = objects[file['player_index']]  #get index of player in the objects list
+    G.inventory = file['inventory']
     game_msgs = file['game_msgs']
     game_state = file['game_state']
-    stairs = objects[file['stairs_index']]
+    stairs = G.objects[file['stairs_index']]
     dungeon_level = file['dungeon_level']
     file.close()
 
     initialize_fov()
 
 def play_game():
-    global key, mouse, objects
+    global key, mouse
     player_action = None
 
     #mouse stuff
@@ -396,7 +331,7 @@ def play_game():
         check_level_up()
 
         #erase objects from old position, before they move
-        for object in objects:
+        for object in G.objects:
             object.clear()
 
         #handle keys and exit game if needed
@@ -406,7 +341,7 @@ def play_game():
 
         #give monsters a turn
         if game_state == 'playing' and player_action != 'no_action':
-            for object in objects:
+            for object in G.objects:
                 if object.ai:
                     object.ai.take_turn()
 
@@ -439,19 +374,19 @@ def cast_fireball():
         message('The fireball explodes', libtcod.orange)
 
     theDmg = roll_dice([[FIREBALL_DAMAGE/2, FIREBALL_DAMAGE*2]])[0]
-    for obj in objects: #damage all fighters within range
+    for obj in G.objects: #damage all fighters within range
         if obj.distance(x,y) <= FIREBALL_RADIUS and obj.fighter:
             message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', libtcod.orange)
             obj.fighter.take_damage(theDmg)
 
 def cast_heal():
     #heal the player
-    if player.fighter.hp == player.fighter.max_hp:
+    if G.player.fighter.hp == G.player.fighter.max_hp:
         message('You are already at full health.', libtcod.red)
         return 'cancelled'
 
     message('You feel better', libtcod.light_violet)
-    player.fighter.heal(HEAL_AMOUNT)
+    G.player.fighter.heal(HEAL_AMOUNT)
 
 def cast_lightning():
     #find nearest enemy (within range) and damage it
@@ -470,10 +405,10 @@ def closest_monster(max_range):
     closest_enemy = None
     closest_dist = max_range + 1 #start with slightly higher than max range
 
-    for object in objects:
-        if object.fighter and not object == player and libtcod.map_is_in_fov(fov_map, object.x, object.y):
+    for object in G.objects:
+        if object.fighter and not object == G.player and libtcod.map_is_in_fov(fov_map, object.x, object.y):
             #calculate the distance between this and the player
-            dist = player.distance_to(object)
+            dist = G.player.distance_to(object)
             if dist < closest_dist:
                 closest_enemy = object
                 closest_dist = dist
@@ -485,7 +420,7 @@ def is_blocked(x, y):
         return True
 
     #now check for any blocking objects
-    for object in objects:
+    for object in G.objects:
         if object.blocks and object.x == x and object.y == y:
             return True
 
@@ -514,9 +449,9 @@ def create_v_tunnel(y1, y2, x):
         map[x][y].block_sight = False
 
 def make_map():
-    global map, objects, stairs
+    global map,  stairs
 
-    objects = [player]
+    G.objects = [G.player]
     #fill map with "blocked" tiles
     map = [[ Tile(True)
         for y in range(MAP_HEIGHT) ]
@@ -553,8 +488,8 @@ def make_map():
 
             if num_rooms == 0:
                 #first room. start player here
-                player.x = new_x
-                player.y = new_y
+                G.player.x = new_x
+                G.player.y = new_y
 
             else:
                 #for all other rooms, need to connect to previous room with a tunnel
@@ -578,7 +513,7 @@ def make_map():
 
     #create stairs at the center of the last room
     stairs = Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
-    objects.append(stairs)
+    G.objects.append(stairs)
     stairs.send_to_back() #so it's drawn below the monsters
 
 def from_dungeon_level(table):
@@ -589,7 +524,6 @@ def from_dungeon_level(table):
         return 0
 
 def place_objects(room):
-    global objects
     #choose random number of monsters
     max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]])
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
@@ -713,7 +647,7 @@ def place_objects(room):
                 print 'ERROR!'
                 break
 
-            objects.append(monster)
+            G.objects.append(monster)
 
     for i in range(num_items):
         #choose random spot for this item
@@ -757,7 +691,7 @@ def place_objects(room):
                 print 'ERROR!'
                 break
 
-            objects.append(item)
+            G.objects.append(item)
             item.send_to_back() #items appear below other objects
 
 def render_all():
@@ -768,7 +702,7 @@ def render_all():
     if fov_recompute:
         #recompute FOV if needed (if player moved or something else happened)
         fov_recompute = False
-        libtcod.map_compute_fov(fov_map, player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+        libtcod.map_compute_fov(fov_map, G.player.x, G.player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
 
         for y in range(MAP_HEIGHT):
             for x in range(MAP_WIDTH):
@@ -799,11 +733,11 @@ def render_all():
                 
 
     #draw all objects in the list
-    for object in objects:
-        if object != player:
+    for object in G.objects:
+        if object != G.player:
             object.draw()
     #ensure we draw player last
-    player.draw()
+    G.player.draw()
 
     #blit contents of con to root console
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
@@ -813,9 +747,9 @@ def render_all():
     libtcod.console_clear(panel)
 
     #show player stats
-    render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
+    render_bar(1, 1, BAR_WIDTH, 'HP', G.player.fighter.hp, G.player.fighter.max_hp, libtcod.light_red, libtcod.darker_red)
     libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level' + str(dungeon_level))
-    libtcod.console_print_ex(panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(player.game_turns))
+    libtcod.console_print_ex(panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(G.player.game_turns))
 
     #print the game messages, one line at a time
     y = 1
@@ -837,7 +771,7 @@ def get_names_under_mouse():
     (x, y) = (mouse.cx, mouse.cy)
 
     #create list with the names of all objects at the mouse's coords and in FOV
-    names = [obj.name for obj in objects
+    names = [obj.name for obj in G.objects
         if obj.x == x and obj.y == y and libtcod.map_is_in_fov(fov_map, obj.x, obj.y)]
     
     names = ', '.join(names) #join names separated by commas
@@ -845,7 +779,7 @@ def get_names_under_mouse():
 
 def handle_keys():
     global fov_recompute
-    global key, player
+    global key
 
     #for real-time, uncomment
     #key = libtcod.console_check_for_keypress()
@@ -895,40 +829,40 @@ def handle_keys():
             #test for other keys
             if key_char == 'g':
                 #pick up an item
-                for object in objects: #look for items in the player's title
-                    if object.x == player.x and object.y == player.y and object.item:
-                        player.game_turns +=1
-                        return object.item.pick_up()
+                for object in G.objects: #look for items in the player's title
+                    if object.x == G.player.x and object.y == G.player.y and object.item:
+                        G.player.game_turns +=1
+                        return object.item.pick_up(G.inventory, G.objects)
                         #break
 
             if key_char == 'i':
                 #show inv. if an item is selected, use it
                 chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n')
                 if chosen_item is not None:
-                    player.game_turns +=1
-                    return chosen_item.use()
+                    G.player.game_turns +=1
+                    return chosen_item.use(G.inventory)
 
             if key_char == 'd':
                 #show the inventory. if item is selected, drop it
                 chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n')
                 if chosen_item is not None:
-                    player.game_turns +=1
-                    chosen_item.drop()
+                    G.player.game_turns +=1
+                    chosen_item.drop(G.inventory, G.objects)
 
             if key_char == 'c':
                 #show character info
-                level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
-                msgbox('Character Information\n\nLevel: ' + str(player.level) + '\nExperience: ' + str(player.fighter.xp) +
-                    '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(player.fighter.max_hp) +
-                    '\nAttack: ' + str(player.fighter.power) + '\nDefense: ' + str(player.fighter.defense), CHARACTER_SCREEN_WIDTH)
+                level_up_xp = LEVEL_UP_BASE + G.player.level * LEVEL_UP_FACTOR
+                msgbox('Character Information\n\nLevel: ' + str(G.player.level) + '\nExperience: ' + str(G.player.fighter.xp) +
+                    '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(G.player.fighter.max_hp) +
+                    '\nAttack: ' + str(G.player.fighter.power) + '\nDefense: ' + str(G.player.fighter.defense), CHARACTER_SCREEN_WIDTH)
 
             if key_char == 'x':
                 #level up
                 msgbox('You start to meditate!', CHARACTER_SCREEN_WIDTH)
-                level_up_xp = LEVEL_UP_BASE + player.level * LEVEL_UP_FACTOR
-                player.fighter.xp = level_up_xp
+                level_up_xp = LEVEL_UP_BASE + G.player.level * LEVEL_UP_FACTOR
+                G.player.fighter.xp = level_up_xp
                 check_level_up()
-                player.game_turns +=1       
+                G.player.game_turns +=1       
 
             if key_char == 'z':
                 #go down stairs, if the player is on them
@@ -937,8 +871,8 @@ def handle_keys():
 
             if key_char == '>':
                 #go down stairs, if the player is on them
-                if stairs.x == player.x and stairs.y == player.y:
-                    player.game_turns +=1
+                if stairs.x == G.player.x and stairs.y == G.player.y:
+                    G.player.game_turns +=1
                     next_level()
 
             return 'no_action'
@@ -952,31 +886,30 @@ def next_level():
     initialize_fov()
 
 def player_resting():
-    global player
-    player.fighter.hp += 2
-    player.game_turns += 1
+    G.player.fighter.hp += 2
+    G.player.game_turns += 1
     
 def player_move_or_attack(dx, dy):
-    global fov_recompute, player
+    global fov_recompute
 
     #the coords the player is moving-to/attacking
-    x = player.x + dx
-    y = player.y + dy
+    x = G.player.x + dx
+    y = G.player.y + dy
 
     #try to find attackable object there
     target = None
-    for object in objects:
+    for object in G.objects:
         if object.x == x and object.y == y and object.fighter:
             target = object
             break
 
     #attack if target found. else, move
     if target is not None:
-        player.fighter.attack(target)
-        player.game_turns +=1
+        G.player.fighter.attack(target)
+        G.player.game_turns +=1
     else:
-        player.move(dx, dy)
-        player.game_turns +=1
+        G.player.move(dx, dy)
+        G.player.game_turns +=1
         fov_recompute = True
 
 
@@ -1079,12 +1012,12 @@ def menu(header, options, width):
 
 def inventory_menu(header):
     #show a menu with each item of the inventory as an option
-    if len(inventory) == 0:
-        options = ['Inventory is empty!']
+    if len(G.inventory) == 0:
+        options = ['inventory is empty!']
     else:
         #options = [item.name for item in inventory]
         options = []
-        for item in inventory:
+        for item in G.inventory:
             text = item.name
             #show additional info, in case it's equipped
             if item.equipment and item.equipment.is_equipped:
@@ -1094,10 +1027,10 @@ def inventory_menu(header):
 
     index = menu(header, options, INVENTORY_WIDTH)
     
-    if (index is None or len(inventory) == 0) or index == 'ESC':
+    if (index is None or len(G.inventory) == 0) or index == 'ESC':
         return None
     else:
-        return inventory[index].item
+        return G.inventory[index].item
 
 def target_tile(max_range = None):
     #return the position of a tile left-clicked in player's FOV (optionally in a range) or (None, None) if right-clicked
@@ -1110,7 +1043,7 @@ def target_tile(max_range = None):
 
         (x, y) = (mouse.cx, mouse.cy)
 
-        if (mouse.lbutton_pressed and libtcod.map_is_in_fov(fov_map, x, y) and (max_range is None or player.distance(x,y) <= max_range)):
+        if (mouse.lbutton_pressed and libtcod.map_is_in_fov(fov_map, x, y) and (max_range is None or G.player.distance(x,y) <= max_range)):
             return (x, y)
 
         if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
@@ -1124,8 +1057,8 @@ def target_monster(max_range = None):
             return None
 
         #return the first clicked monster, otherwise continue looping
-        for obj in objects:
-            if obj.x == x and obj.y == y and obj.fighter and obj != player:
+        for obj in G.objects:
+            if obj.x == x and obj.y == y and obj.fighter and obj != G.player:
                 return obj
 
 ########################################################

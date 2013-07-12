@@ -1,4 +1,3 @@
-from globals import *
 import textwrap
 from constants import *
 
