@@ -5,7 +5,7 @@ import math
 from world import *
 
 class Fighter(object):
-    #combat-related properties and methods (monster, player, NPC, etc)
+    #combat-related properties and methods (monster, Game.player, NPC, etc)
     def __init__(self, hp, defense, power, xp, death_function=None):
         self.base_max_hp = hp
         self.hp = hp
@@ -15,18 +15,18 @@ class Fighter(object):
         self.death_function=death_function
 
     #@property
-    def power(self, player, inventory):
-        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner, player, inventory))
+    def power(self, Game):
+        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner, Game))
         return self.base_power + bonus
 
     #@property
-    def defense(self, player, inventory):
-        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner, player, inventory))
+    def defense(self, Game):
+        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner, Game))
         return self.base_defense + bonus
 
     #@property
-    def max_hp(self, player, inventory):
-        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner, player, inventory))
+    def max_hp(self, Game):
+        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner, Game))
         return self.base_max_hp + bonus
 
     def heal(self, amount):
@@ -35,7 +35,7 @@ class Fighter(object):
         if self.hp > self.max_hp:
             self.hp = self.max_hp
 
-    def take_damage(self, damage, player):
+    def take_damage(self, damage, Game):
         #inflict dmg if possible
         if damage > 0:
             self.hp -= damage
@@ -45,38 +45,38 @@ class Fighter(object):
             function = self.death_function
             if function is not None:
                 function(self.owner)
-            if self.owner != player: #yield experience to the player
-                player.fighter.xp += self.xp
+            if self.owner != Game.player: #yield experience to the Game.player
+                Game.player.fighter.xp += self.xp
 
-    def attack(self, target, player, inventory):
+    def attack(self, target, Game):
         #very simple formula for attack damage
-        damage = self.power(player, inventory) - target.fighter.defense(player, inventory)
+        damage = self.power(Game) - target.fighter.defense(Game)
 
         if damage > 0:
             #make target take some damage
             message (self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', libtcod.yellow)
-            target.fighter.take_damage(damage, player)
+            target.fighter.take_damage(damage, Game)
         else:
             message (self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', libtcod.white)
 
 class BasicMonster(object):
     #AI for basic monster
-    def take_turn(self, player, fov_map, objects, map, inventory):
+    def take_turn(self, Game):
         #basic monsters can see you if you can see them
         monster = self.owner
-        if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
-            #move towards player if far enough away
+        if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
+            #move towards Game.player if far enough away
             if flip_coin() and flip_coin() and flip_coin():
                  message ('The ' + self.owner.name + ' clears its throat!', monster.color)
-            if monster.distance_to(player) >= 2:
-                monster.move_towards(player.x, player.y, objects, map)
+            if monster.distance_to(Game.player) >= 2:
+                monster.move_towards(Game.player.x, Game.player.y, Game)
 
-                #close enough to attack (if the player is alive)
-            elif player.fighter.hp > 0:
-                monster.fighter.attack(player, player, inventory)
+                #close enough to attack (if the Game.player is alive)
+            elif Game.player.fighter.hp > 0:
+                monster.fighter.attack(Game.player, Game)
 
 class Object(object):
-    #this is a generic object: player, monster, item, stairs
+    #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
     def __init__(self, x, y, char, name, color, blocks = False, always_visible = False, fighter = None, ai = None, item = None, equipment = None):
         self.name = name
@@ -107,8 +107,8 @@ class Object(object):
             self.item = Item()
             self.item.owner = self
 
-    def move(self, dx, dy, objects, map):
-        if not is_blocked(self.x + dx, self.y + dy, objects, map):
+    def move(self, dx, dy, Game):
+        if not is_blocked(self.x + dx, self.y + dy, Game):
         #if not map[self.x + dx][self.y + dy].blocked:
             self.x += dx
             self.y += dy
@@ -116,19 +116,19 @@ class Object(object):
         else:
             return False
 
-    def draw(self, fov_map, map, con):
-        #only draw if in field of view of player or it's set to always visible and on explored tile
-        if (libtcod.map_is_in_fov(fov_map, self.x, self.y) or (self.always_visible and map[self.x][self.y].explored)):
+    def draw(self, Game):
+        #only draw if in field of view of Game.player or it's set to always visible and on explored tile
+        if (libtcod.map_is_in_fov(Game.fov_map, self.x, self.y) or (self.always_visible and Game.map[self.x][self.y].explored)):
             #set the color then draw the character that represents this object at its position
-            libtcod.console_set_default_foreground(con, self.color)
-            libtcod.console_put_char(con, self.x, self.y, self.char, libtcod.BKGND_NONE)
+            libtcod.console_set_default_foreground(Game.con, self.color)
+            libtcod.console_put_char(Game.con, self.x, self.y, self.char, libtcod.BKGND_NONE)
 
-    def clear(self, fov_map, con):
+    def clear(self, Game):
         #erase char that represents this object
-        if libtcod.map_is_in_fov(fov_map, self.x, self.y):
-            libtcod.console_put_char_ex(con, self.x, self.y, GROUND_CHAR, libtcod.white, color_light_ground)
+        if libtcod.map_is_in_fov(Game.fov_map, self.x, self.y):
+            libtcod.console_put_char_ex(Game.con, self.x, self.y, GROUND_CHAR, libtcod.white, color_light_ground)
 
-    def move_towards(self, target_x, target_y, objects, map):
+    def move_towards(self, target_x, target_y, Game):
         #vector from this object to the target, and distance
         dx1 = target_x - self.x
         dy1 = target_y - self.y
@@ -140,7 +140,7 @@ class Object(object):
         dy = int(round(dy1 / distance))
 
         #print str(dx) + '/' + str(dx1) + ', ' + str(dy) + '/' + str(dy) + ', ' + str(distance)
-        if not self.move(dx, dy, objects, map):
+        if not self.move(dx, dy, Game):
         #if monster didn't move. Try diagonal
             if dx1 != 0:
                 dx = abs(dx1) / dx1
@@ -156,7 +156,7 @@ class Object(object):
             else:
                 dy = 1
             #print 'trying diagonal:' +str(dx) + ', ' + str(dy) + ', ' + str(distance)
-            self.move(dx, dy, objects, map)
+            self.move(dx, dy, Game)
 
     def distance_to(self, other):
         #return distance to another object
@@ -168,19 +168,19 @@ class Object(object):
         #return distance to some coord
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
-    def send_to_back(self, objects):
+    def send_to_back(self, Game):
         #make this object be drawn first, so all others appear above it if they are in the same tile
-        objects.remove(self)
-        objects.insert(0, self)
+        Game.objects.remove(self)
+        Game.objects.insert(0, self)
 
 class Item(object):
     def __init__(self, use_function=None):
         self.use_function = use_function
 
-    def use(self, inventory):
+    def use(self, Game):
         #special case: if the object has the equipment component, the "use" action is to equip/dequip
         if self.owner.equipment:
-            self.owner.equipment.toggle_equip(inventory)
+            self.owner.equipment.toggle_equip(Game)
             return
 
         #call the 'use_function' if defined
@@ -189,20 +189,20 @@ class Item(object):
             return 'no_action'
         else:
             if self.use_function() != 'cancelled':
-                inventory.remove(self.owner) #destror after use, unless cancelled
+                Game.inventory.remove(self.owner) #destror after use, unless cancelled
                 return 'used'
             else:
                 return 'no_action'
 
     #an item that can be picked up and used
-    def pick_up(self, inventory, objects):
-        #add to the player's inventory and remove from the map
-        if len(inventory) >= 26:
-            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', libtcod.dark_red)
+    def pick_up(self, Game):
+        #add to the Game.player's Game.inventory and remove from the map
+        if len(Game.inventory) >= 26:
+            message('Your Game.inventory is full! Cannot pick up ' + self.owner.name +'.', libtcod.dark_red)
             return 'no_action'
         else:
-            inventory.append(self.owner)
-            objects.remove(self.owner)
+            Game.inventory.append(self.owner)
+            Game.objects.remove(self.owner)
             message('You picked up a ' + self.owner.name + '!', libtcod.green)
             return 'picked_up'
 
@@ -211,12 +211,12 @@ class Item(object):
         if equipment and get_equipped_in_slot(equipment.slot) is None and AUTOEQUIP:
             equipment.equip()
 
-    def drop(self, inventory, objects):
-        #add to the map and remove from the player's inventory. also, place it at the player's coordinates
-        objects.append(self.owner)
-        inventory.remove(self.owner)
-        self.owner.x = player.x
-        self.owner.y = player.y
+    def drop(self, Game):
+        #add to the map and remove from the Game.player's Game.inventory. also, place it at the Game.player's coordinates
+        Game.objects.append(self.owner)
+        Game.inventory.remove(self.owner)
+        self.owner.x = Game.player.x
+        self.owner.y = Game.player.y
         message('You dropped a ' + self.owner.name + '.', libtcod.yellow)
 
         #special case: if the object has the equip component, dequip before dropping it
@@ -232,15 +232,15 @@ class Equipment(object):
         self.max_hp_bonus = max_hp_bonus
         self.is_equipped = False
 
-    def toggle_equip(self, inventory): #toggle equip/dequip status
+    def toggle_equip(self, Game): #toggle equip/dequip status
         if self.is_equipped:
             self.dequip()
         else:
-            self.equip(inventory)
+            self.equip(Game)
 
-    def equip(self, inventory):
+    def equip(self, Game):
         #if the slot is already being used, dequip whatever is there
-        old_equipment = get_equipped_in_slot(self.slot, inventory)
+        old_equipment = get_equipped_in_slot(self.slot, Game)
         if old_equipment is not None:
             old_equipment.dequip()
 
@@ -272,18 +272,18 @@ class ConfusedMonster(object):
 
 
 
-def get_equipped_in_slot(slot, inventory): #returns the equipment in a slot, or None if it's empty
-    for obj in inventory:
+def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
+    for obj in Game.inventory:
         if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
             return obj.equipment
     return None
 
-def get_all_equipped(obj, player, inventory): #returns list of equipped items
-    if obj == player:
+def get_all_equipped(obj, Game): #returns list of equipped items
+    if obj == Game.player:
         equipped_list = []
-        for item in inventory:
+        for item in Game.inventory:
             if item.equipment and item.equipment.is_equipped:
                 equipped_list.append(item.equipment)
         return equipped_list
     else:
-        return [] #other objects have no equipment
+        return [] #other Game.objects have no equipment
