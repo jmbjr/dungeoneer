@@ -1,6 +1,7 @@
 from constants import *
 from ui import *
 from gamestuff import *
+#generic objects. I think these may end up being absorbed by other modules.
 
 class Rect(object):
     #a rectangle on the map. used to characterize a room
@@ -31,3 +32,4 @@ class Tile(object):
         #by default, if a tile is blocked, it also blocks sight
         if block_sight is None: block_sight = blocked
         self.block_sight = block_sight
+

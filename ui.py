@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 import textwrap
 from constants import *
+#primarily concerned with displaying info to the screen
 
 def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
@@ -13,7 +14,6 @@ def message(new_msg, Game, color = libtcod.white):
 
         #add the new line as a tuple, with the txt and the color
         Game.game_msgs.append((line, color))
-
 
 def menu(header, options, width, Game):
     if len(options) > MAX_NUM_ITEMS: raise ValueError('Cannot have a menu with more than ' + MAX_NUM_ITEMS + ' options.')
@@ -61,3 +61,25 @@ def menu(header, options, width, Game):
 
 def msgbox(text, Game, width = 50):
     menu(text, [], width, Game) #use menu as a sort-of message box
+
+def inventory_menu(header, Game):
+	#show a menu with each item of the inventory as an option
+	if len(Game.inventory) == 0:
+	    options = ['inventory is empty!']
+	else:
+	    #options = [item.name for item in inventory]
+	    options = []
+	    for item in Game.inventory:
+	        text = item.name
+	        #show additional info, in case it's equipped
+	        if item.equipment and item.equipment.is_equipped:
+	            text = text + ' (on ' + item.equipment.slot + ')'
+	        options.append(text)
+
+	index = menu(header, options, INVENTORY_WIDTH, Game)
+
+	if (index is None or len(Game.inventory) == 0) or index == 'ESC':
+	    return None
+	else:
+	    return Game.inventory[index].item
+

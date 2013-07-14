@@ -1,6 +1,9 @@
 import libtcodpy as libtcod
 import math
 
+#if it needs more than libtcod or basic python modules, it probably shouldn't go in here
+#also, best not to pass Game to any of these. Use a different module
+
 def flip_coin():
     return (libtcod.random_get_int(0,0,1))
 
@@ -37,4 +40,3 @@ def roll_dice(dicelist):
         dice.append(roll)
 
     return [sum(dice), dice]
-

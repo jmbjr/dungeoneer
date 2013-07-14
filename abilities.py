@@ -3,7 +3,9 @@ from constants import *
 from world import *
 from ui import *
 from gamestuff import *
+from entities import *
 
+#handles abilities for spells, items, etc
 
 def cast_confusion(Game):
     ##find nearest enemy and confuse it
@@ -14,7 +16,7 @@ def cast_confusion(Game):
 
     #ask player for target to confuse
     message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
-    monster = target_monster(CONFUSE_RANGE)
+    monster = target_monster(Game, CONFUSE_RANGE)
     if monster is None:
         return 'cancelled'
 
@@ -37,7 +39,7 @@ def cast_fireball(Game):
     for obj in Game.objects: #damage all fighters within range
         if obj.distance(x,y) <= FIREBALL_RADIUS and obj.fighter:
             message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
-            obj.fighter.take_damage(theDmg)
+            obj.fighter.take_damage(theDmg, Game)
 
 def cast_heal(Game):
     #heal the player

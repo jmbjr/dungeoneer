@@ -1,8 +1,9 @@
+import math
 from ui import *
 from gamestuff import *
 from constants import *
-import math
 from world import *
+#handles Objects. player, enemies, items, etc
 
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
@@ -44,7 +45,7 @@ class Fighter(object):
         if self.hp <= 0:
             function = self.death_function
             if function is not None:
-                function(self.owner)
+                function(self.owner, Game)
             if self.owner != Game.player: #yield experience to the Game.player
                 Game.player.fighter.xp += self.xp
 
@@ -263,7 +264,7 @@ class ConfusedMonster(object):
     def take_turn(self, Game):
         if self.num_turns > 0: #still confused
             #move in random direction
-            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1))
+            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1), Game)
             self.num_turns -= 1
 
         else:

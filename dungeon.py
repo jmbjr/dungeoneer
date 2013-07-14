@@ -11,9 +11,13 @@ from entities import *
 from world import *
 from abilities import *
 
+#main module
+
 class Game(object): 
     game_msgs = []
 
+
+#MAIN MENU GAME OPTIONS
 def main_menu():
     img = libtcod.image_load('menu_background.png')
 
@@ -55,7 +59,7 @@ def new_game():
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
     Game.dungeon_level = 1
-    make_map()
+    make_map(Game)
 
     initialize_fov(Game)
 
@@ -136,30 +140,197 @@ def play_game():
                     object.ai.take_turn(Game)
 
 
+#KEYPRESS CHECKS
+def handle_keys():
+    #for real-time, uncomment
+    #key = libtcod.console_check_for_keypress()
+
+    #for turn-based, uncomment
+    #key = libtcod.console_wait_for_keypress(True)
+    key_char = chr(Game.key.c)
+
+    if Game.key.vk == libtcod.KEY_ENTER and Game.key.lalt:
+        #ALT + ENTER: toggle fullscreen
+        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+    elif Game.key.vk == libtcod.KEY_ESCAPE:
+        return 'exit' #exit game
+
+    if Game.game_state == 'playing':
+        #rest
+        if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
+            player_resting(Game)
+            pass
+        #movement keys
+        elif Game.key.vk == libtcod.KEY_UP or key_char == 'k' or Game.key.vk == libtcod.KEY_KP8 :
+            player_move_or_attack(0, -1, Game)
+
+        elif Game.key.vk == libtcod.KEY_DOWN or key_char == 'j' or Game.key.vk == libtcod.KEY_KP2 :
+            player_move_or_attack(0, 1, Game)
+
+        elif Game.key.vk == libtcod.KEY_LEFT or key_char == 'h' or Game.key.vk == libtcod.KEY_KP4 :
+            player_move_or_attack(-1, 0, Game)
+
+        elif Game.key.vk == libtcod.KEY_RIGHT or key_char == 'l' or Game.key.vk == libtcod.KEY_KP6 :
+            player_move_or_attack(1, 0, Game)
+
+        #handle diagonal. 11 oclock -> clockwise
+        elif key_char == 'y' or Game.key.vk == libtcod.KEY_KP7 :
+            player_move_or_attack(-1, -1, Game)
+
+        elif key_char == 'u' or Game.key.vk == libtcod.KEY_KP9 :
+            player_move_or_attack(1, -1, Game)
+
+        elif key_char == 'n' or Game.key.vk == libtcod.KEY_KP3 :
+            player_move_or_attack(1, 1, Game)
+
+        elif key_char == 'b' or Game.key.vk == libtcod.KEY_KP1 :
+            player_move_or_attack(-1, 1, Game)
+
+        else:
+            #test for other keys
+            if key_char == 'g':
+                #pick up an item
+                for object in Game.objects: #look for items in the player's title
+                    if object.x == Game.player.x and object.y == Game.player.y and object.item:
+                        Game.player.game_turns +=1
+                        return object.item.pick_up(Game)
+                        #break
+
+            if key_char == 'i':
+                #show inv. if an item is selected, use it
+                chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game)
+                if chosen_item is not None:
+                    Game.player.game_turns +=1
+                    return chosen_item.use(Game)
+
+            if key_char == 'd':
+                #show the inventory. if item is selected, drop it
+                chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game)
+                if chosen_item is not None:
+                    Game.player.game_turns +=1
+                    chosen_item.drop(Game.inventory, Game)
+
+            if key_char == 'c':
+                #show character info
+                level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
+                msgbox('Character Information\n\nLevel: ' + str(Game.player.level) + '\nExperience: ' + str(Game.player.fighter.xp) +
+                    '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
+                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, CHARACTER_SCREEN_WIDTH)
+
+            if key_char == 'x':
+                #debug key to automatically level up
+                msgbox('You start to meditate!', Game, CHARACTER_SCREEN_WIDTH)
+                level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
+                Game.player.fighter.xp = level_up_xp
+                check_level_up(Game)
+                Game.player.game_turns +=1       
+
+            if key_char == 'a':
+                #debug key to set all objects to visible
+                msgbox('You can smell them all!', Game, CHARACTER_SCREEN_WIDTH)
+                set_objects_visible(Game)
+
+            if key_char == 'q':
+                #go down stairs, if the player is on them
+                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, CHARACTER_SCREEN_WIDTH)
+                set_map_explored(Game)   
+
+            if key_char == 'z':
+                #debug key to automatically go to next level
+                msgbox('You start digging at your feet!', Game, CHARACTER_SCREEN_WIDTH)
+                next_level(Game)           
+
+            if key_char == '>':
+                #go down stairs, if the player is on them
+                if Game.stairs.x == Game.player.x and Game.stairs.y == Game.player.y:
+                    Game.player.game_turns +=1
+                    next_level(Game)
+
+            if key_char == 'w':
+                #give all items
+                give_items(Game)
+
+            return 'no_action'
 
 
+#DEBUG FUNCTIONS
+def give_items(Game):
+    #healing potion
+    x = 0
+    y = 0
+    item_component = Item(use_function = cast_heal)
+    item = Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
+    item.always_visible = True
+    Game.inventory.append(item)
 
 
+    #lightning scroll
+    item_component = Item(use_function = cast_lightning)
+    item = Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
+    Game.inventory.append(item)
+
+    #fireball scroll
+    item_component = Item(use_function=cast_fireball)
+    item = Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
+    Game.inventory.append(item)
+
+    #confusion scroll
+    item_component = Item(use_function = cast_confusion)
+    item = Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
+    Game.inventory.append(item)
+
+    #sword
+    equipment_component = Equipment(slot='right hand', power_bonus = 5)
+    item = Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
+    Game.inventory.append(item)
+
+    #create a shield
+    equipment_component = Equipment(slot = 'left hand', defense_bonus = 3)
+    item = Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
+    Game.inventory.append(item)
+
+    #wristguards
+    equipment_component = Equipment(slot='wrist', max_hp_bonus = 5)
+    item = Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
+    Game.inventory.append(item)
+
+def set_map_explored(Game):
+    for y in range(MAP_HEIGHT):
+        for x in range(MAP_WIDTH):
+            Game.map[x][y].explored = True
+    Game.fov_recompute = True        
+
+def set_objects_visible(Game):
+    for object in Game.objects:
+        object.always_visible = True
 
 
-def create_room(room):
+#MAP FUNCTIONS
+def next_level(Game):
+    #advance to next level
+    message('You head down the stairs', Game, libtcod.red)
+    Game.dungeon_level +=1
+    make_map(Game) #create fresh new level
+    initialize_fov(Game)
+
+def create_room(room, Game):
     #go through tiles in rect to make them passable
     for x in range(room.x1 + 1, room.x2):
         for y in range(room.y1 + 1, room.y2):
                 Game.map[x][y].blocked = False
                 Game.map[x][y].block_sight = False
 
-def create_h_tunnel(x1, x2, y):
+def create_h_tunnel(x1, x2, y, Game):
     for x in range(min(x1, x2), max(x1, x2) + 1):
         Game.map[x][y].blocked = False
         Game.map[x][y].block_sight = False
 
-def create_v_tunnel(y1, y2, x):
+def create_v_tunnel(y1, y2, x, Game):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         Game.map[x][y].blocked = False
         Game.map[x][y].block_sight = False
 
-def make_map():
+def make_map(Game):
     Game.objects = [Game.player]
     #fill map with "blocked" tiles
     Game.map = [[ Tile(True)
@@ -189,11 +360,11 @@ def make_map():
         if not failed:
             #no intersections
 
-            create_room(new_room)
+            create_room(new_room, Game)
             (new_x, new_y) = new_room.center()
 
             #add some contents to the room
-            place_objects(new_room)
+            place_objects(new_room, Game)
 
             if num_rooms == 0:
                 #first room. start player here
@@ -209,12 +380,12 @@ def make_map():
                 #flip coin
                 if flip_coin() == 1:
                     #move h then v
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
+                    create_h_tunnel(prev_x, new_x, prev_y, Game)
+                    create_v_tunnel(prev_y, new_y, new_x, Game)
                 else:
                     #move v then h
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
+                    create_v_tunnel(prev_y, new_y, prev_x, Game)
+                    create_h_tunnel(prev_x, new_x, new_y, Game)
             
             #add to rooms list
             rooms.append(new_room)
@@ -225,50 +396,43 @@ def make_map():
     Game.objects.append(Game.stairs)
     Game.stairs.send_to_back(Game) #so it's drawn below the monsters
 
-def from_dungeon_level(table):
-        #returns a value that depends on level. table specifies what value occurs after each level. default = 0
-        for (value, level) in reversed(table):
-            if Game.dungeon_level >= level:
-                return value
-        return 0
-
-def place_objects(room):
+def place_objects(room, Game):
     #choose random number of monsters
-    max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]])
+    max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]], Game)
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
     #max number monsters per room
 
     #chance of each monster
     monster_chances = {}
     monster_chances['johnstein']    = 75 #johnstein always shows up, even if all other monsters have 0 chance
-    monster_chances['greynaab']     = from_dungeon_level([[60, 1], [35, 3], [10, 5]])
-    monster_chances['jerbear']      = from_dungeon_level([[50, 1], [30, 3], [15, 5]])
-    monster_chances['zombiesheep']  = from_dungeon_level([[40, 1], [25, 3], [20, 5]])
-    monster_chances['odiv']         = from_dungeon_level([[25, 2], [30, 4], [40, 6]])
-    monster_chances['slitherrr']    = from_dungeon_level([[20, 2], [30, 4], [50, 6]])
-    monster_chances['neckro']       = from_dungeon_level([[15, 2], [30, 4], [60, 6]])
-    monster_chances['chan']         = from_dungeon_level([[25, 3], [30, 5], [40, 7]])
-    monster_chances['ashandarei']   = from_dungeon_level([[20, 3], [30, 5], [50, 7]])
-    monster_chances['zureal']       = from_dungeon_level([[15, 3], [30, 5], [60, 7]])
-    monster_chances['demiurge']     = from_dungeon_level([[25, 4], [30, 6], [40, 8]])
-    monster_chances['hargrimm']     = from_dungeon_level([[20, 4], [30, 6], [50, 8]])
-    monster_chances['frisco']       = from_dungeon_level([[15, 4], [30, 6], [60, 8]])
-    monster_chances['toomuchpete']  = from_dungeon_level([[25, 5], [30, 7], [40, 9]])
-    monster_chances['flatluigi']    = from_dungeon_level([[20, 5], [30, 7], [50, 9]])
-    monster_chances['spanktrunk']   = from_dungeon_level([[15, 5], [30, 7], [60, 9]])
-    monster_chances['stavros']      = from_dungeon_level([[100, 10]])
+    monster_chances['greynaab']     = from_dungeon_level([[60, 1], [35, 3], [10, 5]], Game)
+    monster_chances['jerbear']      = from_dungeon_level([[50, 1], [30, 3], [15, 5]], Game)
+    monster_chances['zombiesheep']  = from_dungeon_level([[40, 1], [25, 3], [20, 5]], Game)
+    monster_chances['odiv']         = from_dungeon_level([[25, 2], [30, 4], [40, 6]], Game)
+    monster_chances['slitherrr']    = from_dungeon_level([[20, 2], [30, 4], [50, 6]], Game)
+    monster_chances['neckro']       = from_dungeon_level([[15, 2], [30, 4], [60, 6]], Game)
+    monster_chances['chan']         = from_dungeon_level([[25, 3], [30, 5], [40, 7]], Game)
+    monster_chances['ashandarei']   = from_dungeon_level([[20, 3], [30, 5], [50, 7]], Game)
+    monster_chances['zureal']       = from_dungeon_level([[15, 3], [30, 5], [60, 7]], Game)
+    monster_chances['demiurge']     = from_dungeon_level([[25, 4], [30, 6], [40, 8]], Game)
+    monster_chances['hargrimm']     = from_dungeon_level([[20, 4], [30, 6], [50, 8]], Game)
+    monster_chances['frisco']       = from_dungeon_level([[15, 4], [30, 6], [60, 8]], Game)
+    monster_chances['toomuchpete']  = from_dungeon_level([[25, 5], [30, 7], [40, 9]], Game)
+    monster_chances['flatluigi']    = from_dungeon_level([[20, 5], [30, 7], [50, 9]], Game)
+    monster_chances['spanktrunk']   = from_dungeon_level([[15, 5], [30, 7], [60, 9]], Game)
+    monster_chances['stavros']      = from_dungeon_level([[100, 10]], Game)
 
-    max_items = from_dungeon_level([[1, 1], [2, 4]])
+    max_items = from_dungeon_level([[1, 1], [2, 4]], Game)
     num_items = libtcod.random_get_int(0, 0, max_items)
     
     #chance of each item (by default they have chance of 0 at level 1 which goes up)
     item_chances = {}
     item_chances['heal'] = 70 #healing potion always shows up even if all other items have 0 chance
-    item_chances['lightning']   = from_dungeon_level([[10, 1], [25, 3], [50, 5]])
-    item_chances['fireball']    = from_dungeon_level([[10, 1], [25, 3], [50, 5]])
-    item_chances['confuse']     = from_dungeon_level([[10, 1], [25, 3], [50, 5]])
-    item_chances['sword']       = from_dungeon_level([[10, 1], [20, 3], [30, 5]])
-    item_chances['shield']      = from_dungeon_level([[10, 1], [20, 3], [30, 5]])
+    item_chances['lightning']   = from_dungeon_level([[10, 1], [25, 3], [50, 5]], Game)
+    item_chances['fireball']    = from_dungeon_level([[10, 1], [25, 3], [50, 5]], Game)
+    item_chances['confuse']     = from_dungeon_level([[10, 1], [25, 3], [50, 5]], Game)
+    item_chances['sword']       = from_dungeon_level([[10, 1], [20, 3], [30, 5]], Game)
+    item_chances['shield']      = from_dungeon_level([[10, 1], [20, 3], [30, 5]], Game)
 
     for i in range(num_monsters):
         #choose random spot for this monster
@@ -403,224 +567,6 @@ def place_objects(room):
             Game.objects.append(item)
             item.send_to_back(Game) #items appear below other objects
 
-def set_map_explored():
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
-            Game.map[x][y].explored = True
-    Game.fov_recompute = True        
-
-def set_objects_visible():
-    for object in Game.objects:
-        object.always_visible = True
-
-
-
-
-def handle_keys():
-    #for real-time, uncomment
-    #key = libtcod.console_check_for_keypress()
-
-    #for turn-based, uncomment
-    #key = libtcod.console_wait_for_keypress(True)
-    key_char = chr(Game.key.c)
-
-    if Game.key.vk == libtcod.KEY_ENTER and Game.key.lalt:
-        #ALT + ENTER: toggle fullscreen
-        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-    elif Game.key.vk == libtcod.KEY_ESCAPE:
-        return 'exit' #exit game
-
-    if Game.game_state == 'playing':
-        #rest
-        if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
-            player_resting()
-            pass
-        #movement keys
-        elif Game.key.vk == libtcod.KEY_UP or key_char == 'k' or Game.key.vk == libtcod.KEY_KP8 :
-            player_move_or_attack(0, -1)
-
-        elif Game.key.vk == libtcod.KEY_DOWN or key_char == 'j' or Game.key.vk == libtcod.KEY_KP2 :
-            player_move_or_attack(0, 1)
-
-        elif Game.key.vk == libtcod.KEY_LEFT or key_char == 'h' or Game.key.vk == libtcod.KEY_KP4 :
-            player_move_or_attack(-1, 0)
-
-        elif Game.key.vk == libtcod.KEY_RIGHT or key_char == 'l' or Game.key.vk == libtcod.KEY_KP6 :
-            player_move_or_attack(1, 0)
-
-        #handle diagonal. 11 oclock -> clockwise
-        elif key_char == 'y' or Game.key.vk == libtcod.KEY_KP7 :
-            player_move_or_attack(-1, -1)
-
-        elif key_char == 'u' or Game.key.vk == libtcod.KEY_KP9 :
-            player_move_or_attack(1, -1)
-
-        elif key_char == 'n' or Game.key.vk == libtcod.KEY_KP3 :
-            player_move_or_attack(1, 1)
-
-        elif key_char == 'b' or Game.key.vk == libtcod.KEY_KP1 :
-            player_move_or_attack(-1, 1)
-
-        else:
-            #test for other keys
-            if key_char == 'g':
-                #pick up an item
-                for object in Game.objects: #look for items in the player's title
-                    if object.x == Game.player.x and object.y == Game.player.y and object.item:
-                        Game.player.game_turns +=1
-                        return object.item.pick_up(Game)
-                        #break
-
-            if key_char == 'i':
-                #show inv. if an item is selected, use it
-                chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n')
-                if chosen_item is not None:
-                    Game.player.game_turns +=1
-                    return chosen_item.use(Game)
-
-            if key_char == 'd':
-                #show the inventory. if item is selected, drop it
-                chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n')
-                if chosen_item is not None:
-                    Game.player.game_turns +=1
-                    chosen_item.drop(Game.inventory, Game)
-
-            if key_char == 'c':
-                #show character info
-                level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
-                msgbox('Character Information\n\nLevel: ' + str(Game.player.level) + '\nExperience: ' + str(Game.player.fighter.xp) +
-                    '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
-                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, CHARACTER_SCREEN_WIDTH)
-
-            if key_char == 'x':
-                #debug key to automatically level up
-                msgbox('You start to meditate!', Game, CHARACTER_SCREEN_WIDTH)
-                level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
-                Game.player.fighter.xp = level_up_xp
-                check_level_up(Game)
-                Game.player.game_turns +=1       
-
-            if key_char == 'a':
-                #debug key to set all objects to visible
-                msgbox('You can smell them all!', Game, CHARACTER_SCREEN_WIDTH)
-                set_objects_visible()
-
-            if key_char == 'q':
-                #go down stairs, if the player is on them
-                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, CHARACTER_SCREEN_WIDTH)
-                set_map_explored()   
-
-            if key_char == 'z':
-                #debug key to automatically go to next level
-                msgbox('You start digging at your feet!', Game, CHARACTER_SCREEN_WIDTH)
-                next_level()           
-
-            if key_char == '>':
-                #go down stairs, if the player is on them
-                if Game.stairs.x == Game.player.x and Game.stairs.y == Game.player.y:
-                    Game.player.game_turns +=1
-                    next_level()
-
-            return 'no_action'
-
-def next_level():
-    #advance to next level
-    message('You head down the stairs', Game, libtcod.red)
-    Game.dungeon_level +=1
-    make_map() #create fresh new level
-    initialize_fov(Game)
-
-def player_resting():
-    Game.player.fighter.hp += 2
-    Game.player.game_turns += 1
-    
-def player_move_or_attack(dx, dy):
-    #the coords the player is moving-to/attacking
-    x = Game.player.x + dx
-    y = Game.player.y + dy
-
-    #try to find attackable object there
-    target = None
-    for object in Game.objects:
-        if object.x == x and object.y == y and object.fighter:
-            target = object
-            break
-
-    #attack if target found. else, move
-    if target is not None:
-        Game.player.fighter.attack(target, Game)
-        Game.player.game_turns +=1
-    else:
-        Game.player.move(dx, dy, Game)
-        Game.player.game_turns +=1
-        Game.fov_recompute = True
-
-
-
-
-
-def player_death(player):
-    #the game has ended
-    message ('YOU DIED! YOU SUCK!', Game, libtcod.red)
-    Game.game_state = 'dead'
-
-    #turn player into corpse
-    player.char = '%'
-    player.color = libtcod.dark_red
-
-def monster_death(monster):
-    #transform into corpse
-    #doesn't block, can't be attacked, cannot move
-    message (monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
-    message ('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
-    monster.char = '%'
-    monster.color = libtcod.dark_red
-    monster.blocks = False
-    monster.fighter = None
-    monster.ai = None
-    monster.name = 'remains of ' + monster.name
-    monster.always_visible = True
-    monster.send_to_back(Game)
-
-
-
-
-
-def inventory_menu(header):
-    #show a menu with each item of the inventory as an option
-    if len(Game.inventory) == 0:
-        options = ['inventory is empty!']
-    else:
-        #options = [item.name for item in inventory]
-        options = []
-        for item in Game.inventory:
-            text = item.name
-            #show additional info, in case it's equipped
-            if item.equipment and item.equipment.is_equipped:
-                text = text + ' (on ' + item.equipment.slot + ')'
-            options.append(text)
-
-
-    index = menu(header, options, INVENTORY_WIDTH, Game)
-    
-    if (index is None or len(Game.inventory) == 0) or index == 'ESC':
-        return None
-    else:
-        return Game.inventory[index].item
-
-
-
-def target_monster(max_range = None):
-    #returns a clicked monster inside FOV up to a range, or None if right-clicked
-    while True:
-        (x, y) = target_tile(Game, max_range)
-        if x is None: #player cancelled
-            return None
-
-        #return the first clicked monster, otherwise continue looping
-        for obj in Game.objects:
-            if obj.x == x and obj.y == y and obj.fighter and obj != Game.player:
-                return obj
 
 ########################################################
 #init and main loop

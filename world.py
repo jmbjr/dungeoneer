@@ -1,6 +1,8 @@
 import libtcodpy as libtcod
 from constants import *
 from ui import *
+#functions to get info from world or interact with it.
+#also handles rendering
 
 def is_blocked(x, y, Game):
     #first test the map tile
@@ -84,7 +86,7 @@ def target_tile(Game, max_range = None):
         #render screen. this erases the inv and shows the names of objects under the mouse
         libtcod.console_flush()
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
-        render_all()
+        render_all(Game)
 
         (x, y) = (Game.mouse.cx, Game.mouse.cy)
 
@@ -164,7 +166,6 @@ def render_all(Game):
     #blit panel to root console
     libtcod.console_blit(Game.panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
 
-
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
     #render a bar (HP, exp, etc). first calc the width of the bar
     bar_width = int(float(value) / maximum * total_width)
@@ -192,3 +193,75 @@ def get_names_under_mouse(Game):
     
     names = ', '.join(names) #join names separated by commas
     return names.capitalize()
+
+def from_dungeon_level(table, Game):
+        #returns a value that depends on level. table specifies what value occurs after each level. default = 0
+        for (value, level) in reversed(table):
+            if Game.dungeon_level >= level:
+                return value
+        return 0
+
+def target_monster(Game, max_range = None):
+    #returns a clicked monster inside FOV up to a range, or None if right-clicked
+    while True:
+        (x, y) = target_tile(Game, max_range)
+        if x is None: #player cancelled
+            return None
+
+        #return the first clicked monster, otherwise continue looping
+        for obj in Game.objects:
+            if obj.x == x and obj.y == y and obj.fighter and obj != Game.player:
+                return obj
+
+def player_death(player, Game):
+    #the game has ended
+    message ('YOU DIED! YOU SUCK!', Game, libtcod.red)
+    Game.game_state = 'dead'
+
+    #turn player into corpse
+    player.char = '%'
+    player.color = libtcod.dark_red
+
+def monster_death(monster, Game):
+    #transform into corpse
+    #doesn't block, can't be attacked, cannot move
+    message (monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
+    message ('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
+    monster.char = '%'
+    monster.color = libtcod.dark_red
+    monster.blocks = False
+    monster.fighter = None
+    monster.ai = None
+    monster.name = 'remains of ' + monster.name
+    monster.always_visible = True
+    monster.send_to_back(Game)
+
+def player_move_or_attack(dx, dy, Game):
+    #the coords the player is moving-to/attacking
+    x = Game.player.x + dx
+    y = Game.player.y + dy
+
+    #try to find attackable object there
+    target = None
+    for object in Game.objects:
+        if object.x == x and object.y == y and object.fighter:
+            target = object
+            break
+
+    #attack if target found. else, move
+    if target is not None:
+        Game.player.fighter.attack(target, Game)
+        Game.player.game_turns +=1
+    else:
+        Game.player.move(dx, dy, Game)
+        Game.player.game_turns +=1
+        Game.fov_recompute = True
+
+def player_resting(Game):
+    Game.player.fighter.hp += 2
+    Game.player.game_turns += 1
+
+
+
+
+
