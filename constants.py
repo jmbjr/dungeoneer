@@ -57,6 +57,6 @@ LEVEL_UP_FACTOR = 150
 COLOR_DARK_WALL = libtcod.Color(0, 0, 100)
 COLOR_LIGHT_WALL = libtcod.Color(130, 110, 50)
 COLOR_DARK_GROUND = libtcod.Color(50, 50, 150)
-color_light_ground = libtcod.Color(25, 25, 25)
+COLOR_LIGHT_GROUND = libtcod.Color(25, 25, 25)
 
 AUTOEQUIP = True #need to add a game options class/structure

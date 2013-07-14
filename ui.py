@@ -2,27 +2,24 @@ import libtcodpy as libtcod
 import textwrap
 from constants import *
 
-global game_msgs
-game_msgs = []
-
-def message(new_msg, color = libtcod.white):
+def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
     new_msg_lines = textwrap.wrap(new_msg, MSG_WIDTH)
 
     for line in new_msg_lines:
         #if the buffer is full, remove the first line to make room for the new one
-        if len(game_msgs) == MSG_HEIGHT:
-            del game_msgs[0]
+        if len(Game.game_msgs) == MSG_HEIGHT:
+            del Game.game_msgs[0]
 
         #add the new line as a tuple, with the txt and the color
-        game_msgs.append((line, color))
+        Game.game_msgs.append((line, color))
 
 
-def menu(header, options, width, G):
+def menu(header, options, width, Game):
     if len(options) > MAX_NUM_ITEMS: raise ValueError('Cannot have a menu with more than ' + MAX_NUM_ITEMS + ' options.')
 
     #calculate total height of the header (after auto-wrap) and one line per option
-    header_height = libtcod.console_get_height_rect(G.con, 0, 0, width, SCREEN_HEIGHT, header)
+    header_height = libtcod.console_get_height_rect(Game.con, 0, 0, width, SCREEN_HEIGHT, header)
     if header == '':
         header_height = 0
     height = len(options) + header_height
@@ -61,3 +58,6 @@ def menu(header, options, width, G):
         return index
     else:
         return None
+
+def msgbox(text, Game, width = 50):
+    menu(text, [], width, Game) #use menu as a sort-of message box

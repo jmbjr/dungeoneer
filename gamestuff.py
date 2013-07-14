@@ -28,3 +28,13 @@ def random_choice_index(chances): #choose one option from list of chances. retur
 
 def get_distance(dx, dy):
     return math.sqrt(dx ** 2 + dy ** 2)
+
+def roll_dice(dicelist):
+    dice=[]
+    #print dicelist
+    for [die_low, die_high] in dicelist:
+        roll = libtcod.random_get_int(0,die_low,die_high)
+        dice.append(roll)
+
+    return [sum(dice), dice]
+

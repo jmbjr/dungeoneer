@@ -9,32 +9,10 @@ from ui import *
 from gamestuff import *
 from entities import *
 from world import *
+from abilities import *
 
-class Game(object): pass
-
-def check_level_up():
-    #see if the player's experience is enough to level-up
-    level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
-    if Game.player.fighter.xp >= level_up_xp:
-        Game.player.level += 1
-        Game.player.fighter.xp -=level_up_xp
-        message('You have reached level ' + str(Game.player.level) + '!', libtcod.yellow)
-
-        choice = None
-        while choice == None: #keep asking till a choice is made
-            choice = menu('Level up! Choose a stat to raise:\n', 
-                ['Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',
-                'Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', 
-                'Agility (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')'], LEVEL_SCREEN_WIDTH, Game)
-
-        if choice == 0:
-            Game.player.fighter.base_max_hp += 25
-        elif choice == 1:
-            Game.player.fighter.base_power += 2
-        elif choice ==2:
-            Game.player.fighter.base_defense += 2
-
-        Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
+class Game(object): 
+    game_msgs = []
 
 def main_menu():
     img = libtcod.image_load('menu_background.png')
@@ -59,34 +37,29 @@ def main_menu():
             try:
                 load_game()
             except:
-                msgbox('\n No saved game to load. \n', 24)
+                msgbox('\n No saved game to load. \n', Game, 24)
                 continue
             play_game()
         elif choice == 2: #quit
             try:
                 save_game()
             except:
-                msgbox('Bye!', 24)
+                msgbox('Bye!', Game, 24)
             break
 
-def msgbox(text, width = 50):
-    menu(text, [], width, Game) #use menu as a sort-of message box
-
 def new_game():
-    global game_state, dungeon_level
-
     #create object representing the player
     fighter_component = Fighter(hp=100, defense=3, power=6, xp=0, death_function=player_death)
     Game.player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
-    dungeon_level = 1
+    Game.dungeon_level = 1
     make_map()
 
-    initialize_fov()
+    initialize_fov(Game)
 
-    game_state = 'playing'
+    Game.game_state = 'playing'
     Game.inventory = []
 
     #create the list of the game messages and their colors, starts empty
@@ -100,18 +73,7 @@ def new_game():
     obj.always_visible = True
 
     #a warm welcoming message!
-    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', libtcod.blue)
-
-def initialize_fov():
-    Game.fov_recompute = True
-
-    #create FOV map according to the generated map
-    Game.fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
-            libtcod.map_set_properties(Game.fov_map, x, y, not Game.map[x][y].block_sight, not Game.map[x][y].blocked)
-
-    libtcod.console_clear(Game.con)
+    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
 
 def save_game(filename='savegame'):
     #open a new empty shelve (or overwrite old one) to write the game data
@@ -121,47 +83,42 @@ def save_game(filename='savegame'):
     file['objects'] = Game.objects
     file['player_index'] = Game.objects.index(Game.player) #index of player in the objects list
     file['inventory'] = Game.inventory
-    file['game_msgs'] = game_msgs
-    file['game_state'] = game_state
-    file['stairs_index'] = Game.objects.index(stairs)
-    file['dungeon_level'] = dungeon_level
+    file['game_msgs'] = Game.game_msgs
+    file['game_state'] = Game.game_state
+    file['stairs_index'] = Game.objects.index(Game.stairs)
+    file['dungeon_level'] = Game.dungeon_level
     file.close()
 
 def load_game(filename='savegame'):
-    global game_msgs, game_state, dungeon_level, stairs
-    print 'trying to load...'
     file = shelve.open(filename, 'r')
     Game.map = file['map']
     Game.objects = file['objects'] 
     Game.player = Game.objects[file['player_index']]  #get index of player in the objects list
     Game.inventory = file['inventory']
-    game_msgs = file['game_msgs']
-    game_state = file['game_state']
-    stairs = Game.objects[file['stairs_index']]
-    dungeon_level = file['dungeon_level']
+    Game.game_msgs = file['game_msgs']
+    Game.game_state = file['game_state']
+    Game.stairs = Game.objects[file['stairs_index']]
+    Game.dungeon_level = file['dungeon_level']
     file.close()
 
-    print 'file loaded?'
-    initialize_fov()
-    print 'fov initialized?'
+    initialize_fov(Game)
 
 def play_game():
-    global key, mouse
     player_action = None
 
     #mouse stuff
-    mouse = libtcod.Mouse()
-    key = libtcod.Key()    
+    Game.mouse = libtcod.Mouse()
+    Game.key = libtcod.Key()    
 
     while not libtcod.console_is_window_closed():
         #render the screen
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
 
         #render the screen
-        render_all()
+        render_all(Game)
 
         libtcod.console_flush()
-        check_level_up()
+        check_level_up(Game)
 
         #erase objects from old position, before they move
         for object in Game.objects:
@@ -173,79 +130,16 @@ def play_game():
             break
 
         #give monsters a turn
-        if game_state == 'playing' and player_action != 'no_action':
+        if Game.game_state == 'playing' and player_action != 'no_action':
             for object in Game.objects:
                 if object.ai:
                     object.ai.take_turn(Game)
 
-def cast_confusion():
-    ##find nearest enemy and confuse it
-    #monster = closest_monster(CONFUSE_RANGE)
-    #if monster is None:
-    #    message ('No enemy is close enough to confuse', libtcod.red)
-    #    return 'cancelled'
 
-    #ask player for target to confuse
-    message('Left-click an enemy to confuse. Right-click or ESC to cancel', libtcod.light_cyan)
-    monster = target_monster(CONFUSE_RANGE)
-    if monster is None:
-        return 'cancelled'
 
-    #replace monster's AI with confuse
-    old_ai = monster.ai
-    monster.ai = ConfusedMonster(old_ai)
-    monster.ai.owner = monster #tell the new component who owns it
-    message('The ' + monster.name + ' is confused!', libtcod.light_green)
 
-def cast_fireball():
-    #ask the player for a target tile to throw a fireball at
-    message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', libtcod.light_cyan)
-    (x,y) = target_tile()
-    if x is None: 
-        return 'cancelled'
-    else:
-        message('The fireball explodes', libtcod.orange)
 
-    theDmg = roll_dice([[FIREBALL_DAMAGE/2, FIREBALL_DAMAGE*2]])[0]
-    for obj in Game.objects: #damage all fighters within range
-        if obj.distance(x,y) <= FIREBALL_RADIUS and obj.fighter:
-            message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', libtcod.orange)
-            obj.fighter.take_damage(theDmg)
 
-def cast_heal():
-    #heal the player
-    if Game.player.fighter.hp == Game.player.fighter.max_hp(Game):
-        message('You are already at full health.', libtcod.red)
-        return 'cancelled'
-
-    message('You feel better', libtcod.light_violet)
-    Game.player.fighter.heal(HEAL_AMOUNT)
-
-def cast_lightning():
-    #find nearest enemy (within range) and damage it
-    monster = closest_monster(LIGHTNING_RANGE)
-    if monster is None:
-        message('No enemy is close enough to strike', libtcod.red)
-        return 'cancelled'
-
-    theDmg = roll_dice([[LIGHTNING_DAMAGE/2, LIGHTNING_DAMAGE]])[0]
-
-    message('A lightning bolt strikes the ' + monster.name + '! \n DMG = ' + str(theDmg) + ' HP.', libtcod.light_blue)
-    monster.fighter.take_damage(theDmg, Game)
-
-def closest_monster(max_range):
-    #find closest enemy up to max range in the player's FOV
-    closest_enemy = None
-    closest_dist = max_range + 1 #start with slightly higher than max range
-
-    for object in Game.objects:
-        if object.fighter and not object == Game.player and libtcod.map_is_in_fov(Game.fov_map, object.x, object.y):
-            #calculate the distance between this and the player
-            dist = Game.player.distance_to(object)
-            if dist < closest_dist:
-                closest_enemy = object
-                closest_dist = dist
-    return closest_enemy
 
 
 def create_room(room):
@@ -266,8 +160,6 @@ def create_v_tunnel(y1, y2, x):
         Game.map[x][y].block_sight = False
 
 def make_map():
-    global stairs
-
     Game.objects = [Game.player]
     #fill map with "blocked" tiles
     Game.map = [[ Tile(True)
@@ -329,14 +221,14 @@ def make_map():
             num_rooms +=1
 
     #create stairs at the center of the last room
-    stairs = Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
-    Game.objects.append(stairs)
-    stairs.send_to_back(Game) #so it's drawn below the monsters
+    Game.stairs = Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
+    Game.objects.append(Game.stairs)
+    Game.stairs.send_to_back(Game) #so it's drawn below the monsters
 
 def from_dungeon_level(table):
         #returns a value that depends on level. table specifies what value occurs after each level. default = 0
         for (value, level) in reversed(table):
-            if dungeon_level >= level:
+            if Game.dungeon_level >= level:
                 return value
         return 0
 
@@ -511,133 +403,62 @@ def place_objects(room):
             Game.objects.append(item)
             item.send_to_back(Game) #items appear below other objects
 
-def render_all():
-    global COLOR_LIGHT_WALL, COLOR_DARK_WALL
-    global color_light_ground, COLOR_DARK_GROUND
+def set_map_explored():
+    for y in range(MAP_HEIGHT):
+        for x in range(MAP_WIDTH):
+            Game.map[x][y].explored = True
+    Game.fov_recompute = True        
 
-    if Game.fov_recompute:
-        #recompute FOV if needed (if player moved or something else happened)
-        Game.fov_recompute = False
-        libtcod.map_compute_fov(Game.fov_map, Game.player.x, Game.player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
-
-        for y in range(MAP_HEIGHT):
-            for x in range(MAP_WIDTH):
-                visible = libtcod.map_is_in_fov(Game.fov_map, x, y)
-                wall = Game.map[x][y].block_sight
-                if not visible:
-                    #tile not visible
-                    if wall:
-                        color_wall_ground = COLOR_DARK_WALL
-                        char_wall_ground = WALL_CHAR
-                    else:
-                        color_wall_ground = COLOR_DARK_GROUND
-                        char_wall_ground = GROUND_CHAR
-                    fov_wall_ground = libtcod.grey
-                else:
-                    #tile is visible
-                    Game.map[x][y].explored = True
-                    if wall:
-                        color_wall_ground = COLOR_LIGHT_WALL
-                        char_wall_ground = WALL_CHAR
-                    else:
-                        color_wall_ground = color_light_ground
-                        char_wall_ground = GROUND_CHAR
-                    fov_wall_ground = libtcod.white
-
-                if Game.map[x][y].explored:
-                    libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
-                
-
-    #draw all objects in the list
+def set_objects_visible():
     for object in Game.objects:
-        if object != Game.player:
-            object.draw(Game)
-    #ensure we draw player last
-    Game.player.draw(Game)
+        object.always_visible = True
 
-    #blit contents of con to root console
-    libtcod.console_blit(Game.con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
-    #show player's stats via GUI panel
-    libtcod.console_set_default_background(panel, libtcod.black)
-    libtcod.console_clear(panel)
 
-    #show player stats
-    render_bar(1, 1, BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), libtcod.light_red, libtcod.darker_red)
-    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level' + str(dungeon_level))
-    libtcod.console_print_ex(panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns))
-
-    #print the game messages, one line at a time
-    y = 1
-    for (line, color) in game_msgs:
-        libtcod.console_set_default_foreground(panel, color)
-        libtcod.console_print_ex(panel, MSG_X, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
-        y += 1
-
-    #display names of objects under the mouse
-    libtcod.console_set_default_foreground(panel, libtcod.light_gray)
-    libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse())
-
-    #blit panel to root console
-    libtcod.console_blit(panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
-
-def get_names_under_mouse():
-    global mouse
-    #return a string with the names of all objects under the mouse
-    (x, y) = (mouse.cx, mouse.cy)
-
-    #create list with the names of all objects at the mouse's coords and in FOV
-    names = [obj.name for obj in Game.objects
-        if obj.x == x and obj.y == y and libtcod.map_is_in_fov(Game.fov_map, obj.x, obj.y)]
-    
-    names = ', '.join(names) #join names separated by commas
-    return names.capitalize()
 
 def handle_keys():
-    global key
-
     #for real-time, uncomment
     #key = libtcod.console_check_for_keypress()
 
     #for turn-based, uncomment
     #key = libtcod.console_wait_for_keypress(True)
-    key_char = chr(key.c)
+    key_char = chr(Game.key.c)
 
-    if key.vk == libtcod.KEY_ENTER and key.lalt:
+    if Game.key.vk == libtcod.KEY_ENTER and Game.key.lalt:
         #ALT + ENTER: toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-    elif key.vk == libtcod.KEY_ESCAPE:
+    elif Game.key.vk == libtcod.KEY_ESCAPE:
         return 'exit' #exit game
 
-    if game_state == 'playing':
+    if Game.game_state == 'playing':
         #rest
-        if key.vk == libtcod.KEY_KPDEC or key.vk == libtcod.KEY_KP5:
+        if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
             player_resting()
             pass
         #movement keys
-        elif key.vk == libtcod.KEY_UP or key_char == 'k' or key.vk == libtcod.KEY_KP8 :
+        elif Game.key.vk == libtcod.KEY_UP or key_char == 'k' or Game.key.vk == libtcod.KEY_KP8 :
             player_move_or_attack(0, -1)
 
-        elif key.vk == libtcod.KEY_DOWN or key_char == 'j' or key.vk == libtcod.KEY_KP2 :
+        elif Game.key.vk == libtcod.KEY_DOWN or key_char == 'j' or Game.key.vk == libtcod.KEY_KP2 :
             player_move_or_attack(0, 1)
 
-        elif key.vk == libtcod.KEY_LEFT or key_char == 'h' or key.vk == libtcod.KEY_KP4 :
+        elif Game.key.vk == libtcod.KEY_LEFT or key_char == 'h' or Game.key.vk == libtcod.KEY_KP4 :
             player_move_or_attack(-1, 0)
 
-        elif key.vk == libtcod.KEY_RIGHT or key_char == 'l' or key.vk == libtcod.KEY_KP6 :
+        elif Game.key.vk == libtcod.KEY_RIGHT or key_char == 'l' or Game.key.vk == libtcod.KEY_KP6 :
             player_move_or_attack(1, 0)
 
         #handle diagonal. 11 oclock -> clockwise
-        elif key_char == 'y' or key.vk == libtcod.KEY_KP7 :
+        elif key_char == 'y' or Game.key.vk == libtcod.KEY_KP7 :
             player_move_or_attack(-1, -1)
 
-        elif key_char == 'u' or key.vk == libtcod.KEY_KP9 :
+        elif key_char == 'u' or Game.key.vk == libtcod.KEY_KP9 :
             player_move_or_attack(1, -1)
 
-        elif key_char == 'n' or key.vk == libtcod.KEY_KP3 :
+        elif key_char == 'n' or Game.key.vk == libtcod.KEY_KP3 :
             player_move_or_attack(1, 1)
 
-        elif key_char == 'b' or key.vk == libtcod.KEY_KP1 :
+        elif key_char == 'b' or Game.key.vk == libtcod.KEY_KP1 :
             player_move_or_attack(-1, 1)
 
         else:
@@ -669,36 +490,45 @@ def handle_keys():
                 level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
                 msgbox('Character Information\n\nLevel: ' + str(Game.player.level) + '\nExperience: ' + str(Game.player.fighter.xp) +
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
-                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), CHARACTER_SCREEN_WIDTH)
+                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, CHARACTER_SCREEN_WIDTH)
 
             if key_char == 'x':
-                #level up
-                msgbox('You start to meditate!', CHARACTER_SCREEN_WIDTH)
+                #debug key to automatically level up
+                msgbox('You start to meditate!', Game, CHARACTER_SCREEN_WIDTH)
                 level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
-                check_level_up()
+                check_level_up(Game)
                 Game.player.game_turns +=1       
 
-            if key_char == 'z':
+            if key_char == 'a':
+                #debug key to set all objects to visible
+                msgbox('You can smell them all!', Game, CHARACTER_SCREEN_WIDTH)
+                set_objects_visible()
+
+            if key_char == 'q':
                 #go down stairs, if the player is on them
-                msgbox('You start digging at your feet!', CHARACTER_SCREEN_WIDTH)
+                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, CHARACTER_SCREEN_WIDTH)
+                set_map_explored()   
+
+            if key_char == 'z':
+                #debug key to automatically go to next level
+                msgbox('You start digging at your feet!', Game, CHARACTER_SCREEN_WIDTH)
                 next_level()           
 
             if key_char == '>':
                 #go down stairs, if the player is on them
-                if stairs.x == Game.player.x and stairs.y == Game.player.y:
+                if Game.stairs.x == Game.player.x and Game.stairs.y == Game.player.y:
                     Game.player.game_turns +=1
                     next_level()
 
             return 'no_action'
 
 def next_level():
-    global dungeon_level
     #advance to next level
-    message('You head down the stairs', libtcod.red)
-    dungeon_level +=1
+    message('You head down the stairs', Game, libtcod.red)
+    Game.dungeon_level +=1
     make_map() #create fresh new level
-    initialize_fov()
+    initialize_fov(Game)
 
 def player_resting():
     Game.player.fighter.hp += 2
@@ -727,20 +557,12 @@ def player_move_or_attack(dx, dy):
 
 
 
-def roll_dice(dicelist):
-    dice=[]
-    #print dicelist
-    for [die_low, die_high] in dicelist:
-        roll = libtcod.random_get_int(0,die_low,die_high)
-        dice.append(roll)
 
-    return [sum(dice), dice]
 
 def player_death(player):
     #the game has ended
-    global game_state
-    message ('YOU DIED! YOU SUCK!', libtcod.red)
-    game_state = 'dead'
+    message ('YOU DIED! YOU SUCK!', Game, libtcod.red)
+    Game.game_state = 'dead'
 
     #turn player into corpse
     player.char = '%'
@@ -749,8 +571,8 @@ def player_death(player):
 def monster_death(monster):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
-    message (monster.name.capitalize() + ' is DEAD!', libtcod.orange)
-    message ('You gain ' + str(monster.fighter.xp) + 'XP', libtcod.orange)
+    message (monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
+    message ('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
     monster.char = '%'
     monster.color = libtcod.dark_red
     monster.blocks = False
@@ -759,23 +581,6 @@ def monster_death(monster):
     monster.name = 'remains of ' + monster.name
     monster.always_visible = True
     monster.send_to_back(Game)
-
-def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
-    #render a bar (HP, exp, etc). first calc the width of the bar
-    bar_width = int(float(value) / maximum * total_width)
-
-    #render the background first
-    libtcod.console_set_default_background(panel, back_color)
-    libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
-
-    #now render the bar on top
-    libtcod.console_set_default_background(panel, bar_color)
-    if bar_width > 0:
-        libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
-
-    #lastly add text
-    libtcod.console_set_default_foreground(panel, libtcod.white)
-    libtcod.console_print_ex(panel, x + total_width/2, y, libtcod.BKGND_NONE, libtcod.CENTER, name + ': ' + str(value) + '/' + str(maximum))
 
 
 
@@ -803,27 +608,12 @@ def inventory_menu(header):
     else:
         return Game.inventory[index].item
 
-def target_tile(max_range = None):
-    #return the position of a tile left-clicked in player's FOV (optionally in a range) or (None, None) if right-clicked
-    global key, mouse
-    while True:
-        #render screen. this erases the inv and shows the names of objects under the mouse
-        libtcod.console_flush()
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-        render_all()
 
-        (x, y) = (mouse.cx, mouse.cy)
-
-        if (mouse.lbutton_pressed and libtcod.map_is_in_fov(Game.fov_map, x, y) and (max_range is None or Game.player.distance(x,y) <= max_range)):
-            return (x, y)
-
-        if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
-            return (None, None)
 
 def target_monster(max_range = None):
     #returns a clicked monster inside FOV up to a range, or None if right-clicked
     while True:
-        (x, y) = target_tile(max_range)
+        (x, y) = target_tile(Game, max_range)
         if x is None: #player cancelled
             return None
 
@@ -839,7 +629,7 @@ libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | 
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'MeFightRogues!', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 Game.con = libtcod.console_new(MAP_WIDTH,MAP_HEIGHT)
-panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
+Game.panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
 
 main_menu()
 

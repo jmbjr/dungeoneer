@@ -12,3 +12,9 @@ had to remove properties from fighter class. need to address this
 I suspect I can simply pass in G to all external modules/classes, then call G.inventory, etc inside the other module.
 Need to check for functions where all inputs use Game
 Need to add the rest of the game globals to Game class
+get rid of spaces before function calls and use consistent spacing in paramter lists
+need to generalize stairs. maybe a class? multiple stairs to multiple branches or the same ones. right now it's a single object per floor.
+
+
+game modes for space roguelike:
+sometimes lots of enemies. sometimes not many at all and it's more of an exploration game. ship is deserted and you need to figure out why. pro: few enemies. con: few enemies to gain XP
