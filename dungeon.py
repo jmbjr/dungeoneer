@@ -3,13 +3,11 @@ import math
 import textwrap
 import shelve
 
-from objects import Rect, Tile
 from constants import *
 from ui import *
 from gamestuff import *
 from entities import *
 from world import *
-from abilities import *
 
 #main module
 
