@@ -4,7 +4,7 @@ from gamestuff import *
 from constants import *
 
 #specific imports needed for this module
-from entities import *  #need entities to create & place objects
+import entities
 
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
@@ -116,7 +116,7 @@ def make_map(Game):
             num_rooms +=1
 
     #create stairs at the center of the last room
-    Game.stairs = Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
+    Game.stairs = entities.Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
     Game.objects.append(Game.stairs)
     Game.stairs.send_to_back(Game) #so it's drawn below the monsters
 
@@ -163,83 +163,83 @@ def place_objects(room, Game):
         x =  libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
         y =  libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
 
-        if not is_blocked(x, y, Game):
+        if not entities.is_blocked(x, y, Game):
             choice = random_choice(monster_chances)
 
             if choice == 'johnstein':
-                fighter_component = Fighter(hp=10, defense=0, power=2, xp=20, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'J', 'johnstein', libtcod.white, blocks=True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=10, defense=0, power=2, xp=20, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'J', 'johnstein', libtcod.white, blocks=True, fighter=fighter_component, ai=ai_component)
             
             elif choice == 'greynaab':
-                fighter_component = Fighter(hp=20, defense=1, power=4, xp=40, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'g', 'greynaab', libtcod.light_blue, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=20, defense=1, power=4, xp=40, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'g', 'greynaab', libtcod.light_blue, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'jerbear':
-                fighter_component = Fighter(hp=25, defense=1, power=5, xp=50, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'j', 'jerbear', libtcod.green, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=25, defense=1, power=5, xp=50, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'j', 'jerbear', libtcod.green, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'zombiesheep':
-                fighter_component = Fighter(hp=30, defense=2, power=6, xp=60, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'z', 'zombiesheep', libtcod.yellow, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=30, defense=2, power=6, xp=60, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'z', 'zombiesheep', libtcod.yellow, blocks= True, fighter=fighter_component, ai=ai_component)
             
             elif choice == 'odiv':
-                fighter_component = Fighter(hp=25, defense=2, power=5, xp=60, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'o', 'odiv', libtcod.darker_orange, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=25, defense=2, power=5, xp=60, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'o', 'odiv', libtcod.darker_orange, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'slitherrr':
-                fighter_component = Fighter(hp=30, defense=2, power=6, xp=70, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 's', 'slitherrr', libtcod.darker_green, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=30, defense=2, power=6, xp=70, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 's', 'slitherrr', libtcod.darker_green, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'neckro':
-                fighter_component = Fighter(hp=35, defense=3, power=7, xp=80, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'n', 'neckro', libtcod.lighter_blue, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=35, defense=3, power=7, xp=80, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'n', 'neckro', libtcod.lighter_blue, blocks= True, fighter=fighter_component, ai=ai_component)
             
             elif choice == 'chan':
-                fighter_component = Fighter(hp=30, defense=3, power=6, xp=80, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'c', 'chan', libtcod.darker_red, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=30, defense=3, power=6, xp=80, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'c', 'chan', libtcod.darker_red, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'ashandarei':
-                fighter_component = Fighter(hp=35, defense=3, power=7, xp=90, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'a', 'ashandarei', libtcod.darker_yellow, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=35, defense=3, power=7, xp=90, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'a', 'ashandarei', libtcod.darker_yellow, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'zureal':
-                fighter_component = Fighter(hp=40, defense=4, power=8, xp=100, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'z', 'zureal', libtcod.dark_green, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=40, defense=4, power=8, xp=100, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'z', 'zureal', libtcod.dark_green, blocks= True, fighter=fighter_component, ai=ai_component)
             
             elif choice == 'demiurge':
-                fighter_component = Fighter(hp=35, defense=4, power=7, xp=100, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'd', 'demiurge', libtcod.darker_violet, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=35, defense=4, power=7, xp=100, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'd', 'demiurge', libtcod.darker_violet, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'hargrimm':
-                fighter_component = Fighter(hp=40, defense=4, power=8, xp=125, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'h', 'hargrimm', libtcod.lighter_green, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=40, defense=4, power=8, xp=125, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'h', 'hargrimm', libtcod.lighter_green, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'frisco':
-                fighter_component = Fighter(hp=45, defense=5, power=9, xp=150, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'f', 'frisco', libtcod.lighter_red, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=45, defense=5, power=9, xp=150, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'f', 'frisco', libtcod.lighter_red, blocks= True, fighter=fighter_component, ai=ai_component)
             
             elif choice == 'toomuchpete':
-                fighter_component = Fighter(hp=40, defense=5, power=8, xp=150, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 't', 'toomuchpete', libtcod.light_blue, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=40, defense=5, power=8, xp=150, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 't', 'toomuchpete', libtcod.light_blue, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'flatluigi':
-                fighter_component = Fighter(hp=50, defense=5, power=9, xp=200, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'f', 'flatluigi', libtcod.light_orange, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=50, defense=5, power=9, xp=200, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'f', 'flatluigi', libtcod.light_orange, blocks= True, fighter=fighter_component, ai=ai_component)
             elif choice == 'spanktrunk':
-                fighter_component = Fighter(hp=60, defense=6, power=10, xp=250, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 's', 'spanktrunk', libtcod.red, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=60, defense=6, power=10, xp=250, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 's', 'spanktrunk', libtcod.red, blocks= True, fighter=fighter_component, ai=ai_component)
             
             elif choice == 'stavros':
-                fighter_component = Fighter(hp=99, defense=10, power=5, xp=500, death_function=monster_death)
-                ai_component = BasicMonster()
-                monster = Object(x, y, 'S', 'Stavros the Wonder Chicken', libtcod.light_cyan, blocks= True, fighter=fighter_component, ai=ai_component)
+                fighter_component = entities.Fighter(hp=99, defense=10, power=5, xp=500, death_function=entities.monster_death)
+                ai_component = entities.BasicMonster()
+                monster = entities.Object(x, y, 'S', 'Stavros the Wonder Chicken', libtcod.light_cyan, blocks= True, fighter=fighter_component, ai=ai_component)
             else:
                 print 'ERROR!'
                 break
@@ -252,43 +252,40 @@ def place_objects(room, Game):
         y = libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
 
         #only place it if the tile is not blocked
-        if not is_blocked(x, y,Game):
+        if not entities.is_blocked(x, y,Game):
             #create an item
-            #roll = roll_dice([[0,100]])[0]
             choice = random_choice(item_chances)
             if choice == 'heal':
                 #healing potion
-                item_component = Item(use_function = cast_heal)
-                item = Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
+                item_component = entities.Item(use_function = entities.cast_heal)
+                item = entities.Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
                 #print 'Healing Potion'
             elif choice == 'lightning':
                 #lightning scroll
-                item_component = Item(use_function = cast_lightning)
-                item = Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
+                item_component = entities.Item(use_function = entities.cast_lightning)
+                item = entities.Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
                 #print 'Lightning Scroll'
             elif choice == 'fireball':
                 #fireball scroll
-                item_component = Item(use_function=cast_fireball)
-                item = Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
+                item_component = entities.Item(use_function=entities.cast_fireball)
+                item = entities.Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
                 #print 'Fireball Scroll'
             elif choice == 'confuse':
                 #confusion scroll
-                item_component = Item(use_function = cast_confusion)
-                item = Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
+                item_component = entities.Item(use_function = entities.cast_confusion)
+                item = entities.Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
                 #print 'Confusion Scroll'
             elif choice == 'sword':
                 #sword
                 equipment_component = Equipment(slot='right hand', power_bonus = 5)
-                item = Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
+                item = entities.Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
             elif choice == 'shield':
                 #create a shield
                 equipment_component = Equipment(slot = 'left hand', defense_bonus = 3)
-                item = Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
+                item = entities.Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
             else:
                 print 'ERROR!'
                 break
 
             Game.objects.append(item)
             item.send_to_back(Game) #items appear below other objects
-
-

@@ -5,8 +5,8 @@ from gamestuff import *
 
 #specific imports needed for this module
 import shelve #for save and load
-from entities import * #Needed to set up player object and for debug functions. 
-from map import *  #Needed to set up map
+import entities
+import map
 
 #global class pattern
 class Game(object): 
@@ -49,15 +49,15 @@ def main_menu():
 
 def new_game():
     #create object representing the player
-    fighter_component = Fighter(hp=100, defense=3, power=6, xp=0, death_function=player_death)
-    Game.player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
+    fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death)
+    Game.player = entities.Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
     Game.dungeon_level = 1
-    make_map(Game)
 
-    initialize_fov(Game)
+    map.make_map(Game)
+    map.initialize_fov(Game)
 
     Game.game_state = 'playing'
     Game.inventory = []
@@ -66,8 +66,8 @@ def new_game():
     Game.player.game_turns = 0
 
     #initial equipment
-    equipment_component = Equipment(slot='wrist', max_hp_bonus = 5)
-    obj = Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
+    equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
+    obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
     Game.inventory.append(obj)
     equipment_component.equip(Game)
     obj.always_visible = True
@@ -101,7 +101,7 @@ def load_game(filename='savegame'):
     Game.dungeon_level = file['dungeon_level']
     file.close()
 
-    initialize_fov(Game)
+    map.initialize_fov(Game)
 
 def play_game():
     player_action = None
@@ -258,13 +258,13 @@ def handle_keys():
             if key_char == 'z':
                 #debug key to automatically go to next level
                 msgbox('You start digging at your feet!', Game, CHARACTER_SCREEN_WIDTH)
-                next_level(Game)           
+                map.next_level(Game)           
 
             if key_char == '>':
                 #go down stairs, if the player is on them
                 if Game.stairs.x == Game.player.x and Game.stairs.y == Game.player.y:
                     Game.player.game_turns +=1
-                    next_level(Game)
+                    map.next_level(Game)
 
             if key_char == 'w':
                 #give all items
@@ -278,40 +278,40 @@ def give_items(Game):
     #healing potion
     x = 0
     y = 0
-    item_component = Item(use_function = cast_heal)
-    item = Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
+    item_component = entities.Item(use_function = cast_heal)
+    item = entities.Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
     item.always_visible = True
     Game.inventory.append(item)
 
 
     #lightning scroll
-    item_component = Item(use_function = cast_lightning)
-    item = Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
+    item_component = entities.Item(use_function = cast_lightning)
+    item = entities.Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
     Game.inventory.append(item)
 
     #fireball scroll
-    item_component = Item(use_function=cast_fireball)
-    item = Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
+    item_component = entities.Item(use_function=cast_fireball)
+    item = entities.Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
     Game.inventory.append(item)
 
     #confusion scroll
-    item_component = Item(use_function = cast_confusion)
-    item = Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
+    item_component = entities.Item(use_function = cast_confusion)
+    item = entities.Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
     Game.inventory.append(item)
 
     #sword
-    equipment_component = Equipment(slot='right hand', power_bonus = 5)
-    item = Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
+    equipment_component = entities.Equipment(slot='right hand', power_bonus = 5)
+    item = entities.Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
     Game.inventory.append(item)
 
     #create a shield
-    equipment_component = Equipment(slot = 'left hand', defense_bonus = 3)
-    item = Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
+    equipment_component = entities.Equipment(slot = 'left hand', defense_bonus = 3)
+    item = entities.Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
     Game.inventory.append(item)
 
     #wristguards
-    equipment_component = Equipment(slot='wrist', max_hp_bonus = 5)
-    item = Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
+    equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
+    item = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
     Game.inventory.append(item)
 
 def set_map_explored(Game):
