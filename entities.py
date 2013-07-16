@@ -1,12 +1,9 @@
+#standard imports
 import libtcodpy as libtcod
-import textwrap
-import math
-from ui import *
 from gamestuff import *
 from constants import *
-from world import *
-#handles Objects. player, enemies, items, etc
 
+#Classes:  Object player, enemies, items, etc
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
     def __init__(self, hp, defense, power, xp, death_function=None):
@@ -169,7 +166,7 @@ class Object(object):
 
     def distance(self, x, y):
         #return distance to some coord
-        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+        return get_distance(x - self.x, y - self.y)
 
     def send_to_back(self, Game):
         #make this object be drawn first, so all others appear above it if they are in the same tile
@@ -192,7 +189,8 @@ class Item(object):
             return 'no_action'
         else:
             if self.use_function(Game) != 'cancelled':
-                Game.inventory.remove(self.owner) #destror after use, unless cancelled
+                Game.inventory.remove(self.owner) #destroy after use, unless cancelled
+                Game.fov_recompute = True
                 return 'used'
             else:
                 return 'no_action'
@@ -273,6 +271,8 @@ class ConfusedMonster(object):
             self.owner.ai = self.old_ai
             message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.red) 
 
+
+#spells/abilities
 def cast_confusion(Game):
     ##find nearest enemy and confuse it
     #monster = closest_monster(CONFUSE_RANGE)
@@ -327,3 +327,104 @@ def cast_lightning(Game):
 
     message('A lightning bolt strikes the ' + monster.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
     monster.fighter.take_damage(theDmg, Game)
+
+
+#death routines
+def player_death(player, Game):
+    #the game has ended
+    message ('YOU DIED! YOU SUCK!', Game, libtcod.red)
+    Game.game_state = 'dead'
+
+    #turn player into corpse
+    player.char = '%'
+    player.color = libtcod.dark_red
+
+def monster_death(monster, Game):
+    #transform into corpse
+    #doesn't block, can't be attacked, cannot move
+    message (monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
+    message ('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
+    monster.char = '%'
+    monster.color = libtcod.dark_red
+    monster.blocks = False
+    monster.fighter = None
+    monster.ai = None
+    monster.name = 'remains of ' + monster.name
+    monster.always_visible = True
+    monster.send_to_back(Game)
+
+
+#check equip and inventory
+def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
+    for obj in Game.inventory:
+        if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
+            return obj.equipment
+    return None
+
+def get_all_equipped(obj, Game): #returns list of equipped items
+    if obj == Game.player:
+        equipped_list = []
+        for item in Game.inventory:
+            if item.equipment and item.equipment.is_equipped:
+                equipped_list.append(item.equipment)
+        return equipped_list
+    else:
+        return [] #other Game.objects have no equipment
+
+
+#target monsters/tiles and check for blocked tiles
+def target_monster(Game, max_range = None):
+    #returns a clicked monster inside FOV up to a range, or None if right-clicked
+    while True:
+        (x, y) = target_tile(Game, max_range)
+        if x is None: #player cancelled
+            return None
+
+        #return the first clicked monster, otherwise continue looping
+        for obj in Game.objects:
+            if obj.x == x and obj.y == y and obj.fighter and obj != Game.player:
+                return obj
+
+def closest_monster(max_range, Game):
+    #find closest enemy up to max range in the player's FOV
+    closest_enemy = None
+    closest_dist = max_range + 1 #start with slightly higher than max range
+
+    for object in Game.objects:
+        if object.fighter and not object == Game.player and libtcod.map_is_in_fov(Game.fov_map, object.x, object.y):
+            #calculate the distance between this and the player
+            dist = Game.player.distance_to(object)
+            if dist < closest_dist:
+                closest_enemy = object
+                closest_dist = dist
+    return closest_enemy
+
+def target_tile(Game, max_range = None):
+    #return the position of a tile left-clicked in player's FOV (optionally in a range) or (None, None) if right-clicked
+    while True:
+        #render screen. this erases the inv and shows the names of objects under the mouse
+        libtcod.console_flush()
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
+        render_all(Game)
+
+        (x, y) = (Game.mouse.cx, Game.mouse.cy)
+
+        if (Game.mouse.lbutton_pressed and libtcod.map_is_in_fov(Game.fov_map, x, y) and (max_range is None or Game.player.distance(x,y) <= max_range)):
+            return (x, y)
+
+        if Game.mouse.rbutton_pressed or Game.key.vk == libtcod.KEY_ESCAPE:
+            return (None, None)
+
+def is_blocked(x, y, Game):
+    #first test the map tile
+    if Game.map[x][y].blocked:
+        return True
+
+    #now check for any blocking objects
+    for object in Game.objects:
+        if object.blocks and object.x == x and object.y == y:
+            return True
+
+    return False
+
+

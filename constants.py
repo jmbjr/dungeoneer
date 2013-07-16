@@ -1,3 +1,4 @@
+#standard imports
 import libtcodpy as libtcod
 
 CHARACTER_SCREEN_WIDTH = 30
