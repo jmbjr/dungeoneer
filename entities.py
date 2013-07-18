@@ -2,6 +2,7 @@
 import libtcodpy as libtcod
 from gamestuff import *
 from constants import *
+import gamedata
 
 #Classes:  Object player, enemies, items, etc
 class Fighter(object):
@@ -54,10 +55,10 @@ class Fighter(object):
 
         if damage > 0:
             #make target take some damage
-            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', Game, libtcod.yellow)
+            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', Game, libtcod.yellow)
             target.fighter.take_damage(damage, Game)
         else:
-            message (self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', Game, libtcod.white)
+            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', Game, libtcod.white)
 
 class BasicMonster(object):
     #AI for basic monster
@@ -67,7 +68,7 @@ class BasicMonster(object):
         if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
             #move towards Game.player if far enough away
             if flip_coin() and flip_coin() and flip_coin():
-                 message ('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
+                 message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
             if monster.distance_to(Game.player) >= 2:
                 monster.move_towards(Game.player.x, Game.player.y, Game)
 
@@ -126,7 +127,7 @@ class Object(object):
     def clear(self, Game):
         #erase char that represents this object
         if libtcod.map_is_in_fov(Game.fov_map, self.x, self.y):
-            libtcod.console_put_char_ex(Game.con, self.x, self.y, GROUND_CHAR, libtcod.white, COLOR_LIGHT_GROUND)
+            libtcod.console_put_char_ex(Game.con, self.x, self.y, gamedata.GROUND_CHAR, libtcod.white, COLOR_LIGHT_GROUND)
 
     def move_towards(self, target_x, target_y, Game):
         #vector from this object to the target, and distance
@@ -332,8 +333,8 @@ def cast_lightning(Game):
 #death routines
 def player_death(player, Game):
     #the game has ended
-    message ('YOU DIED! YOU SUCK!', Game, libtcod.red)
-    Game.game_state = 'dead'
+    message('YOU DIED! YOU SUCK!', Game, libtcod.red)
+    Game.game_state = STATE_DEAD
 
     #turn player into corpse
     player.char = '%'
@@ -342,8 +343,8 @@ def player_death(player, Game):
 def monster_death(monster, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
-    message (monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
-    message ('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
+    message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
+    message('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
     monster.char = '%'
     monster.color = libtcod.dark_red
     monster.blocks = False

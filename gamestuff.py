@@ -1,6 +1,7 @@
 #standard imports
 import libtcodpy as libtcod
 from constants import *
+import gamedata
 
 #specific imports needed for this module
 import math
@@ -180,20 +181,20 @@ def render_all(Game):
                     #tile not visible
                     if wall:
                         color_wall_ground = COLOR_DARK_WALL
-                        char_wall_ground = WALL_CHAR
+                        char_wall_ground = gamedata.WALL_CHAR
                     else:
                         color_wall_ground = COLOR_DARK_GROUND
-                        char_wall_ground = GROUND_CHAR
+                        char_wall_ground = gamedata.GROUND_CHAR
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
                     Game.map[x][y].explored = True
                     if wall:
                         color_wall_ground = COLOR_LIGHT_WALL
-                        char_wall_ground = WALL_CHAR
+                        char_wall_ground = gamedata.WALL_CHAR
                     else:
                         color_wall_ground = COLOR_LIGHT_GROUND
-                        char_wall_ground = GROUND_CHAR
+                        char_wall_ground = gamedata.GROUND_CHAR
                     fov_wall_ground = libtcod.white
 
                 if Game.map[x][y].explored:

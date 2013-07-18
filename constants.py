@@ -1,6 +1,12 @@
 #standard imports
 import libtcodpy as libtcod
 
+
+MAIN_MENU_BKG = 'menu_background.png'
+STATE_PLAYING = 'playing'
+STATE_NOACTION = 'no_action'
+STATE_DEAD = 'dead'
+
 CHARACTER_SCREEN_WIDTH = 30
 LEVEL_SCREEN_WIDTH = 40
 SCREEN_WIDTH = 80
@@ -42,8 +48,8 @@ FOV_ALGO = 2 #FOV_SHADOW
 FOV_LIGHT_WALLS = True
 TORCH_RADIUS = 10
 
-WALL_CHAR = '#'
-GROUND_CHAR  = '.'
+#WALL_CHAR = '#'
+#GROUND_CHAR  = '.'
 
 #dice
 D6=[1,6]

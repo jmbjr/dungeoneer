@@ -2,11 +2,13 @@
 import libtcodpy as libtcod
 from constants import *
 from gamestuff import *
+import gamedata
 
 #specific imports needed for this module
 import shelve #for save and load
 import entities
 import map
+
 
 #global class pattern
 class Game(object): 
@@ -15,7 +17,7 @@ class Game(object):
 
 #MAIN MENU GAME OPTIONS
 def main_menu():
-    img = libtcod.image_load('menu_background.png')
+    img = libtcod.image_load(MAIN_MENU_BKG)
 
     while not libtcod.console_is_window_closed():
         #show the background image, at twice the regular console resolution
@@ -59,7 +61,7 @@ def new_game():
     map.make_map(Game)
     map.initialize_fov(Game)
 
-    Game.game_state = 'playing'
+    Game.game_state = STATE_PLAYING
     Game.inventory = []
 
     #create the list of the game messages and their colors, starts empty
@@ -130,7 +132,7 @@ def play_game():
             break
 
         #give monsters a turn
-        if Game.game_state == 'playing' and player_action != 'no_action':
+        if Game.game_state == STATE_PLAYING and player_action != STATE_NOACTION:
             for object in Game.objects:
                 if object.ai:
                     object.ai.take_turn(Game)
@@ -140,7 +142,7 @@ def check_level_up(Game):
     level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
     if Game.player.fighter.xp >= level_up_xp:
         Game.player.level += 1
-        Game.player.fighter.xp -=level_up_xp
+        Game.player.fighter.xp -= level_up_xp
         message('You have reached level ' + str(Game.player.level) + '!', Game, libtcod.yellow)
 
         choice = None
@@ -154,7 +156,7 @@ def check_level_up(Game):
             Game.player.fighter.base_max_hp += 25
         elif choice == 1:
             Game.player.fighter.base_power += 2
-        elif choice ==2:
+        elif choice == 2:
             Game.player.fighter.base_defense += 2
 
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
@@ -175,7 +177,7 @@ def handle_keys():
     elif Game.key.vk == libtcod.KEY_ESCAPE:
         return 'exit' #exit game
 
-    if Game.game_state == 'playing':
+    if Game.game_state == STATE_PLAYING:
         #rest
         if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
             player_resting(Game)
@@ -212,7 +214,7 @@ def handle_keys():
                 #pick up an item
                 for object in Game.objects: #look for items in the player's title
                     if object.x == Game.player.x and object.y == Game.player.y and object.item:
-                        Game.player.game_turns +=1
+                        Game.player.game_turns += 1
                         return object.item.pick_up(Game)
                         #break
 
@@ -220,14 +222,14 @@ def handle_keys():
                 #show inv. if an item is selected, use it
                 chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game)
                 if chosen_item is not None:
-                    Game.player.game_turns +=1
+                    Game.player.game_turns += 1
                     return chosen_item.use(Game)
 
             if key_char == 'd':
                 #show the inventory. if item is selected, drop it
                 chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game)
                 if chosen_item is not None:
-                    Game.player.game_turns +=1
+                    Game.player.game_turns += 1
                     chosen_item.drop(Game.inventory, Game)
 
             if key_char == 'c':
@@ -243,7 +245,7 @@ def handle_keys():
                 level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
                 check_level_up(Game)
-                Game.player.game_turns +=1       
+                Game.player.game_turns += 1       
 
             if key_char == 'a':
                 #debug key to set all objects to visible
@@ -266,6 +268,11 @@ def handle_keys():
                     Game.player.game_turns +=1
                     map.next_level(Game)
 
+            if key_char == 'p':
+                print 'RELOADING GAME DATA'
+                reload(gamedata)
+                Game.fov_recompute = True
+
             if key_char == 'w':
                 #give all items
                 give_items(Game)
@@ -282,7 +289,6 @@ def give_items(Game):
     item = entities.Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
     item.always_visible = True
     Game.inventory.append(item)
-
 
     #lightning scroll
     item_component = entities.Item(use_function = cast_lightning)

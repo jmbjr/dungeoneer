@@ -277,11 +277,11 @@ def place_objects(room, Game):
                 #print 'Confusion Scroll'
             elif choice == 'sword':
                 #sword
-                equipment_component = Equipment(slot='right hand', power_bonus = 5)
+                equipment_component = entities.Equipment(slot='right hand', power_bonus = 5)
                 item = entities.Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
             elif choice == 'shield':
                 #create a shield
-                equipment_component = Equipment(slot = 'left hand', defense_bonus = 3)
+                equipment_component = entities.Equipment(slot = 'left hand', defense_bonus = 3)
                 item = entities.Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
             else:
                 print 'ERROR!'

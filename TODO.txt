@@ -21,3 +21,7 @@ if player has two of the same item, when equipping one then both are equipped.
 
 game modes for space roguelike:
 sometimes lots of enemies. sometimes not many at all and it's more of an exploration game. ship is deserted and you need to figure out why. pro: few enemies. con: few enemies to gain XP
+
+
+need to variablize leveling up stats.  as you go up in level, you get higher stats? think about it
+
