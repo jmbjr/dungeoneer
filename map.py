@@ -1,7 +1,7 @@
 #standard imports
 import libtcodpy as libtcod
 from gamestuff import *
-from constants import *
+import data
 
 #specific imports needed for this module
 import entities

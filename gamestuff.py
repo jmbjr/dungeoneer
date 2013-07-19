@@ -1,6 +1,5 @@
 #standard imports
 import libtcodpy as libtcod
-from constants import *
 import data
 
 #specific imports needed for this module

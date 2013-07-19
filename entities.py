@@ -1,7 +1,6 @@
 #standard imports
 import libtcodpy as libtcod
 from gamestuff import *
-from constants import *
 import data
 
 #Classes:  Object player, enemies, items, etc

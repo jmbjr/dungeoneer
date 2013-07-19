@@ -1,8 +1,6 @@
 #standard imports
 import libtcodpy as libtcod
-from constants import *
 from gamestuff import *
-import gamedata
 import data
 
 #specific imports needed for this module
