@@ -30,9 +30,9 @@ def create_room(room, Game):
 def initialize_fov(Game):
     Game.fov_recompute = True
     #create FOV map according to the generated map
-    Game.fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
+    Game.fov_map = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
+    for y in range(data.MAP_HEIGHT):
+        for x in range(data.MAP_WIDTH):
             libtcod.map_set_properties(Game.fov_map, x, y, not Game.map[x][y].block_sight, not Game.map[x][y].blocked)
 
     libtcod.console_clear(Game.con)
@@ -58,19 +58,19 @@ def make_map(Game):
     Game.objects = [Game.player]
     #fill map with "blocked" tiles
     Game.map = [[ Tile(True)
-        for y in range(MAP_HEIGHT) ]
-            for x in range(MAP_WIDTH) ]
+        for y in range(data.MAP_HEIGHT) ]
+            for x in range(data.MAP_WIDTH) ]
 
     rooms = []
     num_rooms = 0
 
-    for r in range(MAX_ROOMS):
+    for r in range(data.MAX_ROOMS):
         #get random width/height
-        w = libtcod.random_get_int(0, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
-        h = libtcod.random_get_int(0, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
+        w = libtcod.random_get_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
+        h = libtcod.random_get_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         #get random positions, but stay within map
-        x = libtcod.random_get_int(0, 0, MAP_WIDTH - w - 1)
-        y = libtcod.random_get_int(0, 0, MAP_HEIGHT - h - 1)
+        x = libtcod.random_get_int(0, 0, data.MAP_WIDTH - w - 1)
+        y = libtcod.random_get_int(0, 0, data.MAP_HEIGHT - h - 1)
 
         new_room = Rect(x, y, w, h)
 

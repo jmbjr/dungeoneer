@@ -1,7 +1,7 @@
 #standard imports
 import libtcodpy as libtcod
 from constants import *
-import gamedata
+import data
 
 #specific imports needed for this module
 import math
@@ -42,22 +42,22 @@ class Tile(object):
 #User Interface routines
 def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
-    new_msg_lines = textwrap.wrap(new_msg, MSG_WIDTH)
+    new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
 
     for line in new_msg_lines:
         #if the buffer is full, remove the first line to make room for the new one
-        if len(Game.game_msgs) == MSG_HEIGHT:
+        if len(Game.game_msgs) == data.MSG_HEIGHT:
             del Game.game_msgs[0]
 
         #add the new line as a tuple, with the txt and the color
         Game.game_msgs.append((line, color))
 
 def menu(header, options, width, Game):
-    if len(options) > MAX_NUM_ITEMS: 
-        message('Cannot have a menu with more than ' + str(MAX_NUM_ITEMS) + ' options.', Game)
+    if len(options) > data.MAX_NUM_ITEMS: 
+        message('Cannot have a menu with more than ' + str(data.MAX_NUM_ITEMS) + ' options.', Game)
 
     #calculate total height of the header (after auto-wrap) and one line per option
-    header_height = libtcod.console_get_height_rect(Game.con, 0, 0, width, SCREEN_HEIGHT, header)
+    header_height = libtcod.console_get_height_rect(Game.con, 0, 0, width, data.SCREEN_HEIGHT, header)
     if header == '':
         header_height = 0
     height = len(options) + header_height
@@ -79,8 +79,8 @@ def menu(header, options, width, Game):
         letter_index += 1
 
     #blit contents of window to root console
-    x = SCREEN_WIDTH / 2 - width / 2
-    y = SCREEN_HEIGHT / 2 - height / 2
+    x = data.SCREEN_WIDTH / 2 - width / 2
+    y = data.SCREEN_HEIGHT / 2 - height / 2
     libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
     #present the root console to the player and wait for a keypress
@@ -114,7 +114,7 @@ def inventory_menu(header, Game):
                 text = text + ' (on ' + item.equipment.slot + ')'
             options.append(text)
 
-    index = menu(header, options, INVENTORY_WIDTH, Game)
+    index = menu(header, options, data.INVENTORY_WIDTH, Game)
 
     if (index is None or len(Game.inventory) == 0) or index == 'ESC':
         return None
@@ -165,36 +165,33 @@ def roll_dice(dicelist):
 
 #render routines
 def render_all(Game):
-    global COLOR_LIGHT_WALL, COLOR_DARK_WALL
-    global COLOR_LIGHT_GROUND, COLOR_DARK_GROUND
-
     if Game.fov_recompute:
         #recompute FOV if needed (if player moved or something else happened)
         Game.fov_recompute = False
-        libtcod.map_compute_fov(Game.fov_map, Game.player.x, Game.player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGO)
+        libtcod.map_compute_fov(Game.fov_map, Game.player.x, Game.player.y, data.TORCH_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
 
-        for y in range(MAP_HEIGHT):
-            for x in range(MAP_WIDTH):
+        for y in range(data.MAP_HEIGHT):
+            for x in range(data.MAP_WIDTH):
                 visible = libtcod.map_is_in_fov(Game.fov_map, x, y)
                 wall = Game.map[x][y].block_sight
                 if not visible:
                     #tile not visible
                     if wall:
-                        color_wall_ground = COLOR_DARK_WALL
-                        char_wall_ground = gamedata.WALL_CHAR
+                        color_wall_ground = data.COLOR_DARK_WALL
+                        char_wall_ground = data.WALL_CHAR
                     else:
-                        color_wall_ground = COLOR_DARK_GROUND
-                        char_wall_ground = gamedata.GROUND_CHAR
+                        color_wall_ground = data.COLOR_DARK_GROUND
+                        char_wall_ground = data.GROUND_CHAR
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
                     Game.map[x][y].explored = True
                     if wall:
-                        color_wall_ground = COLOR_LIGHT_WALL
-                        char_wall_ground = gamedata.WALL_CHAR
+                        color_wall_ground = data.COLOR_LIGHT_WALL
+                        char_wall_ground = data.WALL_CHAR
                     else:
-                        color_wall_ground = COLOR_LIGHT_GROUND
-                        char_wall_ground = gamedata.GROUND_CHAR
+                        color_wall_ground = data.COLOR_LIGHT_GROUND
+                        char_wall_ground = data.GROUND_CHAR
                     fov_wall_ground = libtcod.white
 
                 if Game.map[x][y].explored:
@@ -209,14 +206,14 @@ def render_all(Game):
     Game.player.draw(Game)
 
     #blit contents of con to root console
-    libtcod.console_blit(Game.con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+    libtcod.console_blit(Game.con, 0, 0, data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 0, 0, 0)
 
     #show player's stats via GUI panel
     libtcod.console_set_default_background(Game.panel, libtcod.black)
     libtcod.console_clear(Game.panel)
 
     #show player stats
-    render_bar(1, 1, BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), libtcod.light_red, libtcod.darker_red, Game)
+    render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), libtcod.light_red, libtcod.darker_red, Game)
     libtcod.console_print_ex(Game.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level' + str(Game.dungeon_level))
     libtcod.console_print_ex(Game.panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns))
 
@@ -224,7 +221,7 @@ def render_all(Game):
     y = 1
     for (line, color) in Game.game_msgs:
         libtcod.console_set_default_foreground(Game.panel, color)
-        libtcod.console_print_ex(Game.panel, MSG_X, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
+        libtcod.console_print_ex(Game.panel, data.MSG_X, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
         y += 1
 
     #display names of objects under the mouse
@@ -232,7 +229,7 @@ def render_all(Game):
     libtcod.console_print_ex(Game.panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse(Game))
 
     #blit panel to root console
-    libtcod.console_blit(Game.panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
+    libtcod.console_blit(Game.panel, 0, 0, data.SCREEN_WIDTH, data.PANEL_HEIGHT, 0, 0, data.PANEL_Y)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
     #render a bar (HP, exp, etc). first calc the width of the bar

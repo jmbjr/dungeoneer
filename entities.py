@@ -2,7 +2,7 @@
 import libtcodpy as libtcod
 from gamestuff import *
 from constants import *
-import gamedata
+import data
 
 #Classes:  Object player, enemies, items, etc
 class Fighter(object):
@@ -127,7 +127,7 @@ class Object(object):
     def clear(self, Game):
         #erase char that represents this object
         if libtcod.map_is_in_fov(Game.fov_map, self.x, self.y):
-            libtcod.console_put_char_ex(Game.con, self.x, self.y, gamedata.GROUND_CHAR, libtcod.white, COLOR_LIGHT_GROUND)
+            libtcod.console_put_char_ex(Game.con, self.x, self.y, data.GROUND_CHAR, libtcod.white, data.COLOR_LIGHT_GROUND)
 
     def move_towards(self, target_x, target_y, Game):
         #vector from this object to the target, and distance
@@ -201,17 +201,20 @@ class Item(object):
         #add to the Game.player's Game.inventory and remove from the map
         if len(Game.inventory) >= 26:
             message('Your Game.inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
-            return 'no_action'
+            retval = data.STATE_NOACTION
         else:
             Game.inventory.append(self.owner)
             Game.objects.remove(self.owner)
             message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
-            return 'picked_up'
 
-        #special case: auto equip if the slot is unused
-        equipment = self.owner.equipment
-        if equipment and get_equipped_in_slot(equipment.slot) is None and AUTOEQUIP:
-            equipment.equip(Game)
+            #special case: auto equip if the slot is unused
+            equipment = self.owner.equipment
+            if equipment and get_equipped_in_slot(equipment.slot, Game) is None and data.AUTOEQUIP:
+                equipment.equip(Game)
+
+            retval = data.STATE_PLAYING
+
+        return retval
 
     def drop(self, Game):
         #add to the map and remove from the Game.player's Game.inventory. also, place it at the Game.player's coordinates
@@ -257,7 +260,7 @@ class Equipment(object):
         message('Unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)          
 
 class ConfusedMonster(object):
-    def __init__(self, old_ai, num_turns = CONFUSE_NUM_TURNS):
+    def __init__(self, old_ai, num_turns = data.CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
         self.num_turns = num_turns
 
@@ -275,15 +278,9 @@ class ConfusedMonster(object):
 
 #spells/abilities
 def cast_confusion(Game):
-    ##find nearest enemy and confuse it
-    #monster = closest_monster(CONFUSE_RANGE)
-    #if monster is None:
-    #    message ('No enemy is close enough to confuse', libtcod.red)
-    #    return 'cancelled'
-
     #ask player for target to confuse
     message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
-    monster = target_monster(Game, CONFUSE_RANGE)
+    monster = target_monster(Game, data.CONFUSE_RANGE)
     if monster is None:
         return 'cancelled'
 
@@ -302,9 +299,9 @@ def cast_fireball(Game):
     else:
         message('The fireball explodes', Game, libtcod.orange)
 
-    theDmg = roll_dice([[FIREBALL_DAMAGE/2, FIREBALL_DAMAGE*2]])[0]
+    theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
     for obj in Game.objects: #damage all fighters within range
-        if obj.distance(x,y) <= FIREBALL_RADIUS and obj.fighter:
+        if obj.distance(x,y) <= data.FIREBALL_RADIUS and obj.fighter:
             message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
             obj.fighter.take_damage(theDmg, Game)
 
@@ -315,16 +312,16 @@ def cast_heal(Game):
         return 'cancelled'
 
     message('You feel better', Game, libtcod.light_violet)
-    Game.player.fighter.heal(HEAL_AMOUNT)
+    Game.player.fighter.heal(data.HEAL_AMOUNT)
 
 def cast_lightning(Game):
     #find nearest enemy (within range) and damage it
-    monster = closest_monster(LIGHTNING_RANGE, Game)
+    monster = closest_monster(data.LIGHTNING_RANGE, Game)
     if monster is None:
         message('No enemy is close enough to strike', Game, libtcod.red)
         return 'cancelled'
 
-    theDmg = roll_dice([[LIGHTNING_DAMAGE/2, LIGHTNING_DAMAGE]])[0]
+    theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
     message('A lightning bolt strikes the ' + monster.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
     monster.fighter.take_damage(theDmg, Game)
@@ -334,7 +331,7 @@ def cast_lightning(Game):
 def player_death(player, Game):
     #the game has ended
     message('YOU DIED! YOU SUCK!', Game, libtcod.red)
-    Game.game_state = STATE_DEAD
+    Game.game_state = data.STATE_DEAD
 
     #turn player into corpse
     player.char = '%'

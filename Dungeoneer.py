@@ -3,6 +3,7 @@ import libtcodpy as libtcod
 from constants import *
 from gamestuff import *
 import gamedata
+import data
 
 #specific imports needed for this module
 import shelve #for save and load
@@ -17,7 +18,7 @@ class Game(object):
 
 #MAIN MENU GAME OPTIONS
 def main_menu():
-    img = libtcod.image_load(MAIN_MENU_BKG)
+    img = libtcod.image_load(data.MAIN_MENU_BKG)
 
     while not libtcod.console_is_window_closed():
         #show the background image, at twice the regular console resolution
@@ -25,8 +26,8 @@ def main_menu():
 
         #show game title and credits
         libtcod.console_set_default_foreground(0, libtcod.light_yellow)
-        libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 4, libtcod.BKGND_NONE, libtcod.CENTER, 'MeFightRogues!')
-        libtcod.console_print_ex(0, SCREEN_WIDTH/2, SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
+        libtcod.console_print_ex(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, libtcod.BKGND_NONE, libtcod.CENTER, 'MeFightRogues!')
+        libtcod.console_print_ex(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
 
         #show options and wait for the player's choice
         choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24, Game)
@@ -52,7 +53,7 @@ def main_menu():
 def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death)
-    Game.player = entities.Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
+    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -61,7 +62,7 @@ def new_game():
     map.make_map(Game)
     map.initialize_fov(Game)
 
-    Game.game_state = STATE_PLAYING
+    Game.game_state = data.STATE_PLAYING
     Game.inventory = []
 
     #create the list of the game messages and their colors, starts empty
@@ -132,14 +133,14 @@ def play_game():
             break
 
         #give monsters a turn
-        if Game.game_state == STATE_PLAYING and player_action != STATE_NOACTION:
+        if Game.game_state == data.STATE_PLAYING and player_action != data.STATE_NOACTION:
             for object in Game.objects:
                 if object.ai:
                     object.ai.take_turn(Game)
 
 def check_level_up(Game):
     #see if the player's experience is enough to level-up
-    level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
+    level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
     if Game.player.fighter.xp >= level_up_xp:
         Game.player.level += 1
         Game.player.fighter.xp -= level_up_xp
@@ -150,7 +151,7 @@ def check_level_up(Game):
             choice = menu('Level up! Choose a stat to raise:\n', 
                 ['Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',
                 'Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', 
-                'Agility (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')'], LEVEL_SCREEN_WIDTH, Game)
+                'Agility (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')'], data.LEVEL_SCREEN_WIDTH, Game)
 
         if choice == 0:
             Game.player.fighter.base_max_hp += 25
@@ -177,7 +178,7 @@ def handle_keys():
     elif Game.key.vk == libtcod.KEY_ESCAPE:
         return 'exit' #exit game
 
-    if Game.game_state == STATE_PLAYING:
+    if Game.game_state == data.STATE_PLAYING:
         #rest
         if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
             player_resting(Game)
@@ -230,36 +231,36 @@ def handle_keys():
                 chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
-                    chosen_item.drop(Game.inventory, Game)
+                    chosen_item.drop(Game)
 
             if key_char == 'c':
                 #show character info
-                level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
+                level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
                 msgbox('Character Information\n\nLevel: ' + str(Game.player.level) + '\nExperience: ' + str(Game.player.fighter.xp) +
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
-                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, CHARACTER_SCREEN_WIDTH)
+                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, data.CHARACTER_SCREEN_WIDTH)
 
             if key_char == 'x':
                 #debug key to automatically level up
-                msgbox('You start to meditate!', Game, CHARACTER_SCREEN_WIDTH)
-                level_up_xp = LEVEL_UP_BASE + Game.player.level * LEVEL_UP_FACTOR
+                msgbox('You start to meditate!', Game, data.CHARACTER_SCREEN_WIDTH)
+                level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
                 check_level_up(Game)
                 Game.player.game_turns += 1       
 
             if key_char == 'a':
                 #debug key to set all objects to visible
-                msgbox('You can smell them all!', Game, CHARACTER_SCREEN_WIDTH)
+                msgbox('You can smell them all!', Game, data.CHARACTER_SCREEN_WIDTH)
                 set_objects_visible(Game)
 
             if key_char == 'q':
                 #go down stairs, if the player is on them
-                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, CHARACTER_SCREEN_WIDTH)
+                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, data.CHARACTER_SCREEN_WIDTH)
                 set_map_explored(Game)   
 
             if key_char == 'z':
                 #debug key to automatically go to next level
-                msgbox('You start digging at your feet!', Game, CHARACTER_SCREEN_WIDTH)
+                msgbox('You start digging at your feet!', Game, data.CHARACTER_SCREEN_WIDTH)
                 map.next_level(Game)           
 
             if key_char == '>':
@@ -270,11 +271,12 @@ def handle_keys():
 
             if key_char == 'p':
                 print 'RELOADING GAME DATA'
-                reload(gamedata)
+                reload(data)
                 Game.fov_recompute = True
 
             if key_char == 'w':
                 #give all items
+                msgbox('You fashion some items from the scraps at your feet', Game, data.CHARACTER_SCREEN_WIDTH)
                 give_items(Game)
 
             return 'no_action'
@@ -285,23 +287,23 @@ def give_items(Game):
     #healing potion
     x = 0
     y = 0
-    item_component = entities.Item(use_function = cast_heal)
+    item_component = entities.Item(use_function = entities.cast_heal)
     item = entities.Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
     item.always_visible = True
     Game.inventory.append(item)
 
     #lightning scroll
-    item_component = entities.Item(use_function = cast_lightning)
+    item_component = entities.Item(use_function = entities.cast_lightning)
     item = entities.Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
     Game.inventory.append(item)
 
     #fireball scroll
-    item_component = entities.Item(use_function=cast_fireball)
+    item_component = entities.Item(use_function = entities.cast_fireball)
     item = entities.Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
     Game.inventory.append(item)
 
     #confusion scroll
-    item_component = entities.Item(use_function = cast_confusion)
+    item_component = entities.Item(use_function = entities.cast_confusion)
     item = entities.Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
     Game.inventory.append(item)
 
@@ -321,8 +323,8 @@ def give_items(Game):
     Game.inventory.append(item)
 
 def set_map_explored(Game):
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
+    for y in range(data.MAP_HEIGHT):
+        for x in range(data.MAP_WIDTH):
             Game.map[x][y].explored = True
     Game.fov_recompute = True        
 
@@ -336,10 +338,10 @@ def set_objects_visible(Game):
 #init and main loop
 ########################################################
 libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'MeFightRogues!', False)
-libtcod.sys_set_fps(LIMIT_FPS)
-Game.con = libtcod.console_new(MAP_WIDTH,MAP_HEIGHT)
-Game.panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
+libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False)
+libtcod.sys_set_fps(data.LIMIT_FPS)
+Game.con = libtcod.console_new(data.MAP_WIDTH,data.MAP_HEIGHT)
+Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
 
 main_menu()
 
