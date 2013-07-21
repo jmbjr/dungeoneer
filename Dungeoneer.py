@@ -110,7 +110,9 @@ def play_game():
 
     #mouse stuff
     Game.mouse = libtcod.Mouse()
-    Game.key = libtcod.Key()    
+    Game.key = libtcod.Key()  
+
+    (Game.camera_x, Game.camera_y) = (0, 0)  
 
     while not libtcod.console_is_window_closed():
         #render the screen

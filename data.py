@@ -23,10 +23,15 @@ SCREEN_HEIGHT      = 50  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 MAP_WIDTH          = 80
 MAP_HEIGHT         = 40
 
+#camera info
+#size of the map portion shown on-screen
+CAMERA_WIDTH = 100
+CAMERA_HEIGHT = 50
+
 #room info
-ROOM_MAX_SIZE      = 15
+ROOM_MAX_SIZE      = 20
 ROOM_MIN_SIZE      = 4
-MAX_ROOMS          = 40
+MAX_ROOMS          = 50
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 

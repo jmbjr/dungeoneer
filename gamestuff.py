@@ -164,15 +164,21 @@ def roll_dice(dicelist):
 
 #render routines
 def render_all(Game):
+
+    move_camera(Game.player.x, Game.player.y, Game)
+
     if Game.fov_recompute:
         #recompute FOV if needed (if player moved or something else happened)
         Game.fov_recompute = False
         libtcod.map_compute_fov(Game.fov_map, Game.player.x, Game.player.y, data.TORCH_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+        libtcod.console_clear(Game.con)
 
-        for y in range(data.MAP_HEIGHT):
-            for x in range(data.MAP_WIDTH):
-                visible = libtcod.map_is_in_fov(Game.fov_map, x, y)
-                wall = Game.map[x][y].block_sight
+        for y in range(data.CAMERA_HEIGHT):
+            for x in range(data.CAMERA_WIDTH):
+                (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
+                visible = libtcod.map_is_in_fov(Game.fov_map, map_x, map_y)
+                wall = Game.map[map_x][map_y].block_sight
+
                 if not visible:
                     #tile not visible
                     if wall:
@@ -184,7 +190,7 @@ def render_all(Game):
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
-                    Game.map[x][y].explored = True
+                    Game.map[map_x][map_y].explored = True
                     if wall:
                         color_wall_ground = data.COLOR_LIGHT_WALL
                         char_wall_ground = data.WALL_CHAR
@@ -193,8 +199,8 @@ def render_all(Game):
                         char_wall_ground = data.GROUND_CHAR
                     fov_wall_ground = libtcod.white
 
-                if Game.map[x][y].explored:
-                    libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
+                if Game.map[map_x][map_y].explored:
+                    libtcod.console_put_char_ex(Game.con, map_x, map_y, char_wall_ground, fov_wall_ground, color_wall_ground)
                 
 
     #draw all objects in the list
@@ -253,6 +259,7 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
 def get_names_under_mouse(Game):
     #return a string with the names of all objects under the mouse
     (x, y) = (Game.mouse.cx, Game.mouse.cy)
+    (x, y) = (Game.camera_x + x, Game.camera_y + y)  #from screen to map coords
 
     #create list with the names of all objects at the mouse's coords and in FOV
     names = [obj.name for obj in Game.objects
@@ -285,10 +292,36 @@ def player_move_or_attack(dx, dy, Game):
         Game.player.game_turns +=1
     
     Game.fov_recompute = True
+    print str(x) + '/' + str(y)
 
 def player_resting(Game):
     Game.player.fighter.hp += 2
     Game.player.game_turns += 1
+
+#camera stuff for scrolling
+def move_camera(target_x, target_y, Game):
+     #new camera coordinates (top-left corner of the screen relative to the map)
+    x = target_x - data.CAMERA_WIDTH / 2  #coordinates so that the target is at the center of the screen
+    y = target_y - data.CAMERA_HEIGHT / 2
+ 
+    #make sure the camera doesn't see outside the map
+    if x < 0: x = 0
+    if y < 0: y = 0
+    if x > data.MAP_WIDTH - data.CAMERA_WIDTH - 1: x = data.MAP_WIDTH - data.CAMERA_WIDTH - 1
+    if y > data.MAP_HEIGHT - data.CAMERA_HEIGHT - 1: y = data.MAP_HEIGHT - data.CAMERA_HEIGHT - 1
+ 
+    if x != Game.camera_x or y != Game.camera_y: Game.fov_recompute = True
+ 
+    (Game.camera_x, Game.camera_y) = (x, y)
+ 
+def to_camera_coordinates(x, y, Game):
+    #convert coordinates on the map to coordinates on the screen
+    (x, y) = (x - Game.camera_x, y - Game.camera_y)
+ 
+    if (x < 0 or y < 0 or x >= data.CAMERA_WIDTH or y >= data.CAMERA_HEIGHT):
+        return (None, None)  #if it's outside the view, return nothing
+ 
+    return (x, y)
 
 
 

@@ -140,9 +140,12 @@ class Object(object):
     def draw(self, Game):
         #only draw if in field of view of Game.player or it's set to always visible and on explored tile
         if (libtcod.map_is_in_fov(Game.fov_map, self.x, self.y) or (self.always_visible and Game.map[self.x][self.y].explored)):
-            #set the color then draw the character that represents this object at its position
-            libtcod.console_set_default_foreground(Game.con, self.color)
-            libtcod.console_put_char(Game.con, self.x, self.y, self.char, libtcod.BKGND_NONE)
+            (x, y) = to_camera_coordinates(self.x, self.y, Game)
+
+            if x is not None:
+                #set the color then draw the character that represents this object at its position
+                libtcod.console_set_default_foreground(Game.con, self.color)
+                libtcod.console_put_char(Game.con, x, y, self.char, libtcod.BKGND_NONE)
 
     def clear(self, Game):
         #erase char that represents this object
@@ -426,6 +429,7 @@ def target_tile(Game, max_range = None):
         render_all(Game)
 
         (x, y) = (Game.mouse.cx, Game.mouse.cy)
+        (x, y) = (Game.camera_x + x, Game.camera_y + y) #from screen to map coords
 
         if (Game.mouse.lbutton_pressed and libtcod.map_is_in_fov(Game.fov_map, x, y) and (max_range is None or Game.player.distance(x,y) <= max_range)):
             return (x, y)

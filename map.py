@@ -151,7 +151,7 @@ def place_objects(room, Game):
             monster.ai.owner    = monster
 
             monster.set_location(x, y, Game)
-            print 'Added a ' + choice
+            #print 'Added a ' + choice
             Game.objects.append(monster)
 
 
