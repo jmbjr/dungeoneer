@@ -1,7 +1,0 @@
-generalize_entities branch
-
-situation:  entity stats (enemies and equipment) are hardcoded in the code. 
-
-target: save all entity stats in files.  when adding enemies and equipment, access stats from files. Allow editing of files and updating of stats of new and existing enemies and equipment
-
-proposal:  create two files,  enemies.py and equipment.py. add .updateinfo method to Object and assign the enemies or equipment file to be used for the update.
