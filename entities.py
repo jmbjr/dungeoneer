@@ -3,6 +3,7 @@ import libtcodpy as libtcod
 from gamestuff import *
 import data
 
+
 #Classes:  Object player, enemies, items, etc
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
@@ -74,11 +75,13 @@ class BasicMonster(object):
                 #close enough to attack (if the Game.player is alive)
             elif Game.player.fighter.hp > 0:
                 monster.fighter.attack(Game.player, Game)
+        else: #wander
+            monster.move_random(Game)
 
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x, y, char, name, color, blocks = False, always_visible = False, fighter = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, blocks = False, always_visible = False, fighter = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -89,23 +92,37 @@ class Object(object):
 
         self.fighter = fighter
         if self.fighter:
+            if type(fighter) is dict:
+                self.fighter = Fighter(**fighter)
             self.fighter.owner = self
 
         self.ai = ai
         if self.ai:
-            self.ai.owner = self
+            self.ai.owner = self            
 
         self.item = item
         if self.item: 
+            if type(item) is dict:
+                self.item = Item(**item)
             self.item.owner = self
 
         self.equipment = equipment
         if self.equipment:
+            if type(equipment) is dict:
+                self.equipment = Equipment(**equipment)
             self.equipment.owner = self
 
             #there must be an Item component for the equipment component to work properly
             self.item = Item()
             self.item.owner = self
+
+    def set_location(self, x, y, Game):
+        if not is_blocked(x, y, Game):
+            self.x = x
+            self.y = y
+            return True
+        else:
+            return False
 
     def move(self, dx, dy, Game):
         if not is_blocked(self.x + dx, self.y + dy, Game):
@@ -115,6 +132,10 @@ class Object(object):
             return True
         else:
             return False
+
+    def move_random(self, Game):
+        self.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1), Game)
+
 
     def draw(self, Game):
         #only draw if in field of view of Game.player or it's set to always visible and on explored tile

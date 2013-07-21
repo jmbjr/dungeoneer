@@ -26,3 +26,6 @@ sometimes lots of enemies. sometimes not many at all and it's more of an explora
 need to variablize leveling up stats.  as you go up in level, you get higher stats? think about it
 
 for explore-all, only explore the room tiles. that way we don't see all the tiles outside the wall
+
+make all Object calls use attribute names
+add exception handling for Object __init__ to handle all inputs if 'None'

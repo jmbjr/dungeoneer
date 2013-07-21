@@ -2,6 +2,7 @@
 import libtcodpy as libtcod
 from gamestuff import *
 import data
+import entitydata
 
 #specific imports needed for this module
 import shelve #for save and load
@@ -180,6 +181,7 @@ def handle_keys():
         #rest
         if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
             player_resting(Game)
+            Game.fov_recompute = True
             pass
         #movement keys
         elif Game.key.vk == libtcod.KEY_UP or key_char == 'k' or Game.key.vk == libtcod.KEY_KP8 :
@@ -270,6 +272,8 @@ def handle_keys():
             if key_char == 'p':
                 print 'RELOADING GAME DATA'
                 reload(data)
+                reload(entitydata) 
+                #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
 
             if key_char == 'w':
