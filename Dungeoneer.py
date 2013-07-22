@@ -337,7 +337,6 @@ def set_objects_visible(Game):
         object.always_visible = True
 
 
-
 ########################################################
 #init and main loop
 ########################################################

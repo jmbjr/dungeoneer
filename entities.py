@@ -149,8 +149,9 @@ class Object(object):
 
     def clear(self, Game):
         #erase char that represents this object
-        if libtcod.map_is_in_fov(Game.fov_map, self.x, self.y):
-            libtcod.console_put_char_ex(Game.con, self.x, self.y, data.GROUND_CHAR, libtcod.white, data.COLOR_LIGHT_GROUND)
+        (x, y) = to_camera_coordinates(self.x, self.y, Game)
+        if x is not None and libtcod.map_is_in_fov(Game.fov_map, self.x, self.y):
+            libtcod.console_put_char_ex(Game.con, x, y, data.GROUND_CHAR, libtcod.white, data.COLOR_LIGHT_GROUND)
 
     def move_towards(self, target_x, target_y, Game):
         #vector from this object to the target, and distance

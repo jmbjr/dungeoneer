@@ -17,16 +17,16 @@ FOV_LIGHT_WALLS    = True
 TORCH_RADIUS       = 10 #AFFECTS FOV RADIUS
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
-SCREEN_WIDTH       = 80  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
-SCREEN_HEIGHT      = 50  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
+SCREEN_WIDTH       = 150  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
+SCREEN_HEIGHT      = 100  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 
-MAP_WIDTH          = 80
-MAP_HEIGHT         = 40
+MAP_WIDTH          = 200
+MAP_HEIGHT         = 200
 
 #camera info
 #size of the map portion shown on-screen
-CAMERA_WIDTH = 100
-CAMERA_HEIGHT = 50
+CAMERA_WIDTH = 150
+CAMERA_HEIGHT = 80
 
 #room info
 ROOM_MAX_SIZE      = 20
@@ -61,7 +61,7 @@ LIMIT_FPS              = 20  #LIMITS FPS TO A REASONABLE AMOUNT
 #probably shouldn't edit these when the game is running
 #GUI rendering
 BAR_WIDTH         = 20
-PANEL_HEIGHT      = SCREEN_HEIGHT - MAP_HEIGHT
+PANEL_HEIGHT      = SCREEN_HEIGHT - CAMERA_HEIGHT
 PANEL_Y           = SCREEN_HEIGHT - PANEL_HEIGHT
 
 #combat log

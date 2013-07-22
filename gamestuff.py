@@ -200,7 +200,7 @@ def render_all(Game):
                     fov_wall_ground = libtcod.white
 
                 if Game.map[map_x][map_y].explored:
-                    libtcod.console_put_char_ex(Game.con, map_x, map_y, char_wall_ground, fov_wall_ground, color_wall_ground)
+                    libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
                 
 
     #draw all objects in the list
