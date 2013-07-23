@@ -180,10 +180,13 @@ def render_all(Game):
                 wall = Game.map[map_x][map_y].block_sight
 
                 if data.ASCIIMODE:
-                    thewallchar = data.WALL_CHAR
+                    thewallchar  = data.WALL_CHAR
+                    thegroundchar = data.GROUND_CHAR
                 else:
-                    thewallchar = data.TILE_WALL
+                    thewallchar  = data.TILE_WALL
+                    thegroundchar = data.TILE_GROUND
 
+                #thegroundchar = data.GROUND_CHAR
                 if not visible:
                     #tile not visible
                     if wall:
@@ -191,7 +194,7 @@ def render_all(Game):
                         char_wall_ground = thewallchar
                     else:
                         color_wall_ground = data.COLOR_DARK_GROUND
-                        char_wall_ground = data.GROUND_CHAR
+                        char_wall_ground = thegroundchar
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
@@ -201,7 +204,7 @@ def render_all(Game):
                         char_wall_ground = thewallchar
                     else:
                         color_wall_ground = data.COLOR_LIGHT_GROUND
-                        char_wall_ground = data.GROUND_CHAR
+                        char_wall_ground = thegroundchar
                     fov_wall_ground = libtcod.white
 
                 if Game.map[map_x][map_y].explored:

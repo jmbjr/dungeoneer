@@ -340,7 +340,7 @@ def set_objects_visible(Game):
 ########################################################
 #init and main loop
 ########################################################
-libtcod.console_set_custom_font('oryx_tiles2.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
 libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_SDL)
 libtcod.sys_set_fps(data.LIMIT_FPS)
 

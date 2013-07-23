@@ -7,16 +7,17 @@ import libtcodpy as libtcod
 WALL_CHAR          = 'X'
 GROUND_CHAR        = ' '
 
-COLOR_DARK_WALL    = libtcod.Color(0, 0, 100)
-COLOR_LIGHT_WALL   = libtcod.Color(130, 110, 50)
-COLOR_DARK_GROUND  = libtcod.Color(50, 50, 150)
-COLOR_LIGHT_GROUND = libtcod.Color(25, 25, 25)
+COLOR_DARK_WALL    = libtcod.darker_grey
+COLOR_LIGHT_WALL   = libtcod.light_grey
+COLOR_DARK_GROUND  = libtcod.dark_sepia
+COLOR_LIGHT_GROUND = libtcod.sepia
 
 FOV_ALGO           = 2 #FOV ALGORITHM. values = 0 to 4
 FOV_LIGHT_WALLS    = True
-TORCH_RADIUS       = 10 #AFFECTS FOV RADIUS
+TORCH_RADIUS       = 8 #AFFECTS FOV RADIUS
 
 TILE_WALL          = 256  #first tile in the first row of tiles
+TILE_GROUND        = 256 + 1
 TILE_MAGE          = 256 + 32  #first tile in the 2nd row of tiles
 TILE_SKEL_WHITE    = 256 + 32 + 1  #2nd tile in the 2nd row of tiles
 TILE_SKEL_RED      = 256 + 32 + 2  #2nd tile in the 2nd row of tiles
@@ -55,7 +56,7 @@ MAX_ROOMS          = 50
 LEVEL_UP_BASE     = 200
 LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
-ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
+ASCIIMODE         = True #use Object.char for graphics if True. use tilechar if False.
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
