@@ -15,18 +15,31 @@ COLOR_LIGHT_GROUND = libtcod.Color(25, 25, 25)
 FOV_ALGO           = 2 #FOV ALGORITHM. values = 0 to 4
 FOV_LIGHT_WALLS    = True
 TORCH_RADIUS       = 10 #AFFECTS FOV RADIUS
+
+TILE_WALL          = 256  #first tile in the first row of tiles
+TILE_MAGE          = 256 + 32  #first tile in the 2nd row of tiles
+TILE_SKEL_WHITE    = 256 + 32 + 1  #2nd tile in the 2nd row of tiles
+TILE_SKEL_RED      = 256 + 32 + 2  #2nd tile in the 2nd row of tiles
+TILE_SKEL_BLUE     = 256 + 32 + 3  #2nd tile in the 2nd row of tiles
+TILE_SKEL_GREEN    = 256 + 32 + 4  #2nd tile in the 2nd row of tiles
+TILE_SKEL_ORANGE   = 256 + 32 + 5  #2nd tile in the 2nd row of tiles
+TILE_SKEL_MAGENTA  = 256 + 32 + 6  #2nd tile in the 2nd row of tiles
+TILE_SKEL_TEAL     = 256 + 32 + 7  #2nd tile in the 2nd row of tiles
+TILE_SKEL_YELLOW   = 256 + 32 + 8  #2nd tile in the 2nd row of tiles
+TILE_SKEL_PURPLE   = 256 + 32 + 9  #2nd tile in the 2nd row of tiles
+
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
-SCREEN_WIDTH       = 150  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
-SCREEN_HEIGHT      = 100  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
+SCREEN_WIDTH       = 80  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
+SCREEN_HEIGHT      = 50  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 
 MAP_WIDTH          = 200
 MAP_HEIGHT         = 200
 
 #camera info
 #size of the map portion shown on-screen
-CAMERA_WIDTH = 150
-CAMERA_HEIGHT = 80
+CAMERA_WIDTH = 80
+CAMERA_HEIGHT = 40
 
 #room info
 ROOM_MAX_SIZE      = 20
@@ -42,6 +55,8 @@ MAX_ROOMS          = 50
 LEVEL_UP_BASE     = 200
 LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
+ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
+
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 #ITEM INFO

@@ -179,11 +179,16 @@ def render_all(Game):
                 visible = libtcod.map_is_in_fov(Game.fov_map, map_x, map_y)
                 wall = Game.map[map_x][map_y].block_sight
 
+                if data.ASCIIMODE:
+                    thewallchar = data.WALL_CHAR
+                else:
+                    thewallchar = data.TILE_WALL
+
                 if not visible:
                     #tile not visible
                     if wall:
                         color_wall_ground = data.COLOR_DARK_WALL
-                        char_wall_ground = data.WALL_CHAR
+                        char_wall_ground = thewallchar
                     else:
                         color_wall_ground = data.COLOR_DARK_GROUND
                         char_wall_ground = data.GROUND_CHAR
@@ -193,7 +198,7 @@ def render_all(Game):
                     Game.map[map_x][map_y].explored = True
                     if wall:
                         color_wall_ground = data.COLOR_LIGHT_WALL
-                        char_wall_ground = data.WALL_CHAR
+                        char_wall_ground = thewallchar
                     else:
                         color_wall_ground = data.COLOR_LIGHT_GROUND
                         char_wall_ground = data.GROUND_CHAR
@@ -292,7 +297,6 @@ def player_move_or_attack(dx, dy, Game):
         Game.player.game_turns +=1
     
     Game.fov_recompute = True
-    print str(x) + '/' + str(y)
 
 def player_resting(Game):
     Game.player.fighter.hp += 2

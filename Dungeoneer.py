@@ -52,7 +52,7 @@ def main_menu():
 def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death)
-    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, blocks=True, fighter=fighter_component)
+    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -340,9 +340,13 @@ def set_objects_visible(Game):
 ########################################################
 #init and main loop
 ########################################################
-libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False)
+libtcod.console_set_custom_font('oryx_tiles2.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_SDL)
 libtcod.sys_set_fps(data.LIMIT_FPS)
+
+libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
+libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
+
 Game.con = libtcod.console_new(data.MAP_WIDTH,data.MAP_HEIGHT)
 Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
 

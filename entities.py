@@ -81,7 +81,7 @@ class BasicMonster(object):
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, blocks = False, always_visible = False, fighter = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, always_visible = False, fighter = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -89,6 +89,11 @@ class Object(object):
         self.char = char
         self.color = color
         self.always_visible = always_visible
+
+        self.tilechar = tilechar
+        if self.tilechar is None:
+            self.tilechar = self.char
+
 
         self.fighter = fighter
         if self.fighter:
@@ -145,7 +150,12 @@ class Object(object):
             if x is not None:
                 #set the color then draw the character that represents this object at its position
                 libtcod.console_set_default_foreground(Game.con, self.color)
-                libtcod.console_put_char(Game.con, x, y, self.char, libtcod.BKGND_NONE)
+                if data.ASCIIMODE:
+                    thechar = self.char
+                else:
+                    thechar = self.tilechar
+
+                libtcod.console_put_char(Game.con, x, y, thechar, libtcod.BKGND_NONE)
 
     def clear(self, Game):
         #erase char that represents this object

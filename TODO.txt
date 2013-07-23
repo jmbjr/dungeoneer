@@ -29,3 +29,5 @@ for explore-all, only explore the room tiles. that way we don't see all the tile
 
 make all Object calls use attribute names
 add exception handling for Object __init__ to handle all inputs if 'None'
+
+need to add 'death_char' and 'death_tilechar' to Object. right now, when a monster dies, it sets .char = '%', but if ASCIIMODE = True, it still uses tilechar.
