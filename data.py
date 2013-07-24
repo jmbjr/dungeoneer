@@ -31,16 +31,16 @@ TILE_SKEL_PURPLE   = 256 + 32 + 9  #2nd tile in the 2nd row of tiles
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
-SCREEN_WIDTH       = 80  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
-SCREEN_HEIGHT      = 50  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
+SCREEN_WIDTH       = 60  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
+SCREEN_HEIGHT      = 40  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 
 MAP_WIDTH          = 200
 MAP_HEIGHT         = 200
 
 #camera info
 #size of the map portion shown on-screen
-CAMERA_WIDTH = 80
-CAMERA_HEIGHT = 40
+CAMERA_WIDTH = 60
+CAMERA_HEIGHT = 30
 
 #room info
 ROOM_MAX_SIZE      = 20
@@ -56,7 +56,7 @@ MAX_ROOMS          = 50
 LEVEL_UP_BASE     = 200
 LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
-ASCIIMODE         = True #use Object.char for graphics if True. use tilechar if False.
+ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running

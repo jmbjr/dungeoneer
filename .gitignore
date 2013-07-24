@@ -3,3 +3,6 @@ dungeoneer.zip
 screenshots/
 savegame
 *.psd
+build/
+dist/
+dist_1/
