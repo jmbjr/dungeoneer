@@ -7,13 +7,14 @@ import data
 #Classes:  Object player, enemies, items, etc
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, death_function=None):
+    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, death_function=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
         self.base_defense = defense
         self.base_power = power
         self.death_function=death_function
+        self.speed = speed
 
     #@property
     def power(self, Game):
@@ -33,8 +34,8 @@ class Fighter(object):
     def heal(self, amount):
         #heal by the given amount
         self.hp += amount
-        if self.hp > self.max_hp:
-            self.hp = self.max_hp
+        if self.hp > self.max_hp(Game):
+            self.hp = self.max_hp(Game)
 
     def take_damage(self, damage, Game):
         #inflict dmg if possible
@@ -311,6 +312,12 @@ class ConfusedMonster(object):
 
 
 #spells/abilities
+
+def use_crystal(Game):
+    message('You are lost in the crystal\'s glow', Game, libtcod.sky)
+    Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
+
+
 def cast_confusion(Game):
     #ask player for target to confuse
     message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)

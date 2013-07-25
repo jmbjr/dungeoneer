@@ -33,7 +33,9 @@ items = {
 	'confuse':    {'name':'scroll of confusion',      'char':'?', 'color':libtcod.light_violet, 'item':{'use_function': entities.cast_confusion}}, 
 
 	'sword':      {'name':'sword',  'char':'/', 'color':libtcod.sky,           'equipment':{'slot':'right hand' ,   'power_bonus'  :5  }}, 
-	'shield':     {'name':'shield', 'char':'[', 'color':libtcod.darker_orange, 'equipment':{'slot':'left hand'  ,   'defense_bonus':3  }} 
+	'shield':     {'name':'shield', 'char':'[', 'color':libtcod.darker_orange, 'equipment':{'slot':'left hand'  ,   'defense_bonus':3  }},
+
+	'crystal':    {'name':'power crystal',      'char':'$', 'color':libtcod.sky, 'item':{'use_function': entities.use_crystal}}
 
 }
 
@@ -45,4 +47,5 @@ itemchances = {
 	'confuse':    [[10, 1], [25, 3], [50, 5]],
 	'sword':      [[10, 1], [25, 3], [50, 5]],
 	'shield':     [[10, 1], [25, 3], [50, 5]],
+    'crystal':    [[1000,1]]
 }
