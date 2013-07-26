@@ -34,8 +34,8 @@ TILE_SKEL_PURPLE   = 256 + 32 + 9  #2nd tile in the 2nd row of tiles
 SCREEN_WIDTH       = 60  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
 SCREEN_HEIGHT      = 40  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 
-MAP_WIDTH          = 200
-MAP_HEIGHT         = 200
+MAP_WIDTH          = 120
+MAP_HEIGHT         = 60
 
 #camera info
 #size of the map portion shown on-screen
@@ -57,9 +57,10 @@ LEVEL_UP_BASE     = 200
 LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
+TURNBASED         = True #not working yet
 SPEED_DEFAULT     = 5  # speed delay. higher = slower
 REGEN_DEFAULT     = 25  # regen delay. higher = slower
-REGEN_MULTIPLIER  = 1 # % of life to regen 
+REGEN_MULTIPLIER  = 0.1 # % of life to regen 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 #ITEM INFO

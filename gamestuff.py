@@ -302,7 +302,7 @@ def player_move_or_attack(dx, dy, Game):
     Game.fov_recompute = True
 
 def player_resting(Game):
-    Game.player.fighter.hp += 2
+    #Game.player.fighter.hp += 2
     Game.player.game_turns += 1
 
 #camera stuff for scrolling

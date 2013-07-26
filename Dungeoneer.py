@@ -155,7 +155,8 @@ def play_game():
                     object.fighter.speed_counter -= 1
 
                     if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
-                        object.fighter.hp = object.fighter.hp * (100 + object.fighter.regen(Game))/100
+                        object.fighter.hp += int(object.fighter.hp * data.REGEN_MULTIPLIER)
+                        print str(object.fighter.hp * data.REGEN_MULTIPLIER)
                         object.fighter.regen_counter = object.fighter.regen(Game)
 
                         if object.fighter.hp > object.fighter.max_hp(Game):
