@@ -6,10 +6,10 @@ import data
 #EDITABLE MOB DATA
 mobs={}
 mobs = {
- 'johnstein':      {'char':'J', 'color':libtcod.white,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':10 , 'defense':0 , 'power':2 , 'xp':20 , 'death_function': entities.monster_death}}, 
- 'greynaab':       {'char':'g', 'color':libtcod.light_blue,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':20 , 'defense':1 , 'power':4 , 'xp':40 , 'death_function': entities.monster_death}}, 
- 'jerbear':        {'char':'j', 'color':libtcod.green,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':25 , 'defense':1 , 'power':5 , 'xp':50 , 'death_function': entities.monster_death}}, 
- 'zombiesheep':    {'char':'z', 'color':libtcod.yellow,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':30 , 'defense':2 , 'power':6 , 'xp':60 , 'death_function': entities.monster_death}}, 
+ 'johnstein':      {'char':'J', 'color':libtcod.white,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':10 , 'defense':0 , 'power':2 , 'xp':20 , 'death_function': entities.monster_death, 'speed':1}}, 
+ 'greynaab':       {'char':'g', 'color':libtcod.light_blue,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':20 , 'defense':1 , 'power':4 , 'xp':40 , 'death_function': entities.monster_death, 'speed':3}}, 
+ 'jerbear':        {'char':'j', 'color':libtcod.green,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':25 , 'defense':1 , 'power':5 , 'xp':50 , 'death_function': entities.monster_death, 'speed':5}}, 
+ 'zombiesheep':    {'char':'z', 'color':libtcod.yellow,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':30 , 'defense':2 , 'power':6 , 'xp':60 , 'death_function': entities.monster_death, 'speed':7}}, 
 }
 
 #add help on how to use this

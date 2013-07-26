@@ -51,7 +51,7 @@ def main_menu():
 
 def new_game():
     #create object representing the player
-    fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death)
+    fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.level = 1
@@ -129,15 +129,46 @@ def play_game():
             object.clear(Game)
 
         #handle keys and exit game if needed
-        player_action = handle_keys()
-        if player_action == 'exit':
+        if Game.player.fighter.speed_counter <= 0: #player can take a turn-based            
+            Game.player_action = handle_keys()
+
+            if Game.player_action != data.STATE_NOACTION:
+                #player actually did something. we can reset counter
+                Game.player.fighter.speed_counter = Game.player.fighter.speed(Game)
+        else:
+            Game.player_action = data.STATE_WAITING
+
+
+        if Game.player_action == data.STATE_EXIT:
             break
 
+        #print str(Game.player_action) + ' ' + str(Game.player.fighter.speed_counter)
         #give monsters a turn
-        if Game.game_state == data.STATE_PLAYING and player_action != data.STATE_NOACTION:
+        if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             for object in Game.objects:
-                if object.ai:
+                if object.fighter:
+                    if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
+                        if object.ai:
+                            object.ai.take_turn(Game)
+                            object.fighter.speed_counter = object.fighter.speed(Game)
+
+                    object.fighter.speed_counter -= 1
+
+                    if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
+                        object.fighter.hp = object.fighter.hp * (100 + object.fighter.regen(Game))/100
+                        object.fighter.regen_counter = object.fighter.regen(Game)
+
+                        if object.fighter.hp > object.fighter.max_hp(Game):
+                                object.fighter.hp = object.fighter.max_hp(Game)
+
+                    object.fighter.regen_counter -= 1
+         
+                elif object.ai:
                     object.ai.take_turn(Game)
+
+                    
+
+
 
 def check_level_up(Game):
     #see if the player's experience is enough to level-up
@@ -177,7 +208,7 @@ def handle_keys():
         #ALT + ENTER: toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif Game.key.vk == libtcod.KEY_ESCAPE:
-        return 'exit' #exit game
+        return data.STATE_EXIT #exit game
 
     if Game.game_state == data.STATE_PLAYING:
         #rest
@@ -283,7 +314,7 @@ def handle_keys():
                 msgbox('You fashion some items from the scraps at your feet', Game, data.CHARACTER_SCREEN_WIDTH)
                 give_items(Game)
 
-            return 'no_action'
+            return data.STATE_NOACTION
 
 
 #DEBUG FUNCTIONS

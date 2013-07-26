@@ -57,7 +57,9 @@ LEVEL_UP_BASE     = 200
 LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
-SPEED_DEFAULT     = 10
+SPEED_DEFAULT     = 5  # speed delay. higher = slower
+REGEN_DEFAULT     = 25  # regen delay. higher = slower
+REGEN_MULTIPLIER  = 1 # % of life to regen 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 #ITEM INFO
@@ -92,7 +94,8 @@ MAIN_MENU_BKG     = 'menu_background.png'
 STATE_PLAYING     = 'playing'
 STATE_NOACTION    = 'no_action'
 STATE_DEAD        = 'dead'
-
+STATE_WAITING     = 'waiting'
+STATE_EXIT        = 'exit'
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 

@@ -7,14 +7,25 @@ import data
 #Classes:  Object player, enemies, items, etc
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, death_function=None):
+    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
         self.base_defense = defense
         self.base_power = power
         self.death_function=death_function
-        self.speed = speed
+        self.base_speed = speed
+        self.speed_counter = 0
+        self.base_regen = regen
+        self.regen_counter = regen
+
+    def regen(self, Game):
+        bonus = sum(equipment.regen_bonus for equipment in get_all_equipped(self.owner, Game))
+        return self.base_regen + bonus
+
+    def speed(self, Game):
+        bonus = sum(equipment.speed_bonus for equipment in get_all_equipped(self.owner, Game))
+        return self.base_speed + bonus
 
     #@property
     def power(self, Game):
@@ -265,12 +276,14 @@ class Item(object):
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
-    def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0):
+    def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0):
         self.slot = slot
         self.power_bonus = power_bonus
         self.defense_bonus = defense_bonus
         self.max_hp_bonus = max_hp_bonus
         self.is_equipped = False
+        self.speed_bonus = speed_bonus
+        self.regen_bonus = regen_bonus
 
     def toggle_equip(self, Game): #toggle equip/dequip status
         if self.is_equipped:
