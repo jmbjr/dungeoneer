@@ -76,6 +76,8 @@ def new_game():
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
+    libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+
 
 def save_game(filename='savegame'):
     #open a new empty shelve (or overwrite old one) to write the game data
@@ -106,21 +108,20 @@ def load_game(filename='savegame'):
     map.initialize_fov(Game)
 
 def play_game():
-    player_action = None
+    Game.player_action = None
 
     #mouse stuff
     Game.mouse = libtcod.Mouse()
     Game.key = libtcod.Key()  
 
     (Game.camera_x, Game.camera_y) = (0, 0)  
-
+    
     while not libtcod.console_is_window_closed():
         #render the screen
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
 
         #render the screen
         render_all(Game)
-
         libtcod.console_flush()
         check_level_up(Game)
 
@@ -135,9 +136,6 @@ def play_game():
             if Game.player_action != data.STATE_NOACTION:
                 #player actually did something. we can reset counter
                 Game.player.fighter.speed_counter = Game.player.fighter.speed(Game)
-        else:
-            Game.player_action = data.STATE_WAITING
-
 
         if Game.player_action == data.STATE_EXIT:
             break
@@ -309,6 +307,7 @@ def handle_keys():
                 reload(entitydata) 
                 #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
+                libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
 
             if key_char == 'w':
                 #give all items

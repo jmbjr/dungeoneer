@@ -84,17 +84,27 @@ def menu(header, options, width, Game):
 
     #present the root console to the player and wait for a keypress
     libtcod.console_flush()
-    key = libtcod.console_wait_for_keypress(True)
+    libtcod.console_set_keyboard_repeat(0,0) #turn off key repeat
+    
+    goodchoice = False
+    while not goodchoice:
+        key = libtcod.console_wait_for_keypress(True)
 
-    if key.vk == libtcod.KEY_ENTER and key.lalt: # full screen
-        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+        if key.vk == libtcod.KEY_ENTER and key.lalt: # full screen
+            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())       
 
-    #convert ASCII code to an index. if it's valid, return it
-    index = key.c - ord('a')
-    if index >= 0 and index < len(options):
-        return index
-    else:
-        return None
+        #convert ASCII code to an index. if it's valid, return it
+        index = key.c - ord('a')
+
+        if index >= 0 and index < len(options):
+            goodchoice = True
+            retval = index
+        elif key.vk == libtcod.KEY_ESCAPE or key.vk == libtcod.KEY_SPACE:
+            goodchoice = True
+            retval = None
+
+    libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+    return retval
 
 def msgbox(text, Game, width = 50):
     menu(text, [], width, Game) #use menu as a sort-of message box

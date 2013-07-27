@@ -61,6 +61,10 @@ TURNBASED         = True #not working yet
 SPEED_DEFAULT     = 5  # speed delay. higher = slower
 REGEN_DEFAULT     = 25  # regen delay. higher = slower
 REGEN_MULTIPLIER  = 0.1 # % of life to regen 
+
+KEYS_INITIAL_DELAY= 10
+KEYS_INTERVAL     = 10
+
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 #ITEM INFO
@@ -95,7 +99,6 @@ MAIN_MENU_BKG     = 'menu_background.png'
 STATE_PLAYING     = 'playing'
 STATE_NOACTION    = 'no_action'
 STATE_DEAD        = 'dead'
-STATE_WAITING     = 'waiting'
 STATE_EXIT        = 'exit'
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
