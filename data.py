@@ -58,13 +58,14 @@ LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
 TURNBASED         = True #not working yet
-SPEED_DEFAULT     = 5  # speed delay. higher = slower
-REGEN_DEFAULT     = 25  # regen delay. higher = slower
+SPEED_DEFAULT     = 5  # speed delay. higher = slower. How many game ticks to wait between turns
+REGEN_DEFAULT     = 50  # regen delay. higher = slower. How many game ticks to wait between regeneration
 REGEN_MULTIPLIER  = 0.1 # % of life to regen 
 
-KEYS_INITIAL_DELAY= 10
-KEYS_INTERVAL     = 10
-
+KEYS_INITIAL_DELAY= 5
+KEYS_INTERVAL     = 5
+BUFF_DECAYRATE    = 1  #amount to reduce per tick
+BUFF_DURATION     = 30 #in game ticks
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 #ITEM INFO

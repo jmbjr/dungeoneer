@@ -7,7 +7,7 @@ import data
 #Classes:  Object player, enemies, items, etc
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None):
+    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None, buffs = None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -19,27 +19,50 @@ class Fighter(object):
         self.base_regen = regen
         self.regen_counter = regen
 
+        self.buffs = buffs
+        if self.buffs:
+            self.buffs.owner = self
+
+    def add_buff(self, buff):
+        if not self.buffs:
+            self.buffs = []
+
+        self.buffs.append(buff)
+
+    def remove_buff(self, buff):
+        self.buffs.remove(buff)
+
     def regen(self, Game):
         bonus = sum(equipment.regen_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.regen_bonus for buff in self.buffs)
         return self.base_regen + bonus
 
     def speed(self, Game):
         bonus = sum(equipment.speed_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.speed_bonus for buff in self.buffs)
         return self.base_speed + bonus
 
     #@property
     def power(self, Game):
         bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.power_bonus for buff in self.buffs)
         return self.base_power + bonus
 
     #@property
     def defense(self, Game):
         bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.defense_bonus for buff in self.buffs)
         return self.base_defense + bonus
 
     #@property
     def max_hp(self, Game):
         bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.max_hp_bonus for buff in self.buffs)
         return self.base_max_hp + bonus
 
     def heal(self, amount):
@@ -105,7 +128,6 @@ class Object(object):
         self.tilechar = tilechar
         if self.tilechar is None:
             self.tilechar = self.char
-
 
         self.fighter = fighter
         if self.fighter:
@@ -274,6 +296,20 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
+class Buff(object):
+    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=data.BUFF_DECAYRATE, duration=data.BUFF_DURATION):
+        self.name = name
+        self.power_bonus = power_bonus
+        self.defense_bonus = defense_bonus
+        self.max_hp_bonus = max_hp_bonus
+        self.speed_bonus = speed_bonus
+        self.regen_bonus = regen_bonus
+
+        self.decay_rate = decay_rate #if 0, buff does not decay. use positive numbers to make buffs decrement
+        self.duration = duration
+
+
+
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
     def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0):
@@ -406,7 +442,11 @@ def monster_death(monster, Game):
     monster.send_to_back(Game)
 
 
-#check equip and inventory
+#check equip and inventory and buffs
+def get_buffs_in_slot(slot, Game):
+    for obj in Game.player.buffs:
+        print obj.name
+
 def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
     for obj in Game.inventory:
         if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:

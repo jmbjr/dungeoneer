@@ -73,6 +73,7 @@ def new_game():
     Game.inventory.append(obj)
     equipment_component.equip(Game)
     obj.always_visible = True
+    Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
@@ -153,8 +154,7 @@ def play_game():
                     object.fighter.speed_counter -= 1
 
                     if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
-                        object.fighter.hp += int(object.fighter.hp * data.REGEN_MULTIPLIER)
-                        print str(object.fighter.hp * data.REGEN_MULTIPLIER)
+                        object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
                         object.fighter.regen_counter = object.fighter.regen(Game)
 
                         if object.fighter.hp > object.fighter.max_hp(Game):
@@ -162,13 +162,16 @@ def play_game():
 
                     object.fighter.regen_counter -= 1
          
+                    if object.fighter.buffs:
+                        for buff in object.fighter.buffs:
+                            buff.duration -= buff.decay_rate
+                            if buff.duration <= 0:
+                                object.fighter.remove_buff(buff)
+
                 elif object.ai:
                     object.ai.take_turn(Game)
 
-                    
-
-
-
+            
 def check_level_up(Game):
     #see if the player's experience is enough to level-up
     level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
@@ -301,6 +304,9 @@ def handle_keys():
                     Game.player.game_turns +=1
                     map.next_level(Game)
 
+            if key_char == 's': #general status key
+                print str(Game.player.fighter.buffs)
+
             if key_char == 'p':
                 print 'RELOADING GAME DATA'
                 reload(data)
@@ -308,6 +314,10 @@ def handle_keys():
                 #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
                 libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+
+                buff_component = entities.Buff('Super Strength', power_bonus=20)
+                Game.player.fighter.add_buff(buff_component)
+                msgbox ('YOU ROAR WITH BERSERKER RAGE!', Game, data.CHARACTER_SCREEN_WIDTH)
 
             if key_char == 'w':
                 #give all items
