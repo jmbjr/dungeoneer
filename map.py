@@ -70,8 +70,8 @@ def make_map(Game):
         w = libtcod.random_get_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         h = libtcod.random_get_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         #get random positions, but stay within map
-        x = libtcod.random_get_int(0, 0, data.MAP_WIDTH - w - 1)
-        y = libtcod.random_get_int(0, 0, data.MAP_HEIGHT - h - 1)
+        x = libtcod.random_get_int(0, data.MAP_PAD_W, data.MAP_WIDTH - w - data.MAP_PAD_W)
+        y = libtcod.random_get_int(0, data.MAP_PAD_H, data.MAP_HEIGHT - h - data.MAP_PAD_H)
 
         new_room = Rect(x, y, w, h)
 

@@ -362,9 +362,32 @@ class ConfusedMonster(object):
 
 #spells/abilities
 
-def use_crystal(Game):
-    message('You are lost in the crystal\'s glow', Game, libtcod.sky)
+def use_red_crystal(Game):
+    message('You become ENRAGED!', Game, libtcod.red)
+    buff_component = Buff('Super Strength', power_bonus=10)
+    Game.player.fighter.add_buff(buff_component)
+
+def use_blue_crystal(Game):
+    message('You feel well-protected!', Game, libtcod.sky)
+    buff_component = Buff('Super Defense', defense_bonus=10)
+    Game.player.fighter.add_buff(buff_component)
+
+def use_green_crystal(Game):
+    message('You feel more resilient!', Game, libtcod.green)
+    buff_component = Buff('Super Health', max_hp_bonus=50)
+    Game.player.fighter.add_buff(buff_component)
     Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
+
+def use_yellow_crystal(Game):
+    message('You feel healthy!', Game, libtcod.yellow)
+    buff_component = Buff('Super Regen', regen_bonus=-20)
+    Game.player.fighter.add_buff(buff_component)
+
+def use_orange_crystal(Game):
+    message('You feel speedy!', Game, libtcod.orange)
+    buff_component = Buff('Super Speed', speed_bonus=-3)
+    Game.player.fighter.add_buff(buff_component)
+
 
 
 def cast_confusion(Game):

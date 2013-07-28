@@ -46,15 +46,17 @@ items = {
 	'sword':      {'name':'sword',  'char':'/', 'color':libtcod.sky,           'equipment':{'slot':'right hand' ,   'power_bonus'  :5  }}, 
 	'shield':     {'name':'shield', 'char':'[', 'color':libtcod.darker_orange, 'equipment':{'slot':'left hand'  ,   'defense_bonus':3  }},
 
-	'blue_crystal':     {'name':'blue power crystal',    'char':'$', 'color':libtcod.sky,    'item':{'use_function': entities.use_crystal}},
-	'red_crystal':      {'name':'red power crystal',     'char':'$', 'color':libtcod.red,    'item':{'use_function': entities.use_crystal}},
-	'green_crystal':    {'name':'green power crystal',   'char':'$', 'color':libtcod.green,  'item':{'use_function': entities.use_crystal}},
-	'yellow_crystal':   {'name':'yellow power crystal',  'char':'$', 'color':libtcod.yellow, 'item':{'use_function': entities.use_crystal}}
+	'blue_crystal':     {'name':'blue power crystal',    'char':'$', 'color':libtcod.sky,    'item':{'use_function': entities.use_blue_crystal}},
+	'red_crystal':      {'name':'red power crystal',     'char':'$', 'color':libtcod.red,    'item':{'use_function': entities.use_red_crystal}},
+	'green_crystal':    {'name':'green power crystal',   'char':'$', 'color':libtcod.green,  'item':{'use_function': entities.use_green_crystal}},
+	'yellow_crystal':   {'name':'yellow power crystal',  'char':'$', 'color':libtcod.yellow, 'item':{'use_function': entities.use_yellow_crystal}},
+	'orange_crystal':   {'name':'orange power crystal',  'char':'$', 'color':libtcod.orange, 'item':{'use_function': entities.use_orange_crystal}}
+
 }
 
 itemchances = {}
 itemchances = {
-	'heal':          [[100,1]],
+	'heal':          [[5,1]],
 	'lightning':     [[10, 1], [25, 3], [50, 5]],
 	'fireball':      [[10, 1], [25, 3], [50, 5]],
 	'confuse':       [[10, 1], [25, 3], [50, 5]],
@@ -63,6 +65,6 @@ itemchances = {
     'blue_crystal':  [[10, 1], [30, 3], [50, 5]],
     'red_crystal':   [[10, 1], [30, 3], [50, 5]],
     'green_crystal': [[10, 1], [30, 3], [50, 5]],
-    'yellow_crystal':[[10, 1], [30, 3], [50, 5]]
-
+    'yellow_crystal':[[10, 1], [30, 3], [50, 5]],
+    'orange_crystal':[[10, 1], [30, 3], [50, 5]]
 }

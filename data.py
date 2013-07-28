@@ -31,16 +31,19 @@ TILE_SKEL_PURPLE   = 256 + 32 + 9  #2nd tile in the 2nd row of tiles
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
-SCREEN_WIDTH       = 60  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
+SCREEN_WIDTH       = 70  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
 SCREEN_HEIGHT      = 40  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
-
-MAP_WIDTH          = 120
-MAP_HEIGHT         = 60
 
 #camera info
 #size of the map portion shown on-screen
-CAMERA_WIDTH = 60
+CAMERA_WIDTH = 70
 CAMERA_HEIGHT = 30
+
+MAP_WIDTH          = 140
+MAP_HEIGHT         = 80
+MAP_PAD_W          = CAMERA_WIDTH  / 2  #don't allow rooms to touch edges. ideally also don't get close enough to edge of map to stop the scrolling effect
+MAP_PAD_H          = CAMERA_HEIGHT / 2
+
 
 #room info
 ROOM_MAX_SIZE      = 20

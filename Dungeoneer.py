@@ -157,16 +157,18 @@ def play_game():
                         object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
                         object.fighter.regen_counter = object.fighter.regen(Game)
 
-                        if object.fighter.hp > object.fighter.max_hp(Game):
-                                object.fighter.hp = object.fighter.max_hp(Game)
-
                     object.fighter.regen_counter -= 1
          
                     if object.fighter.buffs:
                         for buff in object.fighter.buffs:
                             buff.duration -= buff.decay_rate
                             if buff.duration <= 0:
+                                message('*The effects of ' + buff.name + ' has worn off!', Game, libtcod.light_red)
                                 object.fighter.remove_buff(buff)
+
+                    #always check to ensure hp <= max_hp
+                    if object.fighter.hp > object.fighter.max_hp(Game):
+                            object.fighter.hp = object.fighter.max_hp(Game)
 
                 elif object.ai:
                     object.ai.take_turn(Game)
@@ -332,40 +334,11 @@ def give_items(Game):
     #healing potion
     x = 0
     y = 0
-    item_component = entities.Item(use_function = entities.cast_heal)
-    item = entities.Object(x, y, '!', 'healing potion', libtcod.red, always_visible = True, item = item_component)
-    item.always_visible = True
-    Game.inventory.append(item)
 
-    #lightning scroll
-    item_component = entities.Item(use_function = entities.cast_lightning)
-    item = entities.Object(x, y, '?', 'scroll of lightning bolt', libtcod.yellow, always_visible = True, item = item_component)
-    Game.inventory.append(item)
-
-    #fireball scroll
-    item_component = entities.Item(use_function = entities.cast_fireball)
-    item = entities.Object(x, y, '?', 'scroll of fireball', libtcod.red, always_visible = True, item = item_component)
-    Game.inventory.append(item)
-
-    #confusion scroll
-    item_component = entities.Item(use_function = entities.cast_confusion)
-    item = entities.Object(x, y, '?', 'scroll of confusion', libtcod.light_violet, always_visible = True, item = item_component)
-    Game.inventory.append(item)
-
-    #sword
-    equipment_component = entities.Equipment(slot='right hand', power_bonus = 5)
-    item = entities.Object(x, y, '/', 'sword', libtcod.sky, always_visible = True, equipment = equipment_component)
-    Game.inventory.append(item)
-
-    #create a shield
-    equipment_component = entities.Equipment(slot = 'left hand', defense_bonus = 3)
-    item = entities.Object(x, y, '[', 'shield', libtcod.darker_orange, equipment=equipment_component)
-    Game.inventory.append(item)
-
-    #wristguards
-    equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
-    item = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
-    Game.inventory.append(item)
+    for item in entitydata.items:
+        theitem = entities.Object(**entitydata.items[item])
+        theitem.always_visible = True
+        Game.inventory.append(theitem)
 
 def set_map_explored(Game):
     for y in range(data.MAP_HEIGHT):
