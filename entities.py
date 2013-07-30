@@ -5,118 +5,10 @@ import data
 
 
 #Classes:  Object player, enemies, items, etc
-class Fighter(object):
-    #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None, buffs = None):
-        self.base_max_hp = hp
-        self.hp = hp
-        self.xp = xp
-        self.base_defense = defense
-        self.base_power = power
-        self.death_function=death_function
-        self.base_speed = speed
-        self.speed_counter = 0
-        self.base_regen = regen
-        self.regen_counter = regen
-
-        self.buffs = buffs
-        if self.buffs:
-            self.buffs.owner = self
-
-    def add_buff(self, buff):
-        if not self.buffs:
-            self.buffs = []
-
-        self.buffs.append(buff)
-
-    def remove_buff(self, buff):
-        self.buffs.remove(buff)
-
-    def regen(self, Game):
-        bonus = sum(equipment.regen_bonus for equipment in get_all_equipped(self.owner, Game))
-        if self.buffs:
-            bonus += sum(buff.regen_bonus for buff in self.buffs)
-        return self.base_regen + bonus
-
-    def speed(self, Game):
-        bonus = sum(equipment.speed_bonus for equipment in get_all_equipped(self.owner, Game))
-        if self.buffs:
-            bonus += sum(buff.speed_bonus for buff in self.buffs)
-        return self.base_speed + bonus
-
-    #@property
-    def power(self, Game):
-        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner, Game))
-        if self.buffs:
-            bonus += sum(buff.power_bonus for buff in self.buffs)
-        return self.base_power + bonus
-
-    #@property
-    def defense(self, Game):
-        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner, Game))
-        if self.buffs:
-            bonus += sum(buff.defense_bonus for buff in self.buffs)
-        return self.base_defense + bonus
-
-    #@property
-    def max_hp(self, Game):
-        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner, Game))
-        if self.buffs:
-            bonus += sum(buff.max_hp_bonus for buff in self.buffs)
-        return self.base_max_hp + bonus
-
-    def heal(self, amount):
-        #heal by the given amount
-        self.hp += amount
-        if self.hp > self.max_hp(Game):
-            self.hp = self.max_hp(Game)
-
-    def take_damage(self, damage, Game):
-        #inflict dmg if possible
-        if damage > 0:
-            self.hp -= damage
-
-        #check for death and call death_function (if set)
-        if self.hp <= 0:
-            function = self.death_function
-            if function is not None:
-                function(self.owner, Game)
-            if self.owner != Game.player: #yield experience to the Game.player
-                Game.player.fighter.xp += self.xp
-
-    def attack(self, target, Game):
-        #very simple formula for attack damage
-        damage = self.power(Game) - target.fighter.defense(Game)
-
-        if damage > 0:
-            #make target take some damage
-            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', Game, libtcod.yellow)
-            target.fighter.take_damage(damage, Game)
-        else:
-            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', Game, libtcod.white)
-
-class BasicMonster(object):
-    #AI for basic monster
-    def take_turn(self, Game):
-        #basic monsters can see you if you can see them
-        monster = self.owner
-        if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
-            #move towards Game.player if far enough away
-            if flip_coin() and flip_coin() and flip_coin():
-                 message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
-            if monster.distance_to(Game.player) >= 2:
-                monster.move_towards(Game.player.x, Game.player.y, Game)
-
-                #close enough to attack (if the Game.player is alive)
-            elif Game.player.fighter.hp > 0:
-                monster.fighter.attack(Game.player, Game)
-        else: #wander
-            monster.move_random(Game)
-
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, always_visible = False, fighter = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -134,6 +26,12 @@ class Object(object):
             if type(fighter) is dict:
                 self.fighter = Fighter(**fighter)
             self.fighter.owner = self
+
+        self.caster = caster
+        if self.caster:
+            if type(caster) is dict:
+                self.caster = Caster(**caster)
+            self.caster.owner = self
 
         self.ai = ai
         if self.ai:
@@ -242,6 +140,141 @@ class Object(object):
         Game.objects.remove(self)
         Game.objects.insert(0, self)
 
+
+#fighters, spells, abilities
+class Fighter(object):
+    #combat-related properties and methods (monster, Game.player, NPC, etc)
+    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None, buffs = None):
+        self.base_max_hp = hp
+        self.hp = hp
+        self.xp = xp
+        self.base_defense = defense
+        self.base_power = power
+        self.death_function=death_function
+        self.base_speed = speed
+        self.speed_counter = 0
+        self.base_regen = regen
+        self.regen_counter = regen
+
+        self.buffs = buffs
+        if self.buffs:
+            self.buffs.owner = self
+
+    def add_buff(self, buff):
+        if not self.buffs:
+            self.buffs = []
+
+        self.buffs.append(buff)
+
+    def remove_buff(self, buff):
+        self.buffs.remove(buff)
+
+    def regen(self, Game):
+        bonus = sum(equipment.regen_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.regen_bonus for buff in self.buffs)
+        return self.base_regen + bonus
+
+    def speed(self, Game):
+        bonus = sum(equipment.speed_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.speed_bonus for buff in self.buffs)
+        return self.base_speed + bonus
+
+    #@property
+    def power(self, Game):
+        bonus = sum(equipment.power_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.power_bonus for buff in self.buffs)
+        return self.base_power + bonus
+
+    #@property
+    def defense(self, Game):
+        bonus = sum(equipment.defense_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.defense_bonus for buff in self.buffs)
+        return self.base_defense + bonus
+
+    #@property
+    def max_hp(self, Game):
+        bonus = sum(equipment.max_hp_bonus for equipment in get_all_equipped(self.owner, Game))
+        if self.buffs:
+            bonus += sum(buff.max_hp_bonus for buff in self.buffs)
+        return self.base_max_hp + bonus
+
+    def heal(self, amount):
+        #heal by the given amount
+        self.hp += amount
+        if self.hp > self.max_hp(Game):
+            self.hp = self.max_hp(Game)
+
+    def take_damage(self, damage, Game):
+        #inflict dmg if possible
+        if damage > 0:
+            self.hp -= damage
+
+        #check for death and call death_function (if set)
+        if self.hp <= 0:
+            function = self.death_function
+            if function is not None:
+                function(self.owner, Game)
+            if self.owner != Game.player: #yield experience to the Game.player
+                Game.player.fighter.xp += self.xp
+
+    def attack(self, target, Game):
+        #very simple formula for attack damage
+        damage = self.power(Game) - target.fighter.defense(Game)
+
+        if damage > 0:
+            #make target take some damage
+            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', Game, libtcod.yellow)
+            target.fighter.take_damage(damage, Game)
+        else:
+            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', Game, libtcod.white)
+
+class Buff(object):
+    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=data.BUFF_DECAYRATE, duration=data.BUFF_DURATION):
+        self.name = name
+        self.power_bonus = power_bonus
+        self.defense_bonus = defense_bonus
+        self.max_hp_bonus = max_hp_bonus
+        self.speed_bonus = speed_bonus
+        self.regen_bonus = regen_bonus
+
+        self.decay_rate = decay_rate #if 0, buff does not decay. use positive numbers to make buffs decrement
+        self.duration = duration
+
+class Caster(object):
+    def __init__(self, mp, spells=None):
+        self.base_max_mp = mp
+        self.mp = mp
+
+        self.spells = spells
+        if self.spells:
+            self.spells.owner = self
+
+    def learn_spell(self, spell):
+        if not self.spells:
+            self.spells = []
+
+        self.spells.append(spell)
+
+    def forget_spell(self, spell):
+        self.spells.remove(spell)
+
+class Spell(object):
+    def __init__(self, name, use_function=None):
+        self.name = name
+        self.use_function = use_function
+
+    def use(self, Game):
+        if self.use_function is None:
+            message('This spell sucks! Abracadabra!', Game)
+            return 'no_action'
+
+
+#Items and Equipment
+
 class Item(object):
     def __init__(self, use_function=None):
         self.use_function = use_function
@@ -296,20 +329,6 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
-class Buff(object):
-    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=data.BUFF_DECAYRATE, duration=data.BUFF_DURATION):
-        self.name = name
-        self.power_bonus = power_bonus
-        self.defense_bonus = defense_bonus
-        self.max_hp_bonus = max_hp_bonus
-        self.speed_bonus = speed_bonus
-        self.regen_bonus = regen_bonus
-
-        self.decay_rate = decay_rate #if 0, buff does not decay. use positive numbers to make buffs decrement
-        self.duration = duration
-
-
-
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
     def __init__(self, slot, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0):
@@ -343,6 +362,8 @@ class Equipment(object):
         self.is_equipped = False
         message('Unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)          
 
+
+#AI
 class ConfusedMonster(object):
     def __init__(self, old_ai, num_turns = data.CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
@@ -359,9 +380,26 @@ class ConfusedMonster(object):
             self.owner.ai = self.old_ai
             message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.red) 
 
+class BasicMonster(object):
+    #AI for basic monster
+    def take_turn(self, Game):
+        #basic monsters can see you if you can see them
+        monster = self.owner
+        if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
+            #move towards Game.player if far enough away
+            if flip_coin() and flip_coin() and flip_coin():
+                 message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
+            if monster.distance_to(Game.player) >= 2:
+                monster.move_towards(Game.player.x, Game.player.y, Game)
 
-#spells/abilities
+                #close enough to attack (if the Game.player is alive)
+            elif Game.player.fighter.hp > 0:
+                monster.fighter.attack(Game.player, Game)
+        else: #wander
+            monster.move_random(Game)
 
+
+#spells/abilities functions
 def use_red_crystal(Game):
     message('You become ENRAGED!', Game, libtcod.red)
     buff_component = Buff('Super Strength', power_bonus=10)
@@ -389,7 +427,7 @@ def use_orange_crystal(Game):
     Game.player.fighter.add_buff(buff_component)
 
 
-
+#spells
 def cast_confusion(Game):
     #ask player for target to confuse
     message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
