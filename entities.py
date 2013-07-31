@@ -144,7 +144,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None, buffs = None):
+    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None, buffs = None, inventory = None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -156,9 +156,22 @@ class Fighter(object):
         self.base_regen = regen
         self.regen_counter = regen
 
+        self.inventory = inventory
+        if self.inventory:
+            self.inventory.owner = self
+
         self.buffs = buffs
         if self.buffs:
             self.buffs.owner = self
+
+    def add_item(self, item):
+        if not self.inventory:
+            self.inventory = []
+
+        self.inventory.append(item)
+
+    def remove_item(self, item):
+        self.inventory.remove(item)
 
     def add_buff(self, buff):
         if not self.buffs:
@@ -202,9 +215,10 @@ class Fighter(object):
             bonus += sum(buff.max_hp_bonus for buff in self.buffs)
         return self.base_max_hp + bonus
 
-    def heal(self, amount):
+    def heal(self, amount, Game):
         #heal by the given amount
         self.hp += amount
+        print amount
         if self.hp > self.max_hp(Game):
             self.hp = self.max_hp(Game)
 
@@ -288,25 +302,25 @@ class Item(object):
         #call the 'use_function' if defined
         if self.use_function is None:
             message('The ' + self.owner.name + ' cannot be used.', Game)
-            return 'no_action'
+            return data.STATE_NOACTION
         else:
             if self.use_function(Game, user) != 'cancelled':
                 #need to remove it from the user's inventory
                 #eventually this would be user.inventory.remove(self.owner)
-                Game.inventory.remove(self.owner) #destroy after use, unless cancelled
+                user.fighter.remove_item(self.owner)
                 Game.fov_recompute = True
-                return 'used'
+                return data.STATE_USED
             else:
-                return 'no_action'
+                return data.STATE_NOACTION
 
     #an item that can be picked up and used
     def pick_up(self, Game):
-        #add to the Game.player's Game.inventory and remove from the map
-        if len(Game.inventory) >= 26:
-            message('Your Game.inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
+        #add to the player's inventory and remove from the map
+        if len(Game.player.fighter.inventory) >= 26:
+            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
             retval = data.STATE_NOACTION
         else:
-            Game.inventory.append(self.owner)
+            Game.player.fighter.add_item(self.owner)
             Game.objects.remove(self.owner)
             message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
 
@@ -320,9 +334,9 @@ class Item(object):
         return retval
 
     def drop(self, Game):
-        #add to the map and remove from the Game.player's Game.inventory. also, place it at the Game.player's coordinates
+        #add to the map and remove from the player's inventory. also, place it at the Game.player's coordinates
         Game.objects.append(self.owner)
-        Game.inventory.remove(self.owner)
+        Game.player.fighter.remove_item(self.owner)
         self.owner.x = Game.player.x
         self.owner.y = Game.player.y
         message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
@@ -386,17 +400,29 @@ class BasicMonster(object):
     #AI for basic monster
     def take_turn(self, Game):
         #basic monsters can see you if you can see them
+        useditem = None
+
         monster = self.owner
         if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
-            #move towards Game.player if far enough away
-            if flip_coin() and flip_coin() and flip_coin():
-                 message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
-            if monster.distance_to(Game.player) >= 2:
-                monster.move_towards(Game.player.x, Game.player.y, Game)
+            #move or use item
+            #for now, use items or lose them
+            if monster.fighter.inventory:
+                #for now use first item in list
+                item = monster.fighter.inventory[0].item
+                print 'Monster trying to use ' + str(item.owner.name)
+                useditem = item.use(Game, user=monster)
 
-                #close enough to attack (if the Game.player is alive)
-            elif Game.player.fighter.hp > 0:
-                monster.fighter.attack(Game.player, Game)
+            #if monster didn't use item, then move
+            if useditem is not data.STATE_USED:
+                #move towards Game.player if far enough away
+                if flip_coin() and flip_coin() and flip_coin():
+                     message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
+                if monster.distance_to(Game.player) >= 2:
+                    monster.move_towards(Game.player.x, Game.player.y, Game)
+
+                    #close enough to attack (if the Game.player is alive)
+                elif Game.player.fighter.hp > 0:
+                    monster.fighter.attack(Game.player, Game)
         else: #wander
             monster.move_random(Game)
 
@@ -435,7 +461,7 @@ def cast_confusion(Game, user):
     message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
     monster = target_monster(Game, data.CONFUSE_RANGE)
     if monster is None:
-        return 'cancelled'
+        return data.STATE_CANCELLED
 
     #replace monster's AI with confuse
     old_ai = monster.ai
@@ -448,7 +474,7 @@ def cast_fireball(Game, user):
     message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, libtcod.light_cyan)
     (x,y) = target_tile(Game)
     if x is None: 
-        return 'cancelled'
+        return data.STATE_CANCELLED
     else:
         message('The fireball explodes', Game, libtcod.orange)
 
@@ -459,22 +485,24 @@ def cast_fireball(Game, user):
             obj.fighter.take_damage(theDmg, Game)
 
 def cast_heal(Game, user):
-    #heal the player
-    if Game.player.fighter.hp == Game.player.fighter.max_hp(Game):
-        message('You are already at full health.', Game, libtcod.red)
-        return 'cancelled'
+    #heal the player or monster
+    if user.fighter.hp == user.fighter.max_hp(Game):
+        if user is Game.player:
+            message('You are already at full health.', Game, libtcod.red)
+        return data.STATE_CANCELLED
 
-    message('You feel better', Game, libtcod.light_violet)
-    Game.player.fighter.heal(data.HEAL_AMOUNT)
+    if user is Game.player:
+        message('You feel better', Game, libtcod.light_violet)
+    else:
+        message('The ' + user.name + ' looks healthier!', Game, libtcod.red)
+    user.fighter.heal(data.HEAL_AMOUNT, Game)
 
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
     print user.name
     if user is Game.player:
         target = closest_monster(data.LIGHTNING_RANGE, Game)
-
     else:
-        print 'silly monster, lightning is for kids!'
         target = Game.player
 
     if target is None:
@@ -518,7 +546,7 @@ def get_buffs_in_slot(slot, Game):
         print obj.name
 
 def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
-    for obj in Game.inventory:
+    for obj in Game.player.fighter.inventory:
         if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
             return obj.equipment
     return None
@@ -526,7 +554,7 @@ def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None 
 def get_all_equipped(obj, Game): #returns list of equipped items
     if obj == Game.player:
         equipped_list = []
-        for item in Game.inventory:
+        for item in Game.player.fighter.inventory:
             if item.equipment and item.equipment.is_equipped:
                 equipped_list.append(item.equipment)
         return equipped_list

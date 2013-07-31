@@ -33,3 +33,5 @@ need to add 'death_char' and 'death_tilechar' to Object. right now, when a monst
 3. explosion objects. give them a few graphics to display. put them on top of the object stack. play them each tick and when they play the full animation, remove them from the game or maybe create an 'ash' tile and put it at the bottom.
 
 variablize inventory for each object. 
+
+may need to add some checks to ensure that Game.player.fighter.inventory actually exists.

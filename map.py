@@ -133,8 +133,6 @@ def place_objects(room, Game):
     num_items = libtcod.random_get_int(0, 0, max_items)
     item_chances = get_item_chances(Game)
 
-
-
     for i in range(num_monsters):
         #choose random spot for this monster
         x =  libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
@@ -149,6 +147,12 @@ def place_objects(room, Game):
             monster.blocks      = True        
             monster.ai          = entities.BasicMonster()  #how do I set different ai?
             monster.ai.owner    = monster
+
+            #give monster items if they have them
+            if entitydata.mobitems[choice]:
+                for itemname in entitydata.mobitems[choice]:
+                    item = entities.Object(**entitydata.items[itemname])
+                    monster.fighter.add_item(item)
 
             monster.set_location(x, y, Game)
             #print 'Added a ' + choice

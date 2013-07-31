@@ -111,12 +111,12 @@ def msgbox(text, Game, width = 50):
 
 def inventory_menu(header, Game):
     #show a menu with each item of the inventory as an option
-    if len(Game.inventory) == 0:
+    if len(Game.player.fighter.inventory) == 0:
         options = ['inventory is empty!']
     else:
         #options = [item.name for item in inventory]
         options = []
-        for item in Game.inventory:
+        for item in Game.player.fighter.inventory:
             text = item.name
             #show additional info, in case it's equipped
             if item.equipment and item.equipment.is_equipped:
@@ -125,10 +125,10 @@ def inventory_menu(header, Game):
 
     index = menu(header, options, data.INVENTORY_WIDTH, Game)
 
-    if (index is None or len(Game.inventory) == 0) or index == 'ESC':
+    if (index is None or len(Game.player.fighter.inventory) == 0) or index == 'ESC':
         return None
     else:
-        return Game.inventory[index].item
+        return Game.player.fighter.inventory[index].item
 
 
 

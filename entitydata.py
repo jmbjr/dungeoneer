@@ -18,6 +18,17 @@ mobs = {
 
 }
 
+mobitems = {}
+mobitems = {
+	'johnstein':   ['heal', 'heal', 'heal', 'heal'],
+	'greynaab':    ['heal'],
+	'jerbear':     ['heal'],
+	'zombiesheep': ['heal'],
+	'JOHNSTEIN':   ['heal'],
+	'GREYNAAB':    ['heal'],
+	'JERBEAR':     ['heal'],
+	'ZOMBIESHEEP': ['heal']
+}
 #add help on how to use this
 #basically, set = to list of lists. Each list gives a chance (arbitrary units) and a level
 #map.py will use this info to create monster_chances list to figure out which monsters to select for map

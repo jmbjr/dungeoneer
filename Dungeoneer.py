@@ -62,7 +62,6 @@ def new_game():
     map.initialize_fov(Game)
 
     Game.game_state = data.STATE_PLAYING
-    Game.inventory = []
 
     #create the list of the game messages and their colors, starts empty
     Game.player.game_turns = 0
@@ -70,7 +69,8 @@ def new_game():
     #initial equipment
     equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
     obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
-    Game.inventory.append(obj)
+    Game.player.fighter.add_item(obj)
+
     equipment_component.equip(Game)
     obj.always_visible = True
     Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
@@ -87,7 +87,6 @@ def save_game(filename='savegame'):
     file['map'] = Game.map
     file['objects'] = Game.objects
     file['player_index'] = Game.objects.index(Game.player) #index of player in the objects list
-    file['inventory'] = Game.inventory
     file['game_msgs'] = Game.game_msgs
     file['game_state'] = Game.game_state
     file['stairs_index'] = Game.objects.index(Game.stairs)
@@ -99,7 +98,6 @@ def load_game(filename='savegame'):
     Game.map = file['map']
     Game.objects = file['objects'] 
     Game.player = Game.objects[file['player_index']]  #get index of player in the objects list
-    Game.inventory = file['inventory']
     Game.game_msgs = file['game_msgs']
     Game.game_state = file['game_state']
     Game.stairs = Game.objects[file['stairs_index']]
@@ -338,7 +336,7 @@ def give_items(Game):
     for item in entitydata.items:
         theitem = entities.Object(**entitydata.items[item])
         theitem.always_visible = True
-        Game.inventory.append(theitem)
+        Game.player.fighter.add_item(theitem)
 
 def set_map_explored(Game):
     for y in range(data.MAP_HEIGHT):
