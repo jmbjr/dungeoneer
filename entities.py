@@ -279,7 +279,7 @@ class Item(object):
     def __init__(self, use_function=None):
         self.use_function = use_function
 
-    def use(self, Game):
+    def use(self, Game, user):
         #special case: if the object has the equipment component, the "use" action is to equip/dequip
         if self.owner.equipment:
             self.owner.equipment.toggle_equip(Game)
@@ -290,7 +290,9 @@ class Item(object):
             message('The ' + self.owner.name + ' cannot be used.', Game)
             return 'no_action'
         else:
-            if self.use_function(Game) != 'cancelled':
+            if self.use_function(Game, user) != 'cancelled':
+                #need to remove it from the user's inventory
+                #eventually this would be user.inventory.remove(self.owner)
                 Game.inventory.remove(self.owner) #destroy after use, unless cancelled
                 Game.fov_recompute = True
                 return 'used'
@@ -400,35 +402,35 @@ class BasicMonster(object):
 
 
 #spells/abilities functions
-def use_red_crystal(Game):
+def use_red_crystal(Game, user):
     message('You become ENRAGED!', Game, libtcod.red)
     buff_component = Buff('Super Strength', power_bonus=10)
     Game.player.fighter.add_buff(buff_component)
 
-def use_blue_crystal(Game):
+def use_blue_crystal(Game, user):
     message('You feel well-protected!', Game, libtcod.sky)
     buff_component = Buff('Super Defense', defense_bonus=10)
     Game.player.fighter.add_buff(buff_component)
 
-def use_green_crystal(Game):
+def use_green_crystal(Game, user):
     message('You feel more resilient!', Game, libtcod.green)
     buff_component = Buff('Super Health', max_hp_bonus=50)
     Game.player.fighter.add_buff(buff_component)
     Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
-def use_yellow_crystal(Game):
+def use_yellow_crystal(Game, user):
     message('You feel healthy!', Game, libtcod.yellow)
     buff_component = Buff('Super Regen', regen_bonus=-20)
     Game.player.fighter.add_buff(buff_component)
 
-def use_orange_crystal(Game):
+def use_orange_crystal(Game, user):
     message('You feel speedy!', Game, libtcod.orange)
     buff_component = Buff('Super Speed', speed_bonus=-3)
     Game.player.fighter.add_buff(buff_component)
 
 
 #spells
-def cast_confusion(Game):
+def cast_confusion(Game, user):
     #ask player for target to confuse
     message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
     monster = target_monster(Game, data.CONFUSE_RANGE)
@@ -441,7 +443,7 @@ def cast_confusion(Game):
     monster.ai.owner = monster #tell the new component who owns it
     message('The ' + monster.name + ' is confused!', Game, libtcod.light_green)
 
-def cast_fireball(Game):
+def cast_fireball(Game, user):
     #ask the player for a target tile to throw a fireball at
     message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, libtcod.light_cyan)
     (x,y) = target_tile(Game)
@@ -456,7 +458,7 @@ def cast_fireball(Game):
             message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
             obj.fighter.take_damage(theDmg, Game)
 
-def cast_heal(Game):
+def cast_heal(Game, user):
     #heal the player
     if Game.player.fighter.hp == Game.player.fighter.max_hp(Game):
         message('You are already at full health.', Game, libtcod.red)
@@ -465,17 +467,24 @@ def cast_heal(Game):
     message('You feel better', Game, libtcod.light_violet)
     Game.player.fighter.heal(data.HEAL_AMOUNT)
 
-def cast_lightning(Game):
+def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
-    monster = closest_monster(data.LIGHTNING_RANGE, Game)
-    if monster is None:
+    print user.name
+    if user is Game.player:
+        target = closest_monster(data.LIGHTNING_RANGE, Game)
+
+    else:
+        print 'silly monster, lightning is for kids!'
+        target = Game.player
+
+    if target is None:
         message('No enemy is close enough to strike', Game, libtcod.red)
         return 'cancelled'
 
     theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
-    message('A lightning bolt strikes the ' + monster.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
-    monster.fighter.take_damage(theDmg, Game)
+    message('A lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+    target.fighter.take_damage(theDmg, Game)
 
 
 #death routines

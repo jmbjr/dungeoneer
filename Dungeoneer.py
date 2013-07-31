@@ -261,7 +261,7 @@ def handle_keys():
                 chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
-                    return chosen_item.use(Game)
+                    return chosen_item.use(Game, user=Game.player)
 
             if key_char == 'd':
                 #show the inventory. if item is selected, drop it

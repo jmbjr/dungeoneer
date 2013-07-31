@@ -46,9 +46,9 @@ MAP_PAD_H          = CAMERA_HEIGHT / 2
 
 
 #room info
-ROOM_MAX_SIZE      = 20
+ROOM_MAX_SIZE      = 10
 ROOM_MIN_SIZE      = 4
-MAX_ROOMS          = 50
+MAX_ROOMS          = ((MAP_WIDTH - CAMERA_WIDTH) + (MAP_HEIGHT - CAMERA_HEIGHT)) / 3
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 

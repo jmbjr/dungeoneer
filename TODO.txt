@@ -32,3 +32,4 @@ need to add 'death_char' and 'death_tilechar' to Object. right now, when a monst
 2. in main loop, just do a check. if the player's speed <= 0, don't let the program leave the loop for handle_keys until playeraction <> NOACTION
 3. explosion objects. give them a few graphics to display. put them on top of the object stack. play them each tick and when they play the full animation, remove them from the game or maybe create an 'ash' tile and put it at the bottom.
 
+variablize inventory for each object. 
