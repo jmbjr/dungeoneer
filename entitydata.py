@@ -21,13 +21,13 @@ mobs = {
 mobitems = {}
 mobitems = {
 	'johnstein':   ['heal', 'heal', 'heal', 'heal'],
-	'greynaab':    ['heal', 'fireball', 'fireball'],
-	'jerbear':     ['confuse', 'confuse'],
-	'zombiesheep': ['lightning','lightning','lightning','lightning','lightning'],
-	'JOHNSTEIN':   ['heal'],
-	'GREYNAAB':    ['heal'],
-	'JERBEAR':     ['heal'],
-	'ZOMBIESHEEP': ['heal']
+	'greynaab':    ['fireball', 'heal', 'fireball'],
+	'jerbear':     ['confuse', 'confuse', 'heal'],
+	'zombiesheep': ['lightning','lightning','lightning', 'heal'],
+	'JOHNSTEIN':   ['heal', 'heal', 'heal', 'heal'],
+	'GREYNAAB':    ['fireball', 'heal', 'fireball'],
+	'JERBEAR':     ['confuse', 'confuse', 'heal'],
+	'ZOMBIESHEEP': ['lightning','lightning','lightning', 'heal']
 }
 #add help on how to use this
 #basically, set = to list of lists. Each list gives a chance (arbitrary units) and a level
