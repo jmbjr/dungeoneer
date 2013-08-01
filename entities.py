@@ -218,7 +218,6 @@ class Fighter(object):
     def heal(self, amount, Game):
         #heal by the given amount
         self.hp += amount
-        print amount
         if self.hp > self.max_hp(Game):
             self.hp = self.max_hp(Game)
 
@@ -305,9 +304,10 @@ class Item(object):
             return data.STATE_NOACTION
         else:
             if self.use_function(Game, user) != 'cancelled':
-                #need to remove it from the user's inventory
-                #eventually this would be user.inventory.remove(self.owner)
-                user.fighter.remove_item(self.owner)
+                #need to remove it from the user's inventory if the user is still alive
+                if user.fighter:
+                    user.fighter.remove_item(self.owner)
+
                 Game.fov_recompute = True
                 return data.STATE_USED
             else:
@@ -394,9 +394,15 @@ class ConfusedMonster(object):
 
         else:
             self.owner.ai = self.old_ai
-            message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.red) 
+            message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.red)
+            
+        if monster.fighter:
+            return True
+        else:
+            return False
 
 class BasicMonster(object):
+    #AI must return True or False to indicate if still alive
     #AI for basic monster
     def take_turn(self, Game):
         #basic monsters can see you if you can see them
@@ -409,7 +415,6 @@ class BasicMonster(object):
             if monster.fighter.inventory:
                 #for now use first item in list
                 item = monster.fighter.inventory[0].item
-                print 'Monster trying to use ' + str(item.owner.name)
                 useditem = item.use(Game, user=monster)
 
             #if monster didn't use item, then move
@@ -425,6 +430,11 @@ class BasicMonster(object):
                     monster.fighter.attack(Game.player, Game)
         else: #wander
             monster.move_random(Game)
+        #check if monster is still alive
+        if monster.fighter:
+            return True
+        else:
+            return False
 
 
 #spells/abilities functions
@@ -470,19 +480,27 @@ def cast_confusion(Game, user):
     message('The ' + monster.name + ' is confused!', Game, libtcod.light_green)
 
 def cast_fireball(Game, user):
-    #ask the player for a target tile to throw a fireball at
-    message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, libtcod.light_cyan)
-    (x,y) = target_tile(Game)
-    if x is None: 
-        return data.STATE_CANCELLED
-    else:
+    (x,y) = (None, None)
+
+    if user is Game.player: 
+        #ask the player for a target tile to throw a fireball at
+        message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, libtcod.light_cyan)
+        (x,y) = target_tile(Game)
         message('The fireball explodes', Game, libtcod.orange)
 
-    theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
-    for obj in Game.objects: #damage all fighters within range
-        if obj.distance(x,y) <= data.FIREBALL_RADIUS and obj.fighter:
-            message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
-            obj.fighter.take_damage(theDmg, Game)
+    #otherwise this is a mob
+    elif libtcod.map_is_in_fov(Game.fov_map, user.x, user.y):
+        (x,y) = (Game.player.x, Game.player.y)
+
+    if x is None or y is None:
+        return data.STATE_CANCELLED
+    else:
+        theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
+        for obj in Game.objects: #damage all fighters within range
+            if obj.distance(x,y) <= data.FIREBALL_RADIUS and obj.fighter:
+                message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
+                obj.fighter.take_damage(theDmg, Game)
+        
 
 def cast_heal(Game, user):
     #heal the player or monster
@@ -503,6 +521,7 @@ def cast_lightning(Game, user):
     if user is Game.player:
         target = closest_monster(data.LIGHTNING_RANGE, Game)
 
+    #otherwise, this is a mob
     elif libtcod.map_is_in_fov(Game.fov_map, user.x, user.y):
         #ensure monster is within player's fov
         target = Game.player
@@ -511,13 +530,13 @@ def cast_lightning(Game, user):
         if user is Game.player:
             message('No enemy is close enough to strike', Game, libtcod.red)
         return 'cancelled'
+    else:
+        theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
-    theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
+        if user is Game.player:
+            message('A lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
 
-    if user is Game.player:
-        message('A lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
-
-    target.fighter.take_damage(theDmg, Game)
+        target.fighter.take_damage(theDmg, Game)
 
 
 #death routines
@@ -533,6 +552,7 @@ def player_death(player, Game):
 def monster_death(monster, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
+    print monster.name + ' DIED!'
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
     message('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
     monster.char = '%'

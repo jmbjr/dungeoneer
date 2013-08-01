@@ -144,29 +144,31 @@ def play_game():
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             for object in Game.objects:
                 if object.fighter:
+                    
                     if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
                         if object.ai:
-                            object.ai.take_turn(Game)
-                            object.fighter.speed_counter = object.fighter.speed(Game)
+                            if object.ai.take_turn(Game): #only reset speed_counter if monster is still alive
+                                object.fighter.speed_counter = object.fighter.speed(Game)
 
-                    object.fighter.speed_counter -= 1
+                    #this is clunky, but have to again check if monster is still alive
+                    if object.fighter:
+                        if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
+                            object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
+                            object.fighter.regen_counter = object.fighter.regen(Game)
 
-                    if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
-                        object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
-                        object.fighter.regen_counter = object.fighter.regen(Game)
+                        object.fighter.regen_counter -= 1
+                        object.fighter.speed_counter -= 1
+             
+                        if object.fighter.buffs:
+                            for buff in object.fighter.buffs:
+                                buff.duration -= buff.decay_rate
+                                if buff.duration <= 0:
+                                    message('*The effects of ' + buff.name + ' has worn off!', Game, libtcod.light_red)
+                                    object.fighter.remove_buff(buff)
 
-                    object.fighter.regen_counter -= 1
-         
-                    if object.fighter.buffs:
-                        for buff in object.fighter.buffs:
-                            buff.duration -= buff.decay_rate
-                            if buff.duration <= 0:
-                                message('*The effects of ' + buff.name + ' has worn off!', Game, libtcod.light_red)
-                                object.fighter.remove_buff(buff)
-
-                    #always check to ensure hp <= max_hp
-                    if object.fighter.hp > object.fighter.max_hp(Game):
-                            object.fighter.hp = object.fighter.max_hp(Game)
+                        #always check to ensure hp <= max_hp
+                        if object.fighter.hp > object.fighter.max_hp(Game):
+                                object.fighter.hp = object.fighter.max_hp(Game)
 
                 elif object.ai:
                     object.ai.take_turn(Game)
