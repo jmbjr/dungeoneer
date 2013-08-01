@@ -31,12 +31,12 @@ TILE_SKEL_PURPLE   = 256 + 32 + 9  #2nd tile in the 2nd row of tiles
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
-SCREEN_WIDTH       = 90  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
+SCREEN_WIDTH       = 80  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
 SCREEN_HEIGHT      = 40  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 
 #camera info
 #size of the map portion shown on-screen
-CAMERA_WIDTH = 90
+CAMERA_WIDTH = 80
 CAMERA_HEIGHT = 30
 
 MAP_WIDTH          = 140

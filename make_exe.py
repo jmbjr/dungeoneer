@@ -14,7 +14,7 @@ target_file = 'Dungeoneer.py'
 assets_dir = '.\\'
  
 # Filetypes not to be included in the above.
-excluded_file_types = ['py','pyc','project','pydevproject', 'zip', 'psd']
+excluded_file_types = ['py','pyc','project','pydevproject', 'zip', 'psd', '.git', 'build', 'dist', 'screenshots']
  
 def get_data_files(base_dir, target_dir, list=[]):
     """

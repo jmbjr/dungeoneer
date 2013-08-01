@@ -26,5 +26,10 @@ Go down the stairs with '>' (you can't come back up!)
 
 There's a few other super secret debug keys as well!
 
+a and q show the map and all enemies
+z will put you on the next floor
+x is an instant level-up
+w will give all items
+
 
 
