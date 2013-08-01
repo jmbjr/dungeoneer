@@ -35,3 +35,6 @@ need to add 'death_char' and 'death_tilechar' to Object. right now, when a monst
 variablize inventory for each object. 
 
 may need to add some checks to ensure that Game.player.fighter.inventory actually exists.
+
+if a scroll fails to work, player takes a turn. need to not let the player take a turn.
+

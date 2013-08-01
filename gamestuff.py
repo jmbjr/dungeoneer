@@ -85,10 +85,11 @@ def menu(header, options, width, Game):
     #present the root console to the player and wait for a keypress
     libtcod.console_flush()
     libtcod.console_set_keyboard_repeat(0,0) #turn off key repeat
-    
+
     goodchoice = False
     while not goodchoice:
         key = libtcod.console_wait_for_keypress(True)
+        if key.pressed == False: continue
 
         if key.vk == libtcod.KEY_ENTER and key.lalt: # full screen
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())       

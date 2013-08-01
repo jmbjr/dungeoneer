@@ -499,19 +499,24 @@ def cast_heal(Game, user):
 
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
-    print user.name
+    target = None
     if user is Game.player:
         target = closest_monster(data.LIGHTNING_RANGE, Game)
-    else:
+
+    elif libtcod.map_is_in_fov(Game.fov_map, user.x, user.y):
+        #ensure monster is within player's fov
         target = Game.player
 
     if target is None:
-        message('No enemy is close enough to strike', Game, libtcod.red)
+        if user is Game.player:
+            message('No enemy is close enough to strike', Game, libtcod.red)
         return 'cancelled'
 
     theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
-    message('A lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+    if user is Game.player:
+        message('A lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+
     target.fighter.take_damage(theDmg, Game)
 
 

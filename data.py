@@ -65,8 +65,8 @@ SPEED_DEFAULT     = 5  # speed delay. higher = slower. How many game ticks to wa
 REGEN_DEFAULT     = 50  # regen delay. higher = slower. How many game ticks to wait between regeneration
 REGEN_MULTIPLIER  = 0.1 # % of life to regen 
 
-KEYS_INITIAL_DELAY= 5
-KEYS_INTERVAL     = 5
+KEYS_INITIAL_DELAY= 0
+KEYS_INTERVAL     = 0
 BUFF_DECAYRATE    = 1  #amount to reduce per tick
 BUFF_DURATION     = 30 #in game ticks
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
