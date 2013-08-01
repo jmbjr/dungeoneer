@@ -22,7 +22,7 @@ mobitems = {}
 mobitems = {
 	'johnstein':   ['heal', 'heal', 'heal', 'heal'],
 	'greynaab':    ['heal', 'fireball', 'fireball'],
-	'jerbear':     ['heal', 'lightning'],
+	'jerbear':     ['confuse', 'confuse'],
 	'zombiesheep': ['lightning','lightning','lightning','lightning','lightning'],
 	'JOHNSTEIN':   ['heal'],
 	'GREYNAAB':    ['heal'],

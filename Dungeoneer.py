@@ -129,7 +129,7 @@ def play_game():
             object.clear(Game)
 
         #handle keys and exit game if needed
-        if Game.player.fighter.speed_counter <= 0: #player can take a turn-based            
+        if Game.player.fighter.speed_counter <= 0 and not Game.player.ai: #player can take a turn-based unless it has an AI         
             Game.player_action = handle_keys()
 
             if Game.player_action != data.STATE_NOACTION:

@@ -395,8 +395,8 @@ class ConfusedMonster(object):
         else:
             self.owner.ai = self.old_ai
             message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.red)
-            
-        if monster.fighter:
+
+        if self.owner.fighter:
             return True
         else:
             return False
@@ -436,7 +436,6 @@ class BasicMonster(object):
         else:
             return False
 
-
 #spells/abilities functions
 def use_red_crystal(Game, user):
     message('You become ENRAGED!', Game, libtcod.red)
@@ -467,17 +466,32 @@ def use_orange_crystal(Game, user):
 
 #spells
 def cast_confusion(Game, user):
-    #ask player for target to confuse
-    message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
-    monster = target_monster(Game, data.CONFUSE_RANGE)
-    if monster is None:
+    target = None
+
+    if user is Game.player:
+        #ask player for target to confuse
+        message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
+        target = target_monster(Game, data.CONFUSE_RANGE)
+    
+    elif libtcod.map_is_in_fov(Game.fov_map, user.x, user.y):
+        target = Game.player
+
+    if target is None:
         return data.STATE_CANCELLED
 
-    #replace monster's AI with confuse
-    old_ai = monster.ai
-    monster.ai = ConfusedMonster(old_ai)
-    monster.ai.owner = monster #tell the new component who owns it
-    message('The ' + monster.name + ' is confused!', Game, libtcod.light_green)
+    #replace target's AI with confuse
+    if target.ai:
+        old_ai = target.ai
+    else:
+        old_ai = None
+
+    target.ai = ConfusedMonster(old_ai)
+    target.ai.owner = target #tell the new component who owns it
+    if user is Game.player:
+        message('The ' + target.name + ' is confused!', Game, libtcod.light_green)
+    else:
+        message('You\'ve been confused!!', Game, libtcod.red)
+
 
 def cast_fireball(Game, user):
     (x,y) = (None, None)
@@ -501,7 +515,6 @@ def cast_fireball(Game, user):
                 message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
                 obj.fighter.take_damage(theDmg, Game)
         
-
 def cast_heal(Game, user):
     #heal the player or monster
     if user.fighter.hp == user.fighter.max_hp(Game):
