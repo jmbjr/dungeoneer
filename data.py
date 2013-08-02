@@ -69,10 +69,11 @@ KEYS_INITIAL_DELAY= 0
 KEYS_INTERVAL     = 0
 BUFF_DECAYRATE    = 1  #amount to reduce per tick
 BUFF_DURATION     = 30 #in game ticks
+
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 #ITEM INFO
-MAX_NUM_ITEMS     = 30
+MAX_NUM_ITEMS     = 26
 INVENTORY_WIDTH   = 50
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 

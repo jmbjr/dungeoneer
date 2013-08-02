@@ -13,6 +13,7 @@ import map
 #global class pattern
 class Game(object): 
     game_msgs = []
+    msg_history = []
 
 
 #MAIN MENU GAME OPTIONS
@@ -88,6 +89,7 @@ def save_game(filename='savegame'):
     file['objects'] = Game.objects
     file['player_index'] = Game.objects.index(Game.player) #index of player in the objects list
     file['game_msgs'] = Game.game_msgs
+    file['msg_history'] = Game.msg_history
     file['game_state'] = Game.game_state
     file['stairs_index'] = Game.objects.index(Game.stairs)
     file['dungeon_level'] = Game.dungeon_level
@@ -99,6 +101,7 @@ def load_game(filename='savegame'):
     Game.objects = file['objects'] 
     Game.player = Game.objects[file['player_index']]  #get index of player in the objects list
     Game.game_msgs = file['game_msgs']
+    Game.msg_history = file['msg_history']
     Game.game_state = file['game_state']
     Game.stairs = Game.objects[file['stairs_index']]
     Game.dungeon_level = file['dungeon_level']
@@ -142,6 +145,7 @@ def play_game():
         #print str(Game.player_action) + ' ' + str(Game.player.fighter.speed_counter)
         #give monsters a turn
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
+            Game.fov_recompute = True
             for object in Game.objects:
                 if object.fighter:
                     
@@ -309,7 +313,39 @@ def handle_keys():
             if key_char == 's': #general status key
                 print str(Game.player.fighter.buffs)
 
-            if key_char == 'p':
+            if key_char == 'p': #display log
+                width = data.SCREEN_WIDTH
+                height = data.SCREEN_HEIGHT
+                window = libtcod.console_new(width, height)
+                libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, '')
+                libtcod.console_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
+
+                history = []
+                count = 0
+                page = 0
+                numpages = int(float(len(Game.msg_history))/data.MAX_NUM_ITEMS + 1)
+                
+                for line in Game.msg_history:
+                    history.append(line)
+                    count +=1
+                    print str(count)
+
+                    if count >= data.MAX_NUM_ITEMS:
+                        page +=1
+                        menu ('Message History: Page ' + str(page) + '/' + str(numpages), history, data.SCREEN_WIDTH, Game)
+                        history = []
+                        count = 0
+
+                page +=1
+                menu ('Message History: Page ' + str(page) + '/' + str(numpages), history, data.SCREEN_WIDTH, Game)
+                history = []
+                count = 0
+
+                Game.fov_recompute = True           
+
+
+
+            if key_char == 'r':
                 print 'RELOADING GAME DATA'
                 reload(data)
                 reload(entitydata) 

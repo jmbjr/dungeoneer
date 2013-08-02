@@ -407,15 +407,19 @@ class BasicMonster(object):
     def take_turn(self, Game):
         #basic monsters can see you if you can see them
         useditem = None
+        picked_up_items = False
 
         monster = self.owner
         if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
             #move or use item
             #for now, use items or lose them
             if monster.fighter.inventory:
-                #for now use first item in list
-                item = monster.fighter.inventory[0].item
+                #get random item from inv
+                index = libtcod.random_get_int(0, 0, len(monster.fighter.inventory)-1)
+                item = monster.fighter.inventory[index].item
+                #item = monster.fighter.inventory[0].item
                 useditem = item.use(Game, user=monster)
+                print useditem + ': ' + monster.name + ' used ' + item.owner.name
 
             #if monster didn't use item, then move
             if useditem is not data.STATE_USED:
@@ -430,7 +434,17 @@ class BasicMonster(object):
                     monster.fighter.attack(Game.player, Game)
         else: #wander
             #check if there's an item under the monster's feet
-            monster.move_random(Game)
+            for obj in Game.objects: #look for items in the user's title
+                if obj.x == monster.x and obj.y == monster.y and obj.item:
+                    picked_up_item = True
+                    obj.item.pick_up(Game, monster)
+                    print monster.name + ' has picked up ' + obj.item.owner.name
+                    break
+
+            #if monster picked up objects, don't move
+            if not picked_up_items:
+                monster.move_random(Game)
+
         #check if monster is still alive
         if monster.fighter:
             return True
