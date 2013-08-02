@@ -314,13 +314,13 @@ class Item(object):
                 return data.STATE_NOACTION
 
     #an item that can be picked up and used
-    def pick_up(self, Game):
+    def pick_up(self, Game, user):
         #add to the player's inventory and remove from the map
         if len(Game.player.fighter.inventory) >= 26:
             message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
             retval = data.STATE_NOACTION
         else:
-            Game.player.fighter.add_item(self.owner)
+            user.fighter.add_item(self.owner)
             Game.objects.remove(self.owner)
             message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
 
@@ -429,6 +429,7 @@ class BasicMonster(object):
                 elif Game.player.fighter.hp > 0:
                     monster.fighter.attack(Game.player, Game)
         else: #wander
+            #check if there's an item under the monster's feet
             monster.move_random(Game)
         #check if monster is still alive
         if monster.fighter:

@@ -253,7 +253,7 @@ def handle_keys():
                 for object in Game.objects: #look for items in the player's title
                     if object.x == Game.player.x and object.y == Game.player.y and object.item:
                         Game.player.game_turns += 1
-                        return object.item.pick_up(Game)
+                        return object.item.pick_up(Game, Game.player)
                         #break
 
             if key_char == 'i':
