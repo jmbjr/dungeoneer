@@ -324,8 +324,10 @@ def handle_keys():
                 for thepage in range(numpages):
                     history.append([])
 
-                for line in reversed(Game.msg_history):
-                    history[page].append(line)
+                for obj in reversed(Game.msg_history):
+                    line = obj.text
+                    color = obj.color
+                    history[page].append(Menuobj(line, color = color))
                     count += 1
 
                     if count >= data.MAX_NUM_ITEMS:
@@ -336,7 +338,7 @@ def handle_keys():
                     window = libtcod.console_new(width, height)
                     libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, '')
                     libtcod.console_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
-                    menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], data.SCREEN_WIDTH, Game)
+                    menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], data.SCREEN_WIDTH, Game, letterdelim=None)
 
                 Game.fov_recompute = True           
 

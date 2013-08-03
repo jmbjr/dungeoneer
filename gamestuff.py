@@ -56,7 +56,7 @@ def message(new_msg, Game, color = libtcod.white):
             del Game.game_msgs[0]
 
         #add the new line as a tuple, with the txt and the color
-        Game.msg_history.append(str(turn) + ' : ' + line)
+        Game.msg_history.append(Menuobj(str(turn) + ' : ' + line, color=color))
         Game.game_msgs.append((line, color))
 
 def menu(header, options, width, Game, letterdelim=None):
