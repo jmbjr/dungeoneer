@@ -30,7 +30,7 @@ def main_menu():
         libtcod.console_print_ex(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
 
         #show options and wait for the player's choice
-        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24, Game)
+        choice = menu('', [Menuobj('Play a new game'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
 
         if choice == 0: #new game
             new_game()
@@ -132,7 +132,7 @@ def play_game():
             object.clear(Game)
 
         #handle keys and exit game if needed
-        if Game.player.fighter.speed_counter <= 0 and not Game.player.ai: #player can take a turn-based unless it has an AI         
+        if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
             Game.player_action = handle_keys()
 
             if Game.player_action != data.STATE_NOACTION:
@@ -142,7 +142,6 @@ def play_game():
         if Game.player_action == data.STATE_EXIT:
             break
 
-        #print str(Game.player_action) + ' ' + str(Game.player.fighter.speed_counter)
         #give monsters a turn
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
@@ -188,10 +187,10 @@ def check_level_up(Game):
 
         choice = None
         while choice == None: #keep asking till a choice is made
-            choice = menu('Level up! Choose a stat to raise:\n', 
-                ['Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',
-                'Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', 
-                'Agility (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')'], data.LEVEL_SCREEN_WIDTH, Game)
+                choice = menu('Level up! Choose a stat to raise:\n', 
+                [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=libtcod.green),
+                Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=libtcod.red), 
+                Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=libtcod.blue)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
 
         if choice == 0:
             Game.player.fighter.base_max_hp += 25
@@ -226,29 +225,29 @@ def handle_keys():
             pass
         #movement keys
         elif Game.key.vk == libtcod.KEY_UP or key_char == 'k' or Game.key.vk == libtcod.KEY_KP8 :
-            player_move_or_attack(0, -1, Game)
+            return player_move_or_attack(0, -1, Game)
 
         elif Game.key.vk == libtcod.KEY_DOWN or key_char == 'j' or Game.key.vk == libtcod.KEY_KP2 :
-            player_move_or_attack(0, 1, Game)
+            return player_move_or_attack(0, 1, Game)
 
         elif Game.key.vk == libtcod.KEY_LEFT or key_char == 'h' or Game.key.vk == libtcod.KEY_KP4 :
-            player_move_or_attack(-1, 0, Game)
+            return player_move_or_attack(-1, 0, Game)
 
         elif Game.key.vk == libtcod.KEY_RIGHT or key_char == 'l' or Game.key.vk == libtcod.KEY_KP6 :
-            player_move_or_attack(1, 0, Game)
+            return player_move_or_attack(1, 0, Game)
 
         #handle diagonal. 11 oclock -> clockwise
         elif key_char == 'y' or Game.key.vk == libtcod.KEY_KP7 :
-            player_move_or_attack(-1, -1, Game)
+            return player_move_or_attack(-1, -1, Game)
 
         elif key_char == 'u' or Game.key.vk == libtcod.KEY_KP9 :
-            player_move_or_attack(1, -1, Game)
+            return player_move_or_attack(1, -1, Game)
 
         elif key_char == 'n' or Game.key.vk == libtcod.KEY_KP3 :
-            player_move_or_attack(1, 1, Game)
+            return player_move_or_attack(1, 1, Game)
 
         elif key_char == 'b' or Game.key.vk == libtcod.KEY_KP1 :
-            player_move_or_attack(-1, 1, Game)
+            return player_move_or_attack(-1, 1, Game)
 
         else:
             #test for other keys
@@ -272,7 +271,7 @@ def handle_keys():
                 chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
-                    chosen_item.drop(Game)
+                    chosen_item.drop(Game, Game.player)
 
             if key_char == 'c':
                 #show character info
@@ -316,30 +315,28 @@ def handle_keys():
             if key_char == 'p': #display log
                 width = data.SCREEN_WIDTH
                 height = data.SCREEN_HEIGHT
-                window = libtcod.console_new(width, height)
-                libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, '')
-                libtcod.console_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
 
-                history = []
+                history = [[]]
                 count = 0
-                page = 0
+                page = 1
                 numpages = int(float(len(Game.msg_history))/data.MAX_NUM_ITEMS + 1)
-                
-                for line in Game.msg_history:
-                    history.append(line)
-                    count +=1
-                    print str(count)
+
+                for thepage in range(numpages):
+                    history.append([])
+
+                for line in reversed(Game.msg_history):
+                    history[page].append(line)
+                    count += 1
 
                     if count >= data.MAX_NUM_ITEMS:
                         page +=1
-                        menu ('Message History: Page ' + str(page) + '/' + str(numpages), history, data.SCREEN_WIDTH, Game)
-                        history = []
                         count = 0
 
-                page +=1
-                menu ('Message History: Page ' + str(page) + '/' + str(numpages), history, data.SCREEN_WIDTH, Game)
-                history = []
-                count = 0
+                for thepage in range(numpages):
+                    window = libtcod.console_new(width, height)
+                    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, '')
+                    libtcod.console_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
+                    menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], data.SCREEN_WIDTH, Game)
 
                 Game.fov_recompute = True           
 

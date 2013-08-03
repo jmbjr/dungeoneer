@@ -37,10 +37,17 @@ class Tile(object):
         if block_sight is None: block_sight = blocked
         self.block_sight = block_sight
 
+class Menuobj(object):
+    def __init__(self, text, color=None, char=None):
+        self.text = text
+        self.color = color
+        self.char = char
 
 #User Interface routines
 def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
+    turn = Game.player.game_turns
+
     new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
 
     for line in new_msg_lines:
@@ -49,10 +56,10 @@ def message(new_msg, Game, color = libtcod.white):
             del Game.game_msgs[0]
 
         #add the new line as a tuple, with the txt and the color
-        Game.msg_history.append(line)
+        Game.msg_history.append(str(turn) + ' : ' + line)
         Game.game_msgs.append((line, color))
 
-def menu(header, options, width, Game):
+def menu(header, options, width, Game, letterdelim=None):
     if len(options) > data.MAX_NUM_ITEMS: 
         message('Cannot have a menu with more than ' + str(data.MAX_NUM_ITEMS) + ' options.', Game)
 
@@ -72,9 +79,21 @@ def menu(header, options, width, Game):
     #print all the options
     y = header_height
     letter_index = ord('a')
-    for option_text in options:
-        text = '(' + chr(letter_index) + ') ' + option_text
-        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
+    
+    for obj in options:
+        text = obj.text
+        color = obj.color
+        char = obj.char
+
+        if color is None: color = libtcod.white
+        if char is None: char = ''
+        if letterdelim is None: 
+            letterchar = ''
+        else:
+            letterchar = chr(letter_index) + letterdelim
+
+        libtcod.console_set_default_foreground(window, color)    
+        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, letterchar + ' ' + char + ' ' + text)
         y += 1
         letter_index += 1
 
@@ -123,9 +142,11 @@ def inventory_menu(header, Game):
             #show additional info, in case it's equipped
             if item.equipment and item.equipment.is_equipped:
                 text = text + ' (on ' + item.equipment.slot + ')'
-            options.append(text)
+            
+            obj = Menuobj(text, color=item.color, char=item.char)    
+            options.append(obj)
 
-    index = menu(header, options, data.INVENTORY_WIDTH, Game)
+    index = menu(header, options, data.INVENTORY_WIDTH, Game, letterdelim='')
 
     if (index is None or len(Game.player.fighter.inventory) == 0) or index == 'ESC':
         return None
@@ -307,11 +328,20 @@ def player_move_or_attack(dx, dy, Game):
     if target is not None:
         Game.player.fighter.attack(target, Game)
         Game.player.game_turns +=1
+        state = data.STATE_PLAYING
     else:
-        Game.player.move(dx, dy, Game)
-        Game.player.game_turns +=1
-    
+        if Game.player.move(dx, dy, Game):
+            Game.player.game_turns +=1
+            state = data.STATE_PLAYING
+
+            for object in Game.objects: #look for items in the player's title
+                if object.x == Game.player.x and object.y == Game.player.y and object.item:
+                    message('* You see ' + object.name + ' at your feet *', Game, libtcod.yellow)         
+        else:
+            state = data.STATE_NOACTION
+
     Game.fov_recompute = True
+    return state
 
 def player_resting(Game):
     #Game.player.fighter.hp += 2

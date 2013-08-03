@@ -317,12 +317,14 @@ class Item(object):
     def pick_up(self, Game, user):
         #add to the player's inventory and remove from the map
         if len(Game.player.fighter.inventory) >= 26:
-            message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
+            if user is Game.player:
+                message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
             retval = data.STATE_NOACTION
         else:
             user.fighter.add_item(self.owner)
             Game.objects.remove(self.owner)
-            message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
+            if user is Game.player:
+                message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
@@ -333,17 +335,20 @@ class Item(object):
 
         return retval
 
-    def drop(self, Game):
+    def drop(self, Game, user):
         #add to the map and remove from the player's inventory. also, place it at the Game.player's coordinates
         Game.objects.append(self.owner)
-        Game.player.fighter.remove_item(self.owner)
-        self.owner.x = Game.player.x
-        self.owner.y = Game.player.y
-        message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
+        user.fighter.remove_item(self.owner)
+        self.owner.x = user.x
+        self.owner.y = user.y
+        if user is Game.player:
+            message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
 
         #special case: if the object has the equip component, dequip before dropping it
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
+
+        print user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
@@ -602,6 +607,9 @@ def monster_death(monster, Game):
     print monster.name + ' DIED!'
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
     message('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
+    for equip in monster.fighter.inventory:
+        equip.item.drop(Game, monster)
+
     monster.char = '%'
     monster.color = libtcod.dark_red
     monster.blocks = False
