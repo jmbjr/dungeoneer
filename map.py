@@ -64,7 +64,7 @@ def make_map(Game):
     #fill map with "blocked" tiles
     maplevel = data.maplist[Game.dungeon_level]
     print 'creating map:' + maplevel
-    
+
     Game.map[maplevel] = [[ Tile(True)
         for y in range(data.MAP_HEIGHT) ]
             for x in range(data.MAP_WIDTH) ]            
@@ -124,9 +124,9 @@ def make_map(Game):
             num_rooms +=1
 
     #create stairs at the center of the last room
-    Game.stairs = entities.Object(new_x, new_y, '>', 'stairs', libtcod.white, always_visible = True)
-    Game.objects.append(Game.stairs)
-    Game.stairs.send_to_back(Game) #so it's drawn below the monsters
+    Game.downstairs = entities.Object(new_x, new_y, '>', 'downstairs', libtcod.white, always_visible = True)
+    Game.objects.append(Game.downstairs)
+    Game.downstairs.send_to_back(Game) #so it's drawn below the monsters
 
 def place_objects(room, Game):
     #choose random number of monsters

@@ -306,7 +306,13 @@ def handle_keys():
 
             if key_char == '>':
                 #go down stairs, if the player is on them
-                if Game.stairs.x == Game.player.x and Game.stairs.y == Game.player.y:
+                if Game.downstairs.x == Game.player.x and Game.downstairs.y == Game.player.y:
+                    Game.player.game_turns +=1
+                    map.next_level(Game)
+
+            if key_char == '<':
+                #go down stairs, if the player is on them
+                if Game.upstairs.x == Game.player.x and Game.upstairs.y == Game.player.y:
                     Game.player.game_turns +=1
                     map.next_level(Game)
 
