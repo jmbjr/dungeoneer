@@ -550,8 +550,16 @@ def cast_fireball(Game, user):
         return data.STATE_CANCELLED
     else:
         theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
+        
+        #create fireball fov based on x,y coords of target
+        fov_map_fireball = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
+        for y in range(data.MAP_HEIGHT):
+            for x in range(data.MAP_WIDTH):
+                libtcod.map_set_properties(fov_map_fireball, x, y, not mapobj[x][y].block_sight, not mapobj[x][y].blocked)
+        libtcod.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+
         for obj in Game.objects: #damage all fighters within range
-            if obj.distance(x,y) <= data.FIREBALL_RADIUS and obj.fighter:
+            if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y):
                 message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
                 obj.fighter.take_damage(theDmg, Game)
         
