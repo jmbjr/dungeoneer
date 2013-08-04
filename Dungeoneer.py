@@ -54,7 +54,7 @@ def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
-    Game.map = []
+    Game.map = {}
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -377,9 +377,10 @@ def give_items(Game):
         Game.player.fighter.add_item(theitem)
 
 def set_map_explored(Game):
+    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            Game.map[Game.dungeon_level][x][y].explored = True
+            mapobj[x][y].explored = True
     Game.fov_recompute = True        
 
 def set_objects_visible(Game):

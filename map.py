@@ -9,32 +9,36 @@ import entitydata
 
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
+    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     for x in range(min(x1, x2), max(x1, x2) + 1):
-        Game.map[Game.dungeon_level][x][y].blocked = False
-        Game.map[Game.dungeon_level][x][y].block_sight = False
+        mapobj[x][y].blocked = False
+        mapobj[x][y].block_sight = False
 
 def create_v_tunnel(y1, y2, x, Game):
+    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     for y in range(min(y1, y2), max(y1, y2) + 1):
-        Game.map[Game.dungeon_level][x][y].blocked = False
-        Game.map[Game.dungeon_level][x][y].block_sight = False
+        mapobj[x][y].blocked = False
+        mapobj[x][y].block_sight = False
 
 def create_room(room, Game):
+    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     #go through tiles in rect to make them passable
     for x in range(room.x1 + 1, room.x2):
         for y in range(room.y1 + 1, room.y2):
-                Game.map[Game.dungeon_level][x][y].blocked = False
-                Game.map[Game.dungeon_level][x][y].block_sight = False
+                mapobj[x][y].blocked = False
+                mapobj[x][y].block_sight = False
 
 
 
 #map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
 def initialize_fov(Game):
+    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     Game.fov_recompute = True
     #create FOV map according to the generated map
     Game.fov_map = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.fov_map, x, y, not Game.map[Game.dungeon_level][x][y].block_sight, not Game.map[Game.dungeon_level][x][y].blocked)
+            libtcod.map_set_properties(Game.fov_map, x, y, not mapobj[x][y].block_sight, not mapobj[x][y].blocked)
 
     libtcod.console_clear(Game.con)
 
@@ -58,9 +62,12 @@ def from_dungeon_level(table, Game):
 def make_map(Game):
     Game.objects = [Game.player]
     #fill map with "blocked" tiles
-    Game.map[Game.dungeon_level] = [[ Tile(True)
+    maplevel = data.maplist[Game.dungeon_level]
+    print 'creating map:' + maplevel
+    
+    Game.map[maplevel] = [[ Tile(True)
         for y in range(data.MAP_HEIGHT) ]
-            for x in range(data.MAP_WIDTH) ]
+            for x in range(data.MAP_WIDTH) ]            
 
     rooms = []
     num_rooms = 0

@@ -75,8 +75,9 @@ class Object(object):
 
 
     def draw(self, Game):
+        mapobj = Game.map[data.maplist[Game.dungeon_level]]
         #only draw if in field of view of Game.player or it's set to always visible and on explored tile
-        if (libtcod.map_is_in_fov(Game.fov_map, self.x, self.y) or (self.always_visible and Game.map[Game.dungeon_level][self.x][self.y].explored)):
+        if (libtcod.map_is_in_fov(Game.fov_map, self.x, self.y) or (self.always_visible and mapobj[self.x][self.y].explored)):
             (x, y) = to_camera_coordinates(self.x, self.y, Game)
 
             if x is not None:
@@ -688,7 +689,8 @@ def target_tile(Game, max_range = None):
 
 def is_blocked(x, y, Game):
     #first test the map tile
-    if Game.map[x][y][Game.dungeon_level].blocked:
+    mapobj = Game.map[data.maplist[Game.dungeon_level]]
+    if mapobj[x][y].blocked:
         return True
 
     #now check for any blocking objects

@@ -29,6 +29,14 @@ TILE_SKEL_TEAL     = 256 + 32 + 7  #2nd tile in the 2nd row of tiles
 TILE_SKEL_YELLOW   = 256 + 32 + 8  #2nd tile in the 2nd row of tiles
 TILE_SKEL_PURPLE   = 256 + 32 + 9  #2nd tile in the 2nd row of tiles
 
+maplist =[]
+
+maplist.append('Intro')
+maplist.append('Brig')
+maplist.append('Engineering')
+maplist.append('Bridge')
+maplist.append('Sick Bay')
+
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 SCREEN_WIDTH       = 80  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
