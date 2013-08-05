@@ -342,6 +342,7 @@ class Item(object):
         user.fighter.remove_item(self.owner)
         self.owner.x = user.x
         self.owner.y = user.y
+        self.owner.send_to_back(Game)
         if user is Game.player:
             message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
 
@@ -552,14 +553,16 @@ def cast_fireball(Game, user):
         theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
         
         #create fireball fov based on x,y coords of target
+        mapobj = Game.map[data.maplist[Game.dungeon_level]]
         fov_map_fireball = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
-        for y in range(data.MAP_HEIGHT):
-            for x in range(data.MAP_WIDTH):
-                libtcod.map_set_properties(fov_map_fireball, x, y, not mapobj[x][y].block_sight, not mapobj[x][y].blocked)
+        for yy in range(data.MAP_HEIGHT):
+            for xx in range(data.MAP_WIDTH):
+                libtcod.map_set_properties(fov_map_fireball, xx, yy, not mapobj[xx][yy].block_sight, not mapobj[xx][yy].blocked)
+
         libtcod.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
 
         for obj in Game.objects: #damage all fighters within range
-            if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y):
+            if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
                 message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
                 obj.fighter.take_damage(theDmg, Game)
         
@@ -616,6 +619,8 @@ def monster_death(monster, Game):
     print monster.name + ' DIED!'
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
     message('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
+    monster.send_to_back(Game)
+
     for equip in monster.fighter.inventory:
         equip.item.drop(Game, monster)
 
@@ -626,7 +631,7 @@ def monster_death(monster, Game):
     monster.ai = None
     monster.name = 'remains of ' + monster.name
     monster.always_visible = True
-    monster.send_to_back(Game)
+    
 
 
 #check equip and inventory and buffs

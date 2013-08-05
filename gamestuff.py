@@ -335,8 +335,9 @@ def player_move_or_attack(dx, dy, Game):
             state = data.STATE_PLAYING
 
             for object in Game.objects: #look for items in the player's title
-                if object.x == Game.player.x and object.y == Game.player.y and object.item:
-                    message('* You see ' + object.name + ' at your feet *', Game, libtcod.yellow)         
+                if object.x == Game.player.x and object.y == Game.player.y and object is not Game.player:
+                    message('* You see ' + object.name + ' at your feet *', Game, libtcod.yellow)
+
         else:
             state = data.STATE_NOACTION
 
