@@ -385,10 +385,9 @@ def give_items(Game):
         Game.player.fighter.add_item(theitem)
 
 def set_map_explored(Game):
-    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            mapobj[x][y].explored = True
+            Game.currentmap[x][y].explored = True
     Game.fov_recompute = True        
 
 def set_objects_visible(Game):

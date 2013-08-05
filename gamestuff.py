@@ -197,7 +197,6 @@ def roll_dice(dicelist):
 
 #render routines
 def render_all(Game):
-    mapobj = Game.map[data.maplist[Game.dungeon_level]]
     move_camera(Game.player.x, Game.player.y, Game)
 
     if Game.fov_recompute:
@@ -210,7 +209,7 @@ def render_all(Game):
             for x in range(data.CAMERA_WIDTH):
                 (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
                 visible = libtcod.map_is_in_fov(Game.fov_map, map_x, map_y)
-                wall = mapobj[map_x][map_y].block_sight
+                wall = Game.currentmap[map_x][map_y].block_sight
 
                 if data.ASCIIMODE:
                     thewallchar  = data.WALL_CHAR
@@ -231,7 +230,7 @@ def render_all(Game):
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
-                    mapobj[map_x][map_y].explored = True
+                    Game.currentmap[map_x][map_y].explored = True
                     if wall:
                         color_wall_ground = data.COLOR_LIGHT_WALL
                         char_wall_ground = thewallchar
@@ -240,7 +239,7 @@ def render_all(Game):
                         char_wall_ground = thegroundchar
                     fov_wall_ground = libtcod.white
 
-                if mapobj[map_x][map_y].explored:
+                if Game.currentmap[map_x][map_y].explored:
                     libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
                 
 
