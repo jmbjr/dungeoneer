@@ -311,13 +311,15 @@ def handle_keys():
                     map.next_level(Game)
 
             if key_char == '<':
-                #go down stairs, if the player is on them
+                #go up stairs, if the player is on them
                 if Game.upstairs.x == Game.player.x and Game.upstairs.y == Game.player.y:
                     Game.player.game_turns +=1
-                    map.next_level(Game)
+                    map.prev_level(Game)
 
             if key_char == 's': #general status key
-                print str(Game.player.fighter.buffs)
+                #debug key to automatically go to prev level
+                msgbox('You start digging above your head!', Game, data.CHARACTER_SCREEN_WIDTH)
+                map.prev_level(Game)    
 
             if key_char == 'p': #display log
                 width = data.SCREEN_WIDTH

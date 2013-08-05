@@ -49,6 +49,20 @@ def next_level(Game):
     make_map(Game) #create fresh new level
     initialize_fov(Game)
 
+def prev_level(Game):
+    #advance to next level
+    message('You head up the stairs', Game, libtcod.red)
+    Game.dungeon_level -=1
+
+    if Game.dungeon_level <= 0: #leave dungeon      
+        message('You\'ve left the dungeon!', Game, libtcod.red)
+        Game.dungeon_level =1 #workaround to prevent game from complaining. 
+        return data.STATE_EXIT
+    else:
+        #make_map(Game) #create fresh new level
+        #assume map already made. bad long-term assumption
+        initialize_fov(Game)
+
 def from_dungeon_level(table, Game):
         #returns a value that depends on level. table specifies what value occurs after each level. default = 0
         for (value, level) in reversed(table):
@@ -102,6 +116,10 @@ def make_map(Game):
                 #first room. start player here
                 Game.player.x = new_x
                 Game.player.y = new_y
+                #create upstairs at the center of the first room
+                Game.upstairs = entities.Object(new_x, new_y, '<', 'upstairs', libtcod.white, always_visible = True)
+                Game.objects.append(Game.upstairs)
+                Game.upstairs.send_to_back(Game) #so it's drawn below the monsters
 
             else:
                 #for all other rooms, need to connect to previous room with a tunnel
