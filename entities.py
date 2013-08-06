@@ -416,10 +416,10 @@ class BasicMonster(object):
         useditem = None
         picked_up_items = False
 
+        monster = self.owner
         #find nearest non-clan object
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
-        monster = self.owner
-
+        
         fov_map_dude = fov_map(data.TORCH_RADIUS, Game, monster)
 
         if nearest_nonclan:
