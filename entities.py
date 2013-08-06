@@ -418,11 +418,10 @@ class BasicMonster(object):
 
         monster = self.owner
         #find nearest non-clan object
-        nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
-        
-        fov_map_dude = fov_map(data.TORCH_RADIUS, Game, monster)
-
+        (nearest_nonclan, fov_map_dude) = closest_nonclan(data.TORCH_RADIUS, Game, monster)
+    
         if nearest_nonclan:
+            #fov_map_dude = fov_map(data.TORCH_RADIUS, Game, monster)
             if libtcod.map_is_in_fov(fov_map_dude, nearest_nonclan.x, nearest_nonclan.y):
                 #move or use item
                 #for now, use items or lose them
@@ -711,7 +710,7 @@ def closest_nonclan(max_range, Game, dude):
             if dist < closest_dist:
                 closest_nonclan = object
                 closest_dist = dist           
-    return closest_nonclan
+    return (closest_nonclan, fov_map_dude)
 
 def closest_clan(max_range, Game):
     #find closest enemy up to max range in the player's FOV
