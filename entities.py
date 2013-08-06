@@ -416,7 +416,12 @@ class BasicMonster(object):
         useditem = None
         picked_up_items = False
 
+        #find nearest non-clan object
+        nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
         monster = self.owner
+
+
+
         if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
             #move or use item
             #for now, use items or lose them
@@ -429,16 +434,15 @@ class BasicMonster(object):
             #if monster didn't use item, then move
             if useditem is not data.STATE_USED:
                 #move towards Game.player if far enough away
-                #find nearest non-clan object
 
                 if flip_coin() and flip_coin() and flip_coin():
                      message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
-                if monster.distance_to(Game.player) >= 2:
-                    monster.move_towards(Game.player.x, Game.player.y, Game)
+                if monster.distance_to(nearest_nonclan) >= 2:
+                    monster.move_towards(nearest_nonclan.x, nearest_nonclan.y, Game)
 
                     #close enough to attack (if the Game.player is alive)
-                elif Game.player.fighter.hp > 0:
-                    monster.fighter.attack(Game.player, Game)
+                elif nearest_nonclan.fighter.hp > 0:
+                    monster.fighter.attack(nearest_nonclan, Game)
         else: #wander
             #check if there's an item under the monster's feet
             for obj in Game.objects[mapname(Game)]: #look for items in the user's title
@@ -681,21 +685,26 @@ def closest_monster(max_range, Game):
                 closest_dist = dist
     return closest_enemy
 
-def closest_nonclan(max_range, Game, dude):
-    #find closest nonclan entity up to max range in the object's FOV
-    closest_nonclan = None
-    closest_dist = max_range + 1 #start with slightly higher than max range
-
+def fov_map(max_range, Game, dude):
     #create fovmap for this dude
     fov_map_dude = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for yy in range(data.MAP_HEIGHT):
         for xx in range(data.MAP_WIDTH):
             libtcod.map_set_properties(fov_map_dude, xx, yy, not Game.map[mapname(Game)][xx][yy].block_sight, not Game.map[mapname(Game)][xx][yy].blocked)
 
-    libtcod.map_compute_fov(fov_map_dude, dude.x, dude.y, data.max_range, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+    libtcod.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+    return fov_map_dude
+
+
+def closest_nonclan(max_range, Game, dude):
+    #find closest nonclan entity up to max range in the object's FOV
+    closest_nonclan = None
+    closest_dist = max_range + 1 #start with slightly higher than max range
+
+    fov_map_dude = fov_map(max_range, Game, dude)
 
     for object in Game.objects[mapname(Game)]:
-        if object.fighter and  object.clan != dude.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y):
+        if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y):
             #calculate the distance between this and the dude
             dist = dude.distance_to(object)
             if dist < closest_dist:
