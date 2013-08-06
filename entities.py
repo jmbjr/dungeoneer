@@ -420,29 +420,30 @@ class BasicMonster(object):
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
         monster = self.owner
 
+        fov_map_dude = fov_map(data.TORCH_RADIUS, Game, monster)
 
+        if nearest_nonclan:
+            if libtcod.map_is_in_fov(fov_map_dude, nearest_nonclan.x, nearest_nonclan.y):
+                #move or use item
+                #for now, use items or lose them
+                if monster.fighter.inventory:
+                    #get random item from inv
+                    index = libtcod.random_get_int(0, 0, len(monster.fighter.inventory)-1)
+                    item = monster.fighter.inventory[index].item
+                    useditem = item.use(Game, user=monster)
 
-        if libtcod.map_is_in_fov(Game.fov_map, monster.x, monster.y):
-            #move or use item
-            #for now, use items or lose them
-            if monster.fighter.inventory:
-                #get random item from inv
-                index = libtcod.random_get_int(0, 0, len(monster.fighter.inventory)-1)
-                item = monster.fighter.inventory[index].item
-                useditem = item.use(Game, user=monster)
+                #if monster didn't use item, then move
+                if useditem is not data.STATE_USED:
+                    #move towards Game.player if far enough away
 
-            #if monster didn't use item, then move
-            if useditem is not data.STATE_USED:
-                #move towards Game.player if far enough away
+                    if flip_coin() and flip_coin() and flip_coin():
+                         message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
+                    if monster.distance_to(nearest_nonclan) >= 2:
+                        monster.move_towards(nearest_nonclan.x, nearest_nonclan.y, Game)
 
-                if flip_coin() and flip_coin() and flip_coin():
-                     message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
-                if monster.distance_to(nearest_nonclan) >= 2:
-                    monster.move_towards(nearest_nonclan.x, nearest_nonclan.y, Game)
-
-                    #close enough to attack (if the Game.player is alive)
-                elif nearest_nonclan.fighter.hp > 0:
-                    monster.fighter.attack(nearest_nonclan, Game)
+                        #close enough to attack (if the Game.player is alive)
+                    elif nearest_nonclan.fighter.hp > 0:
+                        monster.fighter.attack(nearest_nonclan, Game)
         else: #wander
             #check if there's an item under the monster's feet
             for obj in Game.objects[mapname(Game)]: #look for items in the user's title
