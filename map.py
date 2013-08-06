@@ -10,20 +10,20 @@ import entitydata
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
     for x in range(min(x1, x2), max(x1, x2) + 1):
-        Game.map[Game.mapname()][x][y].blocked = False
-        Game.map[Game.mapname()][x][y].block_sight = False
+        Game.map[Game.mapname][x][y].blocked = False
+        Game.map[Game.mapname][x][y].block_sight = False
 
 def create_v_tunnel(y1, y2, x, Game):
     for y in range(min(y1, y2), max(y1, y2) + 1):
-        Game.map[Game.mapname()][x][y].blocked = False
-        Game.map[Game.mapname()][x][y].block_sight = False
+        Game.map[Game.mapname][x][y].blocked = False
+        Game.map[Game.mapname][x][y].block_sight = False
 
 def create_room(room, Game):
     #go through tiles in rect to make them passable
     for x in range(room.x1 + 1, room.x2):
         for y in range(room.y1 + 1, room.y2):
-                Game.map[Game.mapname()][x][y].blocked = False
-                Game.map[Game.mapname()][x][y].block_sight = False
+                Game.map[Game.mapname][x][y].blocked = False
+                Game.map[Game.mapname][x][y].block_sight = False
 
 
 
@@ -34,7 +34,7 @@ def initialize_fov(Game):
     Game.fov_map = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.fov_map, x, y, not Game.map[Game.mapname()][x][y].block_sight, not Game.map[Game.mapname()][x][y].blocked)
+            libtcod.map_set_properties(Game.fov_map, x, y, not Game.map[Game.mapname][x][y].block_sight, not Game.map[Game.mapname][x][y].blocked)
 
     libtcod.console_clear(Game.con)
 
@@ -73,8 +73,8 @@ def make_map(Game):
     Game.objects = [Game.player]
     #fill map with "blocked" tiles
 
-    print 'creating map:' + Game.mapname()
-    Game.map[Game.mapname()] = [[ Tile(True)
+    print 'creating map:' + str(Game.mapname)
+    Game.map[Game.mapname] = [[ Tile(True)
         for y in range(data.MAP_HEIGHT) ]
             for x in range(data.MAP_WIDTH) ]            
 

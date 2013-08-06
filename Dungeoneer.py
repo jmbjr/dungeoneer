@@ -390,7 +390,7 @@ def give_items(Game):
 def set_map_explored(Game):
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            Game.map[Game.mapname()][x][y].explored = True
+            Game.map[Game.mapname][x][y].explored = True
     Game.fov_recompute = True        
 
 def set_objects_visible(Game):
