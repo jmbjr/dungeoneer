@@ -177,6 +177,8 @@ def place_objects(room, Game):
             monster.blocks      = True        
             monster.ai          = entities.BasicMonster()  #how do I set different ai?
             monster.ai.owner    = monster
+            monster.fighter.set_fov(Game)
+            print 'made a ' + monster.name
 
             #give monster items if they have them
             if entitydata.mobitems[choice]:

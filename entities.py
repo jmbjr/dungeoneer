@@ -156,6 +156,7 @@ class Fighter(object):
         self.base_regen = regen
         self.regen_counter = regen
         self.clan = clan
+        self.fov = None
 
         self.inventory = inventory
         if self.inventory:
@@ -164,6 +165,18 @@ class Fighter(object):
         self.buffs = buffs
         if self.buffs:
             self.buffs.owner = self
+
+    def set_fov(self, Game):
+        self.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
+        for yy in range(data.MAP_HEIGHT):
+            for xx in range(data.MAP_WIDTH):
+                libtcod.map_set_properties(self.fov, xx, yy, not Game.map[mapname(Game)][xx][yy].block_sight, not Game.map[mapname(Game)][xx][yy].blocked)
+        return self.fov   
+
+    def fov_recompute(self, Game):
+        libtcod.map_compute_fov(self.fov, self.owner.x, self.owner.y, data.TORCH_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+        return self.fov
+
 
     def add_item(self, item):
         if not self.inventory:
@@ -411,6 +424,8 @@ class ConfusedMonster(object):
 class BasicMonster(object):
     #AI must return True or False to indicate if still alive
     #AI for basic monster
+
+
     def take_turn(self, Game):
         #basic monsters can see you if you can see them
         useditem = None
@@ -418,11 +433,11 @@ class BasicMonster(object):
 
         monster = self.owner
         #find nearest non-clan object
-        (nearest_nonclan, fov_map_dude) = closest_nonclan(data.TORCH_RADIUS, Game, monster)
+        nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
     
         if nearest_nonclan:
             #fov_map_dude = fov_map(data.TORCH_RADIUS, Game, monster)
-            if libtcod.map_is_in_fov(fov_map_dude, nearest_nonclan.x, nearest_nonclan.y):
+            if libtcod.map_is_in_fov(monster.fighter.fov, nearest_nonclan.x, nearest_nonclan.y):
                 #move or use item
                 #for now, use items or lose them
                 if monster.fighter.inventory:
@@ -701,7 +716,11 @@ def closest_nonclan(max_range, Game, dude):
     closest_nonclan = None
     closest_dist = max_range + 1 #start with slightly higher than max range
 
-    fov_map_dude = fov_map(max_range, Game, dude)
+    if dude.fighter.fov is None:
+        fov_map_dude = dude.fighter.set_fov(Game)
+        print 'created fov'
+
+    fov_map_dude = dude.fighter.fov_recompute(Game)
 
     for object in Game.objects[mapname(Game)]:
         if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y):
@@ -710,7 +729,7 @@ def closest_nonclan(max_range, Game, dude):
             if dist < closest_dist:
                 closest_nonclan = object
                 closest_dist = dist           
-    return (closest_nonclan, fov_map_dude)
+    return closest_nonclan
 
 def closest_clan(max_range, Game):
     #find closest enemy up to max range in the player's FOV
