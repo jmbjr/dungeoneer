@@ -52,10 +52,12 @@ def main_menu():
 
 def new_game():
     #create object representing the player
-    fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death, speed = 3)
+    fighter_component = entities.Fighter(hp=10000, defense=300, power=600, xp=0, death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.map = {}
-    Game.objects[mapname(Game)] = {}
+    Game.objects = {}
+    Game.upstairs = {}
+    Game.downstairs = {}
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -307,13 +309,13 @@ def handle_keys():
 
             if key_char == '>':
                 #go down stairs, if the player is on them
-                if Game.downstairs.x == Game.player.x and Game.downstairs.y == Game.player.y:
+                if Game.downstairs[mapname(Game)].x == Game.player.x and Game.downstairs[mapname(Game)].y == Game.player.y:
                     Game.player.game_turns +=1
                     map.next_level(Game)
 
             if key_char == '<':
                 #go up stairs, if the player is on them
-                if Game.upstairs.x == Game.player.x and Game.upstairs.y == Game.player.y:
+                if Game.upstairs[mapname(Game)].x == Game.player.x and Game.upstairs[mapname(Game)].y == Game.player.y:
                     Game.player.game_turns +=1
                     map.prev_level(Game)
 

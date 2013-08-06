@@ -425,6 +425,8 @@ class BasicMonster(object):
                 item = monster.fighter.inventory[index].item
                 #item = monster.fighter.inventory[0].item
                 useditem = item.use(Game, user=monster)
+                print 'monster.name=' + str(monster.name)
+                print 'item.owner.name' + str(item.owner.name)
                 print useditem + ': ' + monster.name + ' used ' + item.owner.name
 
             #if monster didn't use item, then move

@@ -42,7 +42,11 @@ def next_level(Game):
     #advance to next level
     message('You head down the stairs', Game, libtcod.red)
     Game.dungeon_level +=1
-    make_map(Game) #create fresh new level
+    if not mapname(Game) in Game.map:
+        make_map(Game) #create fresh new level
+
+    Game.player.x = Game.upstairs[mapname(Game)].x
+    Game.player.y = Game.upstairs[mapname(Game)].y
     initialize_fov(Game)
 
 def prev_level(Game):
@@ -57,7 +61,12 @@ def prev_level(Game):
     else:
         #make_map(Game) #create fresh new level
         #assume map already made. bad long-term assumption
+        if not mapname(Game) in Game.map:
+            make_map(Game) #create fresh new level
+
         print 'sending to level ' + str(mapname(Game))
+        Game.player.x = Game.downstairs[mapname(Game)].x
+        Game.player.y = Game.downstairs[mapname(Game)].y
         initialize_fov(Game)
 
 def from_dungeon_level(table, Game):
