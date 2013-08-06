@@ -144,7 +144,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, speed = data.SPEED_DEFAULT, regen = data.REGEN_DEFAULT, death_function=None, buffs = None, inventory = None):
+    def __init__(self, hp, defense, power, xp, clan=None, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -155,6 +155,7 @@ class Fighter(object):
         self.speed_counter = 0
         self.base_regen = regen
         self.regen_counter = regen
+        self.clan = clan
 
         self.inventory = inventory
         if self.inventory:
@@ -423,7 +424,6 @@ class BasicMonster(object):
                 #get random item from inv
                 index = libtcod.random_get_int(0, 0, len(monster.fighter.inventory)-1)
                 item = monster.fighter.inventory[index].item
-                #item = monster.fighter.inventory[0].item
                 useditem = item.use(Game, user=monster)
                 print 'monster.name=' + str(monster.name)
                 print 'item.owner.name' + str(item.owner.name)
