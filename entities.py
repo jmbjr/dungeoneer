@@ -76,7 +76,7 @@ class Object(object):
 
     def draw(self, Game):
         #only draw if in field of view of Game.player or it's set to always visible and on explored tile
-        if (libtcod.map_is_in_fov(Game.fov_map, self.x, self.y) or (self.always_visible and Game.currentmap[self.x][self.y].explored)):
+        if (libtcod.map_is_in_fov(Game.fov_map, self.x, self.y) or (self.always_visible and Game.map[Game.mapname()][self.x][self.y].explored)):
             (x, y) = to_camera_coordinates(self.x, self.y, Game)
 
             if x is not None:
@@ -555,7 +555,7 @@ def cast_fireball(Game, user):
         fov_map_fireball = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
         for yy in range(data.MAP_HEIGHT):
             for xx in range(data.MAP_WIDTH):
-                libtcod.map_set_properties(fov_map_fireball, xx, yy, not Game.currentmap[xx][yy].block_sight, not Game.currentmap[xx][yy].blocked)
+                libtcod.map_set_properties(fov_map_fireball, xx, yy, not Game.map[Game.mapname()][xx][yy].block_sight, not Game.map[Game.mapname()][xx][yy].blocked)
 
         libtcod.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
 
@@ -700,7 +700,7 @@ def target_tile(Game, max_range = None):
 
 def is_blocked(x, y, Game):
     #first test the map tile
-    if Game.currentmap[x][y].blocked:
+    if Game.map[Game.mapname()][x][y].blocked:
         return True
 
     #now check for any blocking objects

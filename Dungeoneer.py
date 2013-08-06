@@ -15,6 +15,8 @@ class Game(object):
     game_msgs = []
     msg_history = []
 
+    def mapname(self):
+        return(data.maplist[Game.dungeon_level])
 
 #MAIN MENU GAME OPTIONS
 def main_menu():
@@ -55,6 +57,7 @@ def new_game():
     fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.map = {}
+    #Game.objects = {}
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -387,7 +390,7 @@ def give_items(Game):
 def set_map_explored(Game):
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            Game.currentmap[x][y].explored = True
+            Game.map[Game.mapname()][x][y].explored = True
     Game.fov_recompute = True        
 
 def set_objects_visible(Game):
