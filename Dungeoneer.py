@@ -55,7 +55,7 @@ def new_game():
     fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.map = {}
-    #Game.objects = {}
+    Game.objects[mapname(Game)] = {}
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
@@ -88,24 +88,24 @@ def save_game(filename='savegame'):
     print 'file saved!'
     file = shelve.open(filename, 'n')
     file['map'] = Game.map
-    file['objects'] = Game.objects
-    file['player_index'] = Game.objects.index(Game.player) #index of player in the objects list
+    file['objects'] = Game.objects[mapname(Game)]
+    file['player_index'] = Game.objects[mapname(Game)].index(Game.player) #index of player in the objects list
     file['game_msgs'] = Game.game_msgs
     file['msg_history'] = Game.msg_history
     file['game_state'] = Game.game_state
-    file['stairs_index'] = Game.objects.index(Game.stairs)
+    file['stairs_index'] = Game.objects[mapname(Game)].index(Game.stairs)
     file['dungeon_level'] = Game.dungeon_level
     file.close()
 
 def load_game(filename='savegame'):
     file = shelve.open(filename, 'r')
     Game.map = file['map']
-    Game.objects = file['objects'] 
-    Game.player = Game.objects[file['player_index']]  #get index of player in the objects list
+    Game.objects[mapname(Game)] = file['objects'] 
+    Game.player = Game.objects[mapname(Game)][file['player_index']]  #get index of player in the objects list
     Game.game_msgs = file['game_msgs']
     Game.msg_history = file['msg_history']
     Game.game_state = file['game_state']
-    Game.stairs = Game.objects[file['stairs_index']]
+    Game.stairs = Game.objects[mapname(Game)][file['stairs_index']]
     Game.dungeon_level = file['dungeon_level']
     file.close()
 
@@ -130,7 +130,7 @@ def play_game():
         check_level_up(Game)
 
         #erase objects from old position, before they move
-        for object in Game.objects:
+        for object in Game.objects[mapname(Game)]:
             object.clear(Game)
 
         #handle keys and exit game if needed
@@ -147,7 +147,7 @@ def play_game():
         #give monsters a turn
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
-            for object in Game.objects:
+            for object in Game.objects[mapname(Game)]:
                 if object.fighter:
                     
                     if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
@@ -255,7 +255,7 @@ def handle_keys():
             #test for other keys
             if key_char == 'g':
                 #pick up an item
-                for object in Game.objects: #look for items in the player's title
+                for object in Game.objects[mapname(Game)]: #look for items in the player's title
                     if object.x == Game.player.x and object.y == Game.player.y and object.item:
                         Game.player.game_turns += 1
                         return object.item.pick_up(Game, Game.player)
@@ -392,7 +392,7 @@ def set_map_explored(Game):
     Game.fov_recompute = True        
 
 def set_objects_visible(Game):
-    for object in Game.objects:
+    for object in Game.objects[mapname(Game)]:
         object.always_visible = True
 
 

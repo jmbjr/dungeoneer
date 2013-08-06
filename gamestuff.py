@@ -248,7 +248,7 @@ def render_all(Game):
                 
 
     #draw all objects in the list
-    for object in Game.objects:
+    for object in Game.objects[mapname(Game)]:
         if object != Game.player:
             object.draw(Game)
     #ensure we draw player last
@@ -306,7 +306,7 @@ def get_names_under_mouse(Game):
     (x, y) = (Game.camera_x + x, Game.camera_y + y)  #from screen to map coords
 
     #create list with the names of all objects at the mouse's coords and in FOV
-    names = [obj.name for obj in Game.objects
+    names = [obj.name for obj in Game.objects[mapname(Game)]
         if obj.x == x and obj.y == y and libtcod.map_is_in_fov(Game.fov_map, obj.x, obj.y)]
     
     names = ', '.join(names) #join names separated by commas
@@ -322,7 +322,7 @@ def player_move_or_attack(dx, dy, Game):
 
     #try to find attackable object there
     target = None
-    for object in Game.objects:
+    for object in Game.objects[mapname(Game)]:
         if object.x == x and object.y == y and object.fighter:
             target = object
             break
@@ -337,7 +337,7 @@ def player_move_or_attack(dx, dy, Game):
             Game.player.game_turns +=1
             state = data.STATE_PLAYING
 
-            for object in Game.objects: #look for items in the player's title
+            for object in Game.objects[mapname(Game)]: #look for items in the player's title
                 if object.x == Game.player.x and object.y == Game.player.y and object is not Game.player:
                     message('* You see ' + object.name + ' at your feet *', Game, libtcod.yellow)
 

@@ -137,8 +137,8 @@ class Object(object):
 
     def send_to_back(self, Game):
         #make this object be drawn first, so all others appear above it if they are in the same tile
-        Game.objects.remove(self)
-        Game.objects.insert(0, self)
+        Game.objects[mapname(Game)].remove(self)
+        Game.objects[mapname(Game)].insert(0, self)
 
 
 #fighters, spells, abilities
@@ -322,7 +322,7 @@ class Item(object):
             retval = data.STATE_NOACTION
         else:
             user.fighter.add_item(self.owner)
-            Game.objects.remove(self.owner)
+            Game.objects[mapname(Game)].remove(self.owner)
             if user is Game.player:
                 message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
 
@@ -337,7 +337,7 @@ class Item(object):
 
     def drop(self, Game, user):
         #add to the map and remove from the player's inventory. also, place it at the Game.player's coordinates
-        Game.objects.append(self.owner)
+        Game.objects[mapname(Game)].append(self.owner)
         user.fighter.remove_item(self.owner)
         self.owner.x = user.x
         self.owner.y = user.y
@@ -440,7 +440,7 @@ class BasicMonster(object):
                     monster.fighter.attack(Game.player, Game)
         else: #wander
             #check if there's an item under the monster's feet
-            for obj in Game.objects: #look for items in the user's title
+            for obj in Game.objects[mapname(Game)]: #look for items in the user's title
                 if obj.x == monster.x and obj.y == monster.y and obj.item:
                     picked_up_item = True
                     obj.item.pick_up(Game, monster)
@@ -559,7 +559,7 @@ def cast_fireball(Game, user):
 
         libtcod.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
 
-        for obj in Game.objects: #damage all fighters within range
+        for obj in Game.objects[mapname(Game)]: #damage all fighters within range
             if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
                 message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
                 obj.fighter.take_damage(theDmg, Game)
@@ -651,7 +651,7 @@ def get_all_equipped(obj, Game): #returns list of equipped items
                 equipped_list.append(item.equipment)
         return equipped_list
     else:
-        return [] #other Game.objects have no equipment
+        return [] #other Game.objects[mapname(Game)] have no equipment
 
 
 #target monsters/tiles and check for blocked tiles
@@ -663,7 +663,7 @@ def target_monster(Game, max_range = None):
             return None
 
         #return the first clicked monster, otherwise continue looping
-        for obj in Game.objects:
+        for obj in Game.objects[mapname(Game)]:
             if obj.x == x and obj.y == y and obj.fighter and obj != Game.player:
                 return obj
 
@@ -672,7 +672,7 @@ def closest_monster(max_range, Game):
     closest_enemy = None
     closest_dist = max_range + 1 #start with slightly higher than max range
 
-    for object in Game.objects:
+    for object in Game.objects[mapname(Game)]:
         if object.fighter and not object == Game.player and libtcod.map_is_in_fov(Game.fov_map, object.x, object.y):
             #calculate the distance between this and the player
             dist = Game.player.distance_to(object)
@@ -704,7 +704,7 @@ def is_blocked(x, y, Game):
         return True
 
     #now check for any blocking objects
-    for object in Game.objects:
+    for object in Game.objects[mapname(Game)]:
         if object.blocks and object.x == x and object.y == y:
             return True
 
