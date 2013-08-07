@@ -150,37 +150,47 @@ def play_game():
         #give monsters a turn
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
-            for object in Game.objects[mapname(Game)]:
-                if object.fighter:
-                    
-                    if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
-                        if object.ai:
-                            if object.ai.take_turn(Game): #only reset speed_counter if monster is still alive
-                                object.fighter.speed_counter = object.fighter.speed(Game)
+            oldlevel = Game.dungeon_level
 
-                    #this is clunky, but have to again check if monster is still alive
-                    if object.fighter:
-                        if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
-                            object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
-                            object.fighter.regen_counter = object.fighter.regen(Game)
+            for index,level in enumerate(data.maplist):
+                print index 
+                if index > 0: #skip intro level
+                    Game.dungeon_level = index
 
-                        object.fighter.regen_counter -= 1
-                        object.fighter.speed_counter -= 1
-             
-                        if object.fighter.buffs:
-                            for buff in object.fighter.buffs:
-                                buff.duration -= buff.decay_rate
-                                if buff.duration <= 0:
-                                    message('*The effects of ' + buff.name + ' has worn off!', Game, libtcod.light_red)
-                                    object.fighter.remove_buff(buff)
+                    for object in Game.objects[mapname(Game)]:
+                        if object.fighter:
+                            
+                            if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
+                                if object.ai:
+                                    print str(index) + ':' + object.name
+                                    if object.ai.take_turn(Game): #only reset speed_counter if monster is still alive
+                                        object.fighter.speed_counter = object.fighter.speed(Game)
 
-                        #always check to ensure hp <= max_hp
-                        if object.fighter.hp > object.fighter.max_hp(Game):
-                                object.fighter.hp = object.fighter.max_hp(Game)
+                            #this is clunky, but have to again check if monster is still alive
+                            if object.fighter:
+                                if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
+                                    object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
+                                    object.fighter.regen_counter = object.fighter.regen(Game)
 
-                elif object.ai:
-                    object.ai.take_turn(Game)
+                                object.fighter.regen_counter -= 1
+                                object.fighter.speed_counter -= 1
+                     
+                                if object.fighter.buffs:
+                                    for buff in object.fighter.buffs:
+                                        buff.duration -= buff.decay_rate
+                                        if buff.duration <= 0:
+                                            message('*The effects of ' + buff.name + ' has worn off!', Game, libtcod.light_red)
+                                            object.fighter.remove_buff(buff)
 
+                                #always check to ensure hp <= max_hp
+                                if object.fighter.hp > object.fighter.max_hp(Game):
+                                        object.fighter.hp = object.fighter.max_hp(Game)
+
+                        elif object.ai:
+                            print str(index) + 'xxxx' + object.name
+                            object.ai.take_turn(Game)
+
+            Game.dungeon_level = oldlevel 
             
 def check_level_up(Game):
     #see if the player's experience is enough to level-up

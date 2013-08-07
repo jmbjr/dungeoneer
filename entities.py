@@ -647,7 +647,6 @@ def push(Game, user, numpushes):
         return 'cancelled'
     else:
         dist = user.distance_to(target)
-        print 'dist=' + str(dist)
         if dist < 1.5: #adjacent
             #push
             if user is Game.player:
@@ -655,16 +654,15 @@ def push(Game, user, numpushes):
             else:
                 message(user.name + ' pushed ' + target.name + '!', Game, libtcod.magenta)
 
-            for times in range(numpushes):
+            for times in range(numpushes-1):
                 target.move_away(user.x, user.y, Game)
-
+            #last push is random
+            target.move_random(Game)
 
         else:
             if user is Game.player:
                 message('Too Far away to push!', Game, libtcod.red)
             return 'cancelled'
-
-
 
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
@@ -788,7 +786,6 @@ def closest_nonclan(max_range, Game, dude):
 
     if dude.fighter.fov is None:
         fov_map_dude = dude.fighter.set_fov(Game)
-        print 'created fov'
 
     fov_map_dude = dude.fighter.fov_recompute(Game)
 
@@ -800,20 +797,6 @@ def closest_nonclan(max_range, Game, dude):
                 closest_nonclan = object
                 closest_dist = dist           
     return closest_nonclan
-
-def closest_clan(max_range, Game):
-    #find closest enemy up to max range in the player's FOV
-    closest_enemy = None
-    closest_dist = max_range + 1 #start with slightly higher than max range
-
-    for object in Game.objects[mapname(Game)]:
-        if object.fighter and not object == Game.player and libtcod.map_is_in_fov(Game.fov_map, object.x, object.y):
-            #calculate the distance between this and the player
-            dist = Game.player.distance_to(object)
-            if dist < closest_dist:
-                closest_enemy = object
-                closest_dist = dist
-    return closest_enemy
 
 def target_tile(Game, max_range = None):
     #return the position of a tile left-clicked in player's FOV (optionally in a range) or (None, None) if right-clicked
