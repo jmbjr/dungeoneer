@@ -8,7 +8,7 @@ import data
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -16,6 +16,7 @@ class Object(object):
         self.char = char
         self.color = color
         self.always_visible = always_visible
+        self.level = level
 
         self.tilechar = tilechar
         if self.tilechar is None:

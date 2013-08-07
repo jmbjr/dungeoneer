@@ -61,7 +61,7 @@ def new_game():
 
     Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
-    Game.dungeon_level = 1
+    Game.player.level = 1
 
     map.make_dungeon(Game)
     #map.make_map(Game)
@@ -97,7 +97,7 @@ def save_game(filename='savegame'):
     file['msg_history'] = Game.msg_history
     file['game_state'] = Game.game_state
     file['stairs_index'] = Game.objects[mapname(Game)].index(Game.stairs)
-    file['dungeon_level'] = Game.dungeon_level
+    file['dungeon_level'] = Game.player.level
     file.close()
 
 def load_game(filename='savegame'):
@@ -109,7 +109,7 @@ def load_game(filename='savegame'):
     Game.msg_history = file['msg_history']
     Game.game_state = file['game_state']
     Game.stairs = Game.objects[mapname(Game)][file['stairs_index']]
-    Game.dungeon_level = file['dungeon_level']
+    Game.player.level = file['dungeon_level']
     file.close()
 
     map.initialize_fov(Game)
@@ -150,12 +150,12 @@ def play_game():
         #give monsters a turn
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
-            oldlevel = Game.dungeon_level
+            oldlevel = Game.player.level
 
             for index,level in enumerate(data.maplist):
                 print index 
                 if index > 0: #skip intro level
-                    Game.dungeon_level = index
+                    Game.player.level = index
 
                     for object in Game.objects[mapname(Game)]:
                         if object.fighter:
@@ -190,7 +190,7 @@ def play_game():
                             print str(index) + 'xxxx' + object.name
                             object.ai.take_turn(Game)
 
-            Game.dungeon_level = oldlevel 
+            Game.player.level = oldlevel 
             
 def check_level_up(Game):
     #see if the player's experience is enough to level-up

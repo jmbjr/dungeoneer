@@ -42,7 +42,7 @@ def initialize_fov(Game):
 def next_level(Game):
     #advance to next level
     message('You head down the stairs', Game, libtcod.red)
-    Game.dungeon_level +=1
+    Game.player.level +=1
     if not mapname(Game) in Game.map:
         make_map(Game) #create fresh new level
 
@@ -53,11 +53,11 @@ def next_level(Game):
 def prev_level(Game):
     #advance to next level
     message('You head up the stairs', Game, libtcod.red)
-    Game.dungeon_level -=1
+    Game.player.level -=1
 
-    if Game.dungeon_level <= 0: #leave dungeon      
+    if Game.player.level <= 0: #leave dungeon      
         message('You\'ve left the dungeon!', Game, libtcod.red)
-        Game.dungeon_level =1 #workaround to prevent game from complaining. 
+        Game.player.level =1 #workaround to prevent game from complaining. 
         return data.STATE_EXIT
     else:
         #make_map(Game) #create fresh new level
@@ -73,7 +73,7 @@ def prev_level(Game):
 def from_dungeon_level(table, Game):
         #returns a value that depends on level. table specifies what value occurs after each level. default = 0
         for (value, level) in reversed(table):
-            if Game.dungeon_level >= level:
+            if Game.player.level >= level:
                 return value
         return 0
 
@@ -82,10 +82,10 @@ def make_dungeon(Game):
     for index,level in enumerate(data.maplist):
         if index > 0: #skip intro level
             print '=== creating level ' + mapname(Game)
-            Game.dungeon_level = index
+            Game.player.level = index
             make_map(Game)
 
-    Game.dungeon_level = 1
+    Game.player.level = 1
 
     Game.player.x = Game.upstairs[mapname(Game)].x
     Game.player.y = Game.upstairs[mapname(Game)].y
