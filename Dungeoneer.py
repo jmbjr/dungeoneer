@@ -52,7 +52,7 @@ def main_menu():
 
 def new_game():
     #create object representing the player
-    fighter_component = entities.Fighter(hp=10000, defense=300, power=600, xp=0, clan='monster', death_function=entities.player_death, speed = 3)
+    fighter_component = entities.Fighter(hp=10000, defense=300, power=600, xp=0, clan='clan1', death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.map = {}
     Game.objects = {}

@@ -95,6 +95,36 @@ class Object(object):
         if x is not None and libtcod.map_is_in_fov(Game.fov_map, self.x, self.y):
             libtcod.console_put_char_ex(Game.con, x, y, data.GROUND_CHAR, libtcod.white, data.COLOR_LIGHT_GROUND)
 
+    def move_away(self, target_x, target_y, Game):
+        #vector from this object to the target, and distance
+        dx1 = target_x - self.x
+        dy1 = target_y - self.y
+        #print str(target_x) + '/' + str(target_y) + '::' + str(self.x) + '/' + str(self.y)
+        distance = get_distance(dx1, dy1)
+        
+        #normalize vector and round accordingly and convert to int
+        dx = -1*int(round(dx1 / distance))
+        dy = -1*int(round(dy1 / distance))
+
+        #print str(dx) + '/' + str(dx1) + ', ' + str(dy) + '/' + str(dy) + ', ' + str(distance)
+        if not self.move(dx, dy, Game):
+        #if monster didn't move. Try diagonal
+            if dx1 != 0:
+                dx = -1 * abs(dx1) / dx1
+            elif target_x < self.x:
+                dx = 1
+            else:
+                dx = -1
+
+            if dy1 != 0:
+                dy = -1*abs(dy1) / dy1
+            elif target_y < self.y:
+                dy = 1
+            else:
+                dy = -1
+            #print 'trying diagonal:' +str(dx) + ', ' + str(dy) + ', ' + str(distance)
+            self.move(dx, dy, Game)        
+
     def move_towards(self, target_x, target_y, Game):
         #vector from this object to the target, and distance
         dx1 = target_x - self.x
@@ -116,7 +146,7 @@ class Object(object):
             else:
                 dx = 1
 
-            if dy != 0:
+            if dy1 != 0:
                 dy = abs(dy1) / dy1
             elif target_y < self.y:
                 dy = -1
@@ -436,7 +466,6 @@ class BasicMonster(object):
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
     
         if nearest_nonclan:
-            #fov_map_dude = fov_map(data.TORCH_RADIUS, Game, monster)
             if libtcod.map_is_in_fov(monster.fighter.fov, nearest_nonclan.x, nearest_nonclan.y):
                 #move or use item
                 #for now, use items or lose them
@@ -597,15 +626,20 @@ def cast_heal(Game, user):
     user.fighter.heal(data.HEAL_AMOUNT, Game)
 
 def cast_push(Game, user):
+    push(Game, user, 3)
+
+def cast_bigpush(Game, user):
+    push(Game, user, 5)
+
+def push(Game, user, numpushes):
     #find nearest enemy (within range) and damage it
     target = None
     if user is Game.player:
         target = closest_monster(data.LIGHTNING_RANGE, Game)
 
     #otherwise, this is a mob
-    elif libtcod.map_is_in_fov(Game.fov_map, user.x, user.y):
-        #ensure monster is within player's fov
-        target = Game.player
+    else:
+        target = closest_nonclan(data.TORCH_RADIUS, Game, user)
 
     if target is None:
         if user is Game.player:
@@ -613,9 +647,18 @@ def cast_push(Game, user):
         return 'cancelled'
     else:
         dist = user.distance_to(target)
-        if dist ==1: #adjacent
+        print 'dist=' + str(dist)
+        if dist < 1.5: #adjacent
             #push
-            target.move_random(Game)
+            if user is Game.player:
+                message('You pushed the ' + target.name + '!', Game, libtcod.magenta)
+            else:
+                message(user.name + ' pushed ' + target.name + '!', Game, libtcod.magenta)
+
+            for times in range(numpushes):
+                target.move_away(user.x, user.y, Game)
+
+
         else:
             if user is Game.player:
                 message('Too Far away to push!', Game, libtcod.red)

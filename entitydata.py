@@ -6,16 +6,17 @@ import data
 #EDITABLE MOB DATA
 mobs={}
 mobs = {
- 'johnstein':      {'char':'j', 'color':libtcod.white,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':10 , 'defense':0 , 'power':2 , 'xp':20 , 'clan':'clan1', 'death_function': entities.monster_death, 'speed':1}, 'caster':{'mp':10}}, 
+ 'johnstein':      {'char':'j', 'color':libtcod.light_gray,  'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':10 , 'defense':0 , 'power':2 , 'xp':20 , 'clan':'clan1', 'death_function': entities.monster_death, 'speed':1}, 'caster':{'mp':10}}, 
  'greynaab':       {'char':'g', 'color':libtcod.light_blue,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':20 , 'defense':1 , 'power':4 , 'xp':40 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
  'jerbear':        {'char':'j', 'color':libtcod.green,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':25 , 'defense':1 , 'power':5 , 'xp':50 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
  'zombiesheep':    {'char':'z', 'color':libtcod.yellow,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':30 , 'defense':2 , 'power':6 , 'xp':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':7}}, 
- 'Vitamin p':       {'char':'p', 'color':libtcod.pink,        'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':30 , 'defense':3 , 'power':0 , 'xp':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':2}}, 
+ 'pushy':          {'char':'p', 'color':libtcod.pink,        'tilechar':data.TILE_SKEL_MAGENTA,'fighter':{'hp':50 , 'defense':10 ,'power':0 , 'xp':100 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
 
  'JOHNSTEIN':      {'char':'J', 'color':libtcod.black,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':100 , 'defense':3, 'power':5 , 'xp':200 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
  'GREYNAAB':       {'char':'G', 'color':libtcod.red,         'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':200 , 'defense':6, 'power':10, 'xp':400 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
  'JERBEAR':        {'char':'J', 'color':libtcod.blue,        'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':250 , 'defense':9, 'power':15, 'xp':500 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
  'ZOMBIESHEEP':    {'char':'Z', 'color':libtcod.green,       'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':300 , 'defense':12,'power':20, 'xp':600 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':7}}, 
+ 'PUSHY':          {'char':'P', 'color':libtcod.pink,        'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':500 , 'defense':20 ,'power':0 , 'xp':1000 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
 
 }
 
@@ -23,13 +24,15 @@ mobitems = {}
 mobitems = {
 	'johnstein':   ['heal', 'heal', 'heal', 'heal'],
 	'greynaab':    ['fireball', 'heal', 'fireball'],
-	'jerbear':     ['confuse', 'heal', 'confuse'],
+	'jerbear':     ['confuse', 'heal', 'heal'],
 	'zombiesheep': ['lightning','lightning','heal','lightning'],
-	'Vitamin p':   ['push','push','push','push','push','push'],
+	'pushy':       ['push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push'],
 	'JOHNSTEIN':   ['heal', 'heal', 'heal', 'heal'],
 	'GREYNAAB':    ['fireball', 'heal', 'fireball'],
-	'JERBEAR':     ['confuse', 'heal', 'confuse'],
-	'ZOMBIESHEEP': ['lightning','lightning','heal', 'lightning']
+	'JERBEAR':     ['confuse', 'heal', 'heal'],
+	'ZOMBIESHEEP': ['lightning','lightning','heal', 'lightning'],
+	'PUSHY':       ['bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush','bigpush']
+
 }
 #add help on how to use this
 #basically, set = to list of lists. Each list gives a chance (arbitrary units) and a level
@@ -38,16 +41,17 @@ mobitems = {
 
 mobchances = {}
 mobchances = {
-	'johnstein':    [[100,1], [25, 3]],
+	'johnstein':    [[100,1], [50, 3]],
 	'greynaab':     [[60, 1], [25, 3]],
 	'jerbear':      [[50, 1], [25, 3]],
 	'zombiesheep':  [[40, 1], [25, 3]],
-	'Vitamin p'  :  [[100,1], [100,3]],
+	'pushy'      :  [[100,1], [50,3]],
 
 	'JOHNSTEIN':    [[100,3], [35, 5]],
 	'GREYNAAB':     [[60, 3], [35, 5]],
 	'JERBEAR':      [[50, 3], [30, 5]],
-	'ZOMBIESHEEP':  [[40, 3], [25, 5]]
+	'ZOMBIESHEEP':  [[40, 3], [25, 5]],
+	'PUSHY':        [[100, 3],[50, 5]]
 }
 
 items={}
@@ -56,7 +60,8 @@ items = {
 	'lightning':  {'name':'scroll of lightning bolt', 'char':'?', 'color':libtcod.yellow,       'item':{'use_function': entities.cast_lightning}}, 
 	'fireball':   {'name':'scroll of fireball',       'char':'?', 'color':libtcod.red,          'item':{'use_function': entities.cast_fireball}}, 
 	'confuse':    {'name':'scroll of confusion',      'char':'?', 'color':libtcod.light_violet, 'item':{'use_function': entities.cast_confusion}}, 
-	'push'   :    {'name':'scroll of push',           'char':'?', 'color':libtcod.pink,         'item':{'use_function': entities.cast_push}},
+	'push'   :    {'name':'scroll of push',           'char':'?', 'color':libtcod.magenta,      'item':{'use_function': entities.cast_push}},
+	'bigpush':    {'name':'scroll of bigpush',        'char':'?', 'color':libtcod.dark_magenta, 'item':{'use_function': entities.cast_bigpush}},
 
 	'sword':      {'name':'sword',  'char':'/', 'color':libtcod.sky,           'equipment':{'slot':'right hand' ,   'power_bonus'  :5  }}, 
 	'shield':     {'name':'shield', 'char':'[', 'color':libtcod.darker_orange, 'equipment':{'slot':'left hand'  ,   'defense_bonus':3  }},

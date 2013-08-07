@@ -87,6 +87,9 @@ def make_dungeon(Game):
 
     Game.dungeon_level = 1
 
+    Game.player.x = Game.upstairs[mapname(Game)].x
+    Game.player.y = Game.upstairs[mapname(Game)].y
+    initialize_fov(Game)
 
 #Primary map generator and object placement routines.
 def make_map(Game):
