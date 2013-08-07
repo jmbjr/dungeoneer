@@ -6,6 +6,7 @@ import data
 #specific imports needed for this module
 import entities
 import entitydata
+import itertools
 
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
@@ -76,6 +77,15 @@ def from_dungeon_level(table, Game):
                 return value
         return 0
 
+
+def make_dungeon(Game):
+    for index,level in enumerate(data.maplist):
+        if index > 0: #skip intro level
+            print '=== creating level ' + mapname(Game)
+            Game.dungeon_level = index
+            make_map(Game)
+
+    Game.dungeon_level = 1
 
 
 #Primary map generator and object placement routines.

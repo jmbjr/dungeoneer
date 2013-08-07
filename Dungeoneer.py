@@ -63,7 +63,8 @@ def new_game():
     #generate map (at this point it's not drawn to screen)
     Game.dungeon_level = 1
 
-    map.make_map(Game)
+    map.make_dungeon(Game)
+    #map.make_map(Game)
     map.initialize_fov(Game)
 
     Game.game_state = data.STATE_PLAYING
