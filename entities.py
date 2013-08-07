@@ -518,7 +518,7 @@ def use_orange_crystal(Game, user):
     if user is Game.player:
         message('You feel speedy!', Game, libtcod.orange)
     else:
-        message('The ' + user.name + ' looks speedy!')
+        message('The ' + user.name + ' looks speedy!', Game, libtcod.orange)
 
     buff_component = Buff('Super Speed', speed_bonus=-3)
     user.fighter.add_buff(buff_component)
@@ -595,6 +595,33 @@ def cast_heal(Game, user):
     else:
         message('The ' + user.name + ' looks healthier!', Game, libtcod.red)
     user.fighter.heal(data.HEAL_AMOUNT, Game)
+
+def cast_push(Game, user):
+    #find nearest enemy (within range) and damage it
+    target = None
+    if user is Game.player:
+        target = closest_monster(data.LIGHTNING_RANGE, Game)
+
+    #otherwise, this is a mob
+    elif libtcod.map_is_in_fov(Game.fov_map, user.x, user.y):
+        #ensure monster is within player's fov
+        target = Game.player
+
+    if target is None:
+        if user is Game.player:
+            message('No enemy is close enough to strike', Game, libtcod.red)
+        return 'cancelled'
+    else:
+        dist = user.distance_to(target)
+        if dist ==1: #adjacent
+            #push
+            target.move_random(Game)
+        else:
+            if user is Game.player:
+                message('Too Far away to push!', Game, libtcod.red)
+            return 'cancelled'
+
+
 
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
