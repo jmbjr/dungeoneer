@@ -26,8 +26,6 @@ def create_room(room, Game):
                 Game.map[Game.level][x][y].blocked = False
                 Game.map[Game.level][x][y].block_sight = False
 
-
-
 #map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
 def initialize_fov(Game):
     Game.fov_recompute = True
@@ -43,6 +41,8 @@ def next_level(Game):
     #advance to next level
     message('You head down the stairs', Game, libtcod.red)
     Game.player.dungeon_level +=1
+    Game.level = data.maplist[Game.player.dungeon_level]
+
     if not Game.level in Game.map:
         make_map(Game) #create fresh new level
 
@@ -54,6 +54,7 @@ def prev_level(Game):
     #advance to next level
     message('You head up the stairs', Game, libtcod.red)
     Game.player.dungeon_level -=1
+    Game.level = data.maplist[Game.player.dungeon_level]
 
     if Game.player.dungeon_level <= 0: #leave dungeon      
         message('You\'ve left the dungeon!', Game, libtcod.red)
@@ -81,11 +82,13 @@ def from_dungeon_level(table, Game):
 def make_dungeon(Game):
     for index,level in enumerate(data.maplist):
         if index > 0: #skip intro level
-            print '=== creating level ' + Game.level
+            print '=== creating level ' + level
             Game.player.dungeon_level = index
+            Game.level = level
             make_map(Game)
 
     Game.player.dungeon_level = 1
+    Game.level = data.maplist[Game.player.dungeon_level]
 
     Game.player.x = Game.upstairs[Game.level].x
     Game.player.y = Game.upstairs[Game.level].y
@@ -191,6 +194,8 @@ def place_objects(room, Game):
             monster.ai          = entities.BasicMonster()  #how do I set different ai?
             monster.ai.owner    = monster
             monster.fighter.set_fov(Game)
+            monster.dungeon_level = data.maplist.index(Game.level)
+
             print 'made a ' + monster.name
 
             #give monster items if they have them

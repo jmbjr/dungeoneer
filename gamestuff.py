@@ -44,7 +44,7 @@ class Menuobj(object):
         self.char = char
 
 
-def Game.level:
+def mapname(Game):
     return(data.maplist[Game.player.dungeon_level])
 
 #User Interface routines

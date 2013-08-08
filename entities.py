@@ -127,35 +127,36 @@ class Object(object):
 
             self.move(dx, dy, Game)        
 
-    def move_towards(self, target_x, target_y, Game):
-        #vector from this object to the target, and distance
-        dx1 = target_x - self.x
-        dy1 = target_y - self.y
-        #print str(target_x) + '/' + str(target_y) + '::' + str(self.x) + '/' + str(self.y)
-        distance = get_distance(dx1, dy1)
-        
-        #normalize vector and round accordingly and convert to int
-        dx = int(round(dx1 / distance))
-        dy = int(round(dy1 / distance))
+    def move_towards(self, target, Game):
+        if self.dungeon_level == target.dungeon_level:
+            #vector from this object to the target, and distance
+            dx1 = target.x - self.x
+            dy1 = target.y - self.y
+            #print str(target_x) + '/' + str(target_y) + '::' + str(self.x) + '/' + str(self.y)
+            distance = get_distance(dx1, dy1)
+            
+            #normalize vector and round accordingly and convert to int
+            dx = int(round(dx1 / distance))
+            dy = int(round(dy1 / distance))
 
-        #print str(dx) + '/' + str(dx1) + ', ' + str(dy) + '/' + str(dy) + ', ' + str(distance)
-        if not self.move(dx, dy, Game):
-        #if monster didn't move. Try diagonal
-            if dx1 != 0:
-                dx = abs(dx1) / dx1
-            elif target_x < self.x:
-                dx = -1
-            else:
-                dx = 1
+            #print str(dx) + '/' + str(dx1) + ', ' + str(dy) + '/' + str(dy) + ', ' + str(distance)
+            if not self.move(dx, dy, Game):
+            #if monster didn't move. Try diagonal
+                if dx1 != 0:
+                    dx = abs(dx1) / dx1
+                elif target.x < self.x:
+                    dx = -1
+                else:
+                    dx = 1
 
-            if dy1 != 0:
-                dy = abs(dy1) / dy1
-            elif target_y < self.y:
-                dy = -1
-            else:
-                dy = 1
-            #print 'trying diagonal:' +str(dx) + ', ' + str(dy) + ', ' + str(distance)
-            self.move(dx, dy, Game)
+                if dy1 != 0:
+                    dy = abs(dy1) / dy1
+                elif target.y < self.y:
+                    dy = -1
+                else:
+                    dy = 1
+                #print 'trying diagonal:' +str(dx) + ', ' + str(dy) + ', ' + str(distance)
+                self.move(dx, dy, Game)
 
     def distance_to(self, other):
         #return distance to another object
@@ -483,7 +484,7 @@ class BasicMonster(object):
                     if flip_coin() and flip_coin() and flip_coin():
                          message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
                     if monster.distance_to(nearest_nonclan) >= 2:
-                        monster.move_towards(nearest_nonclan.x, nearest_nonclan.y, Game)
+                        monster.move_towards(nearest_nonclan, Game)
 
                         #close enough to attack (if the Game.player is alive)
                     elif nearest_nonclan.fighter.hp > 0:
@@ -584,6 +585,8 @@ def cast_confusion(Game, user):
 
 def cast_fireball(Game, user):
     (x,y) = (None, None)
+    target = None
+    target = closest_nonclan(data.TORCH_RADIUS, Game, user)
 
     if user is Game.player: 
         #ask the player for a target tile to throw a fireball at
@@ -592,8 +595,9 @@ def cast_fireball(Game, user):
         message('The fireball explodes', Game, libtcod.orange)
 
     #otherwise this is a mob
-    elif libtcod.map_is_in_fov(Game.player.fighter.fov, user.x, user.y) and Game.player.dungeon_level == user.dungeon_level:
-        (x,y) = (Game.player.x, Game.player.y)
+    elif target:
+        if libtcod.map_is_in_fov(user.fighter.fov, target.x, target.y) and target.dungeon_level == user.dungeon_level:
+            (x,y) = (target.x, target.y)
 
     if x is None or y is None:
         return data.STATE_CANCELLED
@@ -668,13 +672,17 @@ def push(Game, user, numpushes):
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
     target = None
+    target = closest_nonclan(data.LIGHTNING_RANGE, Game, user)
+
     if user is Game.player:
         target = closest_monster(data.LIGHTNING_RANGE, Game)
 
     #otherwise, this is a mob
-    elif libtcod.map_is_in_fov(Game.player.fighter.fov, user.x, user.y) and Game.player.dungeon_level == user.dungeon_level:
+    elif target:
+        if not (libtcod.map_is_in_fov(user.fighter.fov, target.x, target.y) and target.dungeon_level == user.dungeon_level):
+            target = None
         #ensure monster is within player's fov
-        target = Game.player
+        
 
     if target is None:
         if user is Game.player:
