@@ -44,7 +44,7 @@ class Menuobj(object):
         self.char = char
 
 
-def mapname(Game):
+def Game.level:
     return(data.maplist[Game.player.dungeon_level])
 
 #User Interface routines
@@ -206,14 +206,14 @@ def render_all(Game):
     if Game.fov_recompute:
         #recompute FOV if needed (if player moved or something else happened)
         Game.fov_recompute = False
-        libtcod.map_compute_fov(Game.fov_map, Game.player.x, Game.player.y, data.TORCH_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+        Game.player.fighter.fov_recompute(Game)
         libtcod.console_clear(Game.con)
 
         for y in range(data.CAMERA_HEIGHT):
             for x in range(data.CAMERA_WIDTH):
                 (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
-                visible = libtcod.map_is_in_fov(Game.fov_map, map_x, map_y)
-                wall = Game.map[mapname(Game)][map_x][map_y].block_sight
+                visible = libtcod.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
+                wall = Game.map[Game.level][map_x][map_y].block_sight
 
                 if data.ASCIIMODE:
                     thewallchar  = data.WALL_CHAR
@@ -234,7 +234,7 @@ def render_all(Game):
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
-                    Game.map[mapname(Game)][map_x][map_y].explored = True
+                    Game.map[Game.level][map_x][map_y].explored = True
                     if wall:
                         color_wall_ground = data.COLOR_LIGHT_WALL
                         char_wall_ground = thewallchar
@@ -243,12 +243,12 @@ def render_all(Game):
                         char_wall_ground = thegroundchar
                     fov_wall_ground = libtcod.white
 
-                if Game.map[mapname(Game)][map_x][map_y].explored:
+                if Game.map[Game.level][map_x][map_y].explored:
                     libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
                 
 
     #draw all objects in the list
-    for object in Game.objects[mapname(Game)]:
+    for object in Game.objects[Game.level]:
         if object != Game.player:
             object.draw(Game)
     #ensure we draw player last
@@ -263,7 +263,7 @@ def render_all(Game):
 
     #show player stats
     render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), libtcod.light_red, libtcod.darker_red, Game)
-    libtcod.console_print_ex(Game.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, mapname(Game))
+    libtcod.console_print_ex(Game.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, Game.level)
     libtcod.console_print_ex(Game.panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level: ' + str(Game.player.dungeon_level))
     libtcod.console_print_ex(Game.panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns))
 
@@ -307,8 +307,8 @@ def get_names_under_mouse(Game):
     (x, y) = (Game.camera_x + x, Game.camera_y + y)  #from screen to map coords
 
     #create list with the names of all objects at the mouse's coords and in FOV
-    names = [obj.name for obj in Game.objects[mapname(Game)]
-        if obj.x == x and obj.y == y and libtcod.map_is_in_fov(Game.fov_map, obj.x, obj.y)]
+    names = [obj.name for obj in Game.objects[Game.level]
+        if obj.x == x and obj.y == y and libtcod.map_is_in_fov(Game.player.fighter.fov, obj.x, obj.y)]
     
     names = ', '.join(names) #join names separated by commas
     return names.capitalize()
@@ -320,7 +320,7 @@ def player_move_or_attack(dx, dy, Game):
     #the coords the player is moving-to/attacking
     x = Game.player.x + dx
     y = Game.player.y + dy
-    
+
     #try to find attackable object there
     target = None
     #only check objects on the same floor as the player
