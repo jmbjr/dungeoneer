@@ -15,7 +15,6 @@ class Game(object):
     game_msgs = []
     msg_history = []
 
-
 #MAIN MENU GAME OPTIONS
 def main_menu():
     img = libtcod.image_load(data.MAIN_MENU_BKG)
@@ -54,23 +53,19 @@ def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=10000, defense=300, power=600, xp=0, clan='clan1', death_function=entities.player_death, speed = 3)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
+    Game.player.dungeon_level = 1
+    Game.player.level = 1
+    Game.game_state = data.STATE_PLAYING
+    Game.player.game_turns = 0
+
     Game.map = {}
     Game.objects = {}
     Game.upstairs = {}
     Game.downstairs = {}
 
-    Game.player.level = 1
     #generate map (at this point it's not drawn to screen)
-    Game.player.level = 1
-
     map.make_dungeon(Game)
-    #map.make_map(Game)
     map.initialize_fov(Game)
-
-    Game.game_state = data.STATE_PLAYING
-
-    #create the list of the game messages and their colors, starts empty
-    Game.player.game_turns = 0
 
     #initial equipment
     equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
@@ -97,7 +92,7 @@ def save_game(filename='savegame'):
     file['msg_history'] = Game.msg_history
     file['game_state'] = Game.game_state
     file['stairs_index'] = Game.objects[mapname(Game)].index(Game.stairs)
-    file['dungeon_level'] = Game.player.level
+    file['dungeon_level'] = Game.player.dungeon_level
     file.close()
 
 def load_game(filename='savegame'):
@@ -109,7 +104,7 @@ def load_game(filename='savegame'):
     Game.msg_history = file['msg_history']
     Game.game_state = file['game_state']
     Game.stairs = Game.objects[mapname(Game)][file['stairs_index']]
-    Game.player.level = file['dungeon_level']
+    Game.player.dungeon_level = file['dungeon_level']
     file.close()
 
     map.initialize_fov(Game)
@@ -150,12 +145,12 @@ def play_game():
         #give monsters a turn
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
-            oldlevel = Game.player.level
+            oldlevel = Game.player.dungeon_level
 
             for index,level in enumerate(data.maplist):
                 print index 
                 if index > 0: #skip intro level
-                    Game.player.level = index
+                    Game.player.dungeon_level = index
 
                     for object in Game.objects[mapname(Game)]:
                         if object.fighter:
@@ -190,7 +185,7 @@ def play_game():
                             print str(index) + 'xxxx' + object.name
                             object.ai.take_turn(Game)
 
-            Game.player.level = oldlevel 
+            Game.player.dungeon_level = oldlevel 
             
 def check_level_up(Game):
     #see if the player's experience is enough to level-up
@@ -298,7 +293,7 @@ def handle_keys():
             if key_char == 'x':
                 #debug key to automatically level up
                 msgbox('You start to meditate!', Game, data.CHARACTER_SCREEN_WIDTH)
-                level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
+                level_up_xp = data.LEVEL_UP_BASE + Game.player.dungeon_level * data.LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
                 check_level_up(Game)
                 Game.player.game_turns += 1       
