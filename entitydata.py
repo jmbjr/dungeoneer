@@ -6,11 +6,11 @@ import data
 #EDITABLE MOB DATA
 mobs={}
 mobs = {
- 'johnstein':      {'char':'j', 'color':libtcod.light_gray,  'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':10 , 'defense':0 , 'power':2 , 'xp':20 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}, 'caster':{'mp':10}}, 
- 'greynaab':       {'char':'g', 'color':libtcod.light_blue,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':20 , 'defense':1 , 'power':4 , 'xp':40 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'jerbear':        {'char':'j', 'color':libtcod.green,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':25 , 'defense':1 , 'power':5 , 'xp':50 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'zombiesheep':    {'char':'z', 'color':libtcod.yellow,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':30 , 'defense':2 , 'power':6 , 'xp':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'pushy':          {'char':'p', 'color':libtcod.pink,        'tilechar':data.TILE_SKEL_MAGENTA,'fighter':{'hp':50 , 'defense':10 ,'power':0 , 'xp':100 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'johnstein':      {'char':'j', 'color':libtcod.light_gray,  'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':10 , 'defense':0 , 'power':2 , 'xp':20 , 'clan':'monster1', 'death_function': entities.monster_death, 'speed':5}, 'caster':{'mp':10}}, 
+ 'greynaab':       {'char':'g', 'color':libtcod.light_blue,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':20 , 'defense':1 , 'power':4 , 'xp':40 , 'clan':'monster2', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'jerbear':        {'char':'j', 'color':libtcod.green,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':25 , 'defense':1 , 'power':5 , 'xp':50 , 'clan':'monster3', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'zombiesheep':    {'char':'z', 'color':libtcod.yellow,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':30 , 'defense':2 , 'power':6 , 'xp':60 , 'clan':'monster4', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'pushy':          {'char':'p', 'color':libtcod.pink,        'tilechar':data.TILE_SKEL_MAGENTA,'fighter':{'hp':50 , 'defense':10 ,'power':0 , 'xp':100 , 'clan':'monster5', 'death_function': entities.monster_death, 'speed':5}}, 
 
  'JOHNSTEIN':      {'char':'J', 'color':libtcod.black,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':100 , 'defense':3, 'power':5 , 'xp':200 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
  'GREYNAAB':       {'char':'G', 'color':libtcod.red,         'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':200 , 'defense':6, 'power':10, 'xp':400 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
