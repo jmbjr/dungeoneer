@@ -456,8 +456,7 @@ class ConfusedMonster(object):
 class BasicMonster(object):
     #AI must return True or False to indicate if still alive
     #AI for basic monster
-
-
+    
     def take_turn(self, Game):
         #basic monsters can see you if you can see them
         useditem = None

@@ -80,7 +80,6 @@ def new_game():
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
     libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
 
-
 def save_game(filename='savegame'):
     #open a new empty shelve (or overwrite old one) to write the game data
     print 'file saved!'
@@ -127,11 +126,11 @@ def play_game():
         libtcod.console_flush()
         check_level_up(Game)
 
-        #erase objects from old position, before they move
+        #erase objects from old position on current map, before they move
         for object in Game.objects[mapname(Game)]:
             object.clear(Game)
 
-        #handle keys and exit game if needed
+        #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
         if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
             Game.player_action = handle_keys()
 
@@ -142,7 +141,7 @@ def play_game():
         if Game.player_action == data.STATE_EXIT:
             break
 
-        #give monsters a turn
+        #handle monsters
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
             oldlevel = Game.player.dungeon_level

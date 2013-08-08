@@ -320,10 +320,11 @@ def player_move_or_attack(dx, dy, Game):
     #the coords the player is moving-to/attacking
     x = Game.player.x + dx
     y = Game.player.y + dy
-
+    
     #try to find attackable object there
     target = None
-    for object in Game.objects[mapname(Game)]:
+    #only check objects on the same floor as the player
+    for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
         if object.x == x and object.y == y and object.fighter:
             target = object
             break
@@ -338,7 +339,7 @@ def player_move_or_attack(dx, dy, Game):
             Game.player.game_turns +=1
             state = data.STATE_PLAYING
 
-            for object in Game.objects[mapname(Game)]: #look for items in the player's title
+            for object in Game.objects[data.maplist[Game.player.dungeon_level]]: #look for items in the player's title
                 if object.x == Game.player.x and object.y == Game.player.y and object is not Game.player:
                     message('* You see ' + object.name + ' at your feet *', Game, libtcod.yellow)
 
