@@ -23,9 +23,9 @@ mobs = {
 mobitems = {}
 mobitems = {
 	'johnstein':   ['heal', 'heal', 'heal', 'heal'],
-	'greynaab':    ['fireball', 'heal', 'fireball'],
-	'jerbear':     ['confuse', 'heal', 'heal'],
-	'zombiesheep': ['lightning','lightning','heal','lightning'],
+	'greynaab':    ['fireball', 'fireball', 'fireball'],
+	'jerbear':     ['confuse', 'confuse', 'confuse'],
+	'zombiesheep': ['lightning','lightning','lightning','lightning'],
 	'pushy':       ['push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push'],
 	'JOHNSTEIN':   ['heal', 'heal', 'heal', 'heal'],
 	'GREYNAAB':    ['fireball', 'heal', 'fireball'],

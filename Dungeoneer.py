@@ -51,7 +51,7 @@ def main_menu():
 
 def new_game():
     #create object representing the player
-    fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, clan='player', death_function=entities.player_death, speed = 2)
+    fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, clan='player', death_function=entities.player_death, speed = 10)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.player.dungeon_level = 1
     Game.level = data.maplist[Game.player.dungeon_level]

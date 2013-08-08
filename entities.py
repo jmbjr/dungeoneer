@@ -683,7 +683,6 @@ def cast_lightning(Game, user):
             target = None
         #ensure monster is within player's fov
         
-
     if target is None:
         if user is Game.player:
             message('No enemy is close enough to strike', Game, libtcod.red)
@@ -692,7 +691,9 @@ def cast_lightning(Game, user):
         theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
         if user is Game.player:
-            message('A lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+            message('Your lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+        else:
+            message(user.name + '\'s lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
 
         target.fighter.take_damage(theDmg, Game)
 
