@@ -472,14 +472,28 @@ class BasicMonster(object):
     def take_turn(self, Game):
         #basic monsters can see you if you can see them
         useditem = None
-        picked_up_items = False
+        fight = True
+        pickup = True
 
         monster = self.owner
         #find nearest non-clan object
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
         nearest_item    = closest_item(data.TORCH_RADIUS, Game, monster)
     
-        if nearest_nonclan:
+        if nearest_nonclan is None:
+            fight = False
+
+        if nearest_item is None:
+            pickup = False
+
+        if fight and pickup:
+            #decide which to do based on which is closer
+            if monster.distance_to(nearest_nonclan) <= monster.distance_to(nearest_item):
+                pickup = False
+            else:
+                fight = False
+
+        if fight:
             if libtcod.map_is_in_fov(monster.fighter.fov, nearest_nonclan.x, nearest_nonclan.y): #nearest_nonclan ensures same level
                 #move or use item
                 #for now, use items or lose them
@@ -499,17 +513,13 @@ class BasicMonster(object):
                         #close enough to attack (if the Game.player is alive)
                     elif nearest_nonclan.fighter.hp > 0:
                         monster.fighter.attack(nearest_nonclan, Game)
-        else: #wander
-            #check if there's an item under the monster's feet
-            for obj in Game.objects[Game.dungeon_level]: #look for items in the user's title
-                if obj.x == monster.x and obj.y == monster.y and obj.item and obj.dungeon_level == monster.dungeon_level:
-                    picked_up_item = True
-                    obj.item.pick_up(Game, monster)
-                    break
-
-            #if monster picked up objects, don't move
-            if not picked_up_items:
-                monster.move_random(Game)
+        elif pickup: 
+            if monster.distance_to(nearest_item) > 0:
+                monster.move_towards(nearest_item, Game)
+            elif nearest_item.x == monster.x and nearest_item.y == monster.y and nearest_item.item and nearest_item.dungeon_level == monster.dungeon_level:
+                    nearest_item.item.pick_up(Game, monster)
+        else:
+            monster.move_random(Game)
 
         #check if monster is still alive
         if monster.fighter:
