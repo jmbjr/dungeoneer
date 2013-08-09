@@ -16,7 +16,7 @@ class Object(object):
         self.char = char
         self.color = color
         self.always_visible = always_visible
-        self.xplevel = level
+        self.xplevel = xplevel
         self.dungeon_level = dungeon_level
 
         self.tilechar = tilechar
