@@ -14,7 +14,7 @@ COLOR_LIGHT_GROUND = libtcod.sepia
 
 FOV_ALGO           = 2 #FOV ALGORITHM. values = 0 to 4
 FOV_LIGHT_WALLS    = True
-TORCH_RADIUS       = 8 #AFFECTS FOV RADIUS
+TORCH_RADIUS       = 80 #AFFECTS FOV RADIUS
 
 TILE_WALL          = 256  #first tile in the first row of tiles
 TILE_GROUND        = 256 + 1
@@ -33,30 +33,31 @@ maplist =[]
 
 maplist.append('Intro')
 maplist.append('Brig')
-maplist.append('Engineering')
-maplist.append('Bridge')
-maplist.append('Sick Bay')
+#maplist.append('Engineering')
+#maplist.append('Bridge')
+#maplist.append('Sick Bay')
 
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #probably shouldn't edit these when the game is running
 SCREEN_WIDTH       = 80  #SETS OVERALL SCREEN WIDTH. MUST BE > MAP_WIDTH
-SCREEN_HEIGHT      = 40  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
+SCREEN_HEIGHT      = 60  #SETS OVERALL SCREEN HEIGHT. MUST BE > MAP_HEIGHT
 
 #camera info
 #size of the map portion shown on-screen
 CAMERA_WIDTH = 80
-CAMERA_HEIGHT = 30
+CAMERA_HEIGHT = 40
 
-MAP_WIDTH          = 140
-MAP_HEIGHT         = 80
+MAP_WIDTH          = 100
+MAP_HEIGHT         = 60
 MAP_PAD_W          = CAMERA_WIDTH  / 2  #don't allow rooms to touch edges. ideally also don't get close enough to edge of map to stop the scrolling effect
 MAP_PAD_H          = CAMERA_HEIGHT / 2
 
 
 #room info
-ROOM_MAX_SIZE      = 10
-ROOM_MIN_SIZE      = 4
+ROOM_MAX_SIZE      = 25
+ROOM_MIN_SIZE      = 25
 MAX_ROOMS          = ((MAP_WIDTH - CAMERA_WIDTH) + (MAP_HEIGHT - CAMERA_HEIGHT)) / 3
+MAX_ROOMS = 2
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
@@ -68,11 +69,12 @@ LEVEL_UP_BASE     = 200
 LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
+AUTOMODE          = True
 PRINT_MESSAGES	  = True
 TURNBASED         = True #not working yet
 SPEED_DEFAULT     = 5  # speed delay. higher = slower. How many game ticks to wait between turns
-REGEN_DEFAULT     = 50  # regen delay. higher = slower. How many game ticks to wait between regeneration
-REGEN_MULTIPLIER  = 0.1 # % of life to regen 
+REGEN_DEFAULT     = 100000  # regen delay. higher = slower. How many game ticks to wait between regeneration
+REGEN_MULTIPLIER  = 0.00001 # % of life to regen 
 
 KEYS_INITIAL_DELAY= 0
 KEYS_INTERVAL     = 0
