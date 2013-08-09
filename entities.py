@@ -97,35 +97,36 @@ class Object(object):
         if x is not None and libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y):
             libtcod.console_put_char_ex(Game.con, x, y, data.GROUND_CHAR, libtcod.white, data.COLOR_LIGHT_GROUND)
 
-    def move_away(self, target_x, target_y, Game):
-        #vector from this object to the target, and distance
-        dx1 = target_x - self.x
-        dy1 = target_y - self.y
+    def move_away(self, target, Game):
+        if self.dungeon_level == target.dungeon_level:
+            #vector from this object to the target, and distance
+            dx1 = target.x - self.x
+            dy1 = target.y - self.y
 
-        distance = get_distance(dx1, dy1)
-        
-        #normalize vector and round accordingly and convert to int
-        dx = -1*int(round(dx1 / distance))
-        dy = -1*int(round(dy1 / distance))
+            distance = get_distance(dx1, dy1)
+            
+            #normalize vector and round accordingly and convert to int
+            dx = -1*int(round(dx1 / distance))
+            dy = -1*int(round(dy1 / distance))
 
 
-        if not self.move(dx, dy, Game):
-        #if monster didn't move. Try diagonal
-            if dx1 != 0:
-                dx = -1 * abs(dx1) / dx1
-            elif target_x < self.x:
-                dx = 1
-            else:
-                dx = -1
+            if not self.move(dx, dy, Game):
+            #if monster didn't move. Try diagonal
+                if dx1 != 0:
+                    dx = -1 * abs(dx1) / dx1
+                elif target.x < self.x:
+                    dx = 1
+                else:
+                    dx = -1
 
-            if dy1 != 0:
-                dy = -1*abs(dy1) / dy1
-            elif target_y < self.y:
-                dy = 1
-            else:
-                dy = -1
+                if dy1 != 0:
+                    dy = -1*abs(dy1) / dy1
+                elif target.y < self.y:
+                    dy = 1
+                else:
+                    dy = -1
 
-            self.move(dx, dy, Game)        
+                self.move(dx, dy, Game)        
 
     def move_towards(self, target, Game):
         if self.dungeon_level == target.dungeon_level:
@@ -177,7 +178,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, clan=None, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
+    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -190,6 +191,7 @@ class Fighter(object):
         self.regen_counter = regen
         self.clan = clan
         self.fov = None
+        self.xpvalue = xpvalue
 
         self.inventory = inventory
         if self.inventory:
@@ -268,7 +270,7 @@ class Fighter(object):
         if self.hp > self.max_hp(Game):
             self.hp = self.max_hp(Game)
 
-    def take_damage(self, damage, Game):
+    def take_damage(self, attacker, damage, Game):
         #inflict dmg if possible
         if damage > 0:
             self.hp -= damage
@@ -278,8 +280,11 @@ class Fighter(object):
             function = self.death_function
             if function is not None:
                 function(self.owner, Game)
-            if self.owner != Game.player: #yield experience to the Game.player
-                Game.player.fighter.xp += self.xp
+            
+            if attacker.fighter:
+                attacker.fighter.xp += self.xpvalue
+                print Game.dungeon_level + ':' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
+
 
     def attack(self, target, Game):
         #very simple formula for attack damage
@@ -288,7 +293,7 @@ class Fighter(object):
         if damage > 0:
             #make target take some damage
             message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', Game, libtcod.yellow)
-            target.fighter.take_damage(damage, Game)
+            target.fighter.take_damage(self.owner, damage, Game)
         else:
             message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', Game, libtcod.white)
 
@@ -396,7 +401,7 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
-        print user.name + ' dropped ' + self.owner.name
+        print Game.dungeon_level + '::' + user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
@@ -615,7 +620,7 @@ def cast_fireball(Game, user):
         for obj in Game.objects[Game.dungeon_level]: #damage all fighters within range
             if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
                 message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
-                obj.fighter.take_damage(theDmg, Game)
+                obj.fighter.take_damage(user, theDmg, Game)
         
 def cast_heal(Game, user):
     #heal the player or monster
@@ -660,7 +665,7 @@ def push(Game, user, numpushes):
                 message(user.name + ' pushed ' + target.name + '!', Game, libtcod.magenta)
 
             for times in range(numpushes-1):
-                target.move_away(user.x, user.y, Game)
+                target.move_away(user, Game)
             #last push is random
             target.move_random(Game)
 
@@ -695,7 +700,7 @@ def cast_lightning(Game, user):
         else:
             message(user.name + '\'s lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
 
-        target.fighter.take_damage(theDmg, Game)
+        target.fighter.take_damage(user, theDmg, Game)
 
 
 #death routines
@@ -711,7 +716,7 @@ def player_death(player, Game):
 def monster_death(monster, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
-    print monster.name + ' DIED!'
+    print Game.dungeon_level + ':' + monster.name + ' DIED!'
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
     message('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
     monster.send_to_back(Game)

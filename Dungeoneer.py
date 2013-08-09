@@ -152,14 +152,14 @@ def play_game():
             Game.fov_recompute = True
 
             for index,Game.dungeon_level in enumerate(data.maplist):
-                print index 
+                #print index 
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_level]:
                         if object.fighter:
                             
                             if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
                                 if object.ai:
-                                    print str(index) + ':' + object.name
+                                    #print str(index) + ':' + object.name
                                     if object.ai.take_turn(Game): #only reset speed_counter if monster is still alive
                                         object.fighter.speed_counter = object.fighter.speed(Game)
 
@@ -184,7 +184,7 @@ def play_game():
                                         object.fighter.hp = object.fighter.max_hp(Game)
 
                         elif object.ai:
-                            print str(index) + 'xxxx' + object.name
+                            #print str(index) + 'xxxx' + object.name
                             object.ai.take_turn(Game)
 
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
