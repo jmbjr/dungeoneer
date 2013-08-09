@@ -280,7 +280,7 @@ class Fighter(object):
             
             if attacker.fighter:
                 attacker.fighter.xp += self.xpvalue
-                print 'STATS--\t ' + str(Game.player.game_turns) + '\t' + Game.dungeon_level + '\t' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
+                print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
 
 
     def attack(self, target, Game):
@@ -405,7 +405,7 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
-        print 'STATS--\t ' + str(Game.player.game_turns) + '\t' + Game.dungeon_level + '\t' + user.name + ' dropped ' + self.owner.name
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component

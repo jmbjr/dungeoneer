@@ -63,9 +63,12 @@ def new_game():
     Game.objects = {}
     Game.upstairs = {}
     Game.downstairs = {}
+    Game.tick = 0
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
+    Game.tick = 1
+
 
     Game.fov_recompute = True
     Game.player.fighter.set_fov(Game)
@@ -150,7 +153,7 @@ def play_game():
         #handle monsters
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
-
+            
             for index,Game.dungeon_level in enumerate(data.maplist):
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_level]:
@@ -183,6 +186,7 @@ def play_game():
 
                         elif object.ai:
                             object.ai.take_turn(Game)
+            Game.tick+=1
 
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 

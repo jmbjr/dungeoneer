@@ -51,8 +51,8 @@ def mapname(Game):
 def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
     if data.PRINT_MESSAGES:
-        print 'MSG--\t ' + str(Game.player.game_turns) + '\t' + Game.dungeon_level + '\t' + new_msg
-        
+        print 'MSG--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + new_msg
+
     turn = Game.player.game_turns
 
     new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
@@ -269,7 +269,7 @@ def render_all(Game):
     render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), libtcod.light_red, libtcod.darker_red, Game)
     libtcod.console_print_ex(Game.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, Game.dungeon_level)
     libtcod.console_print_ex(Game.panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level: ' + str(Game.player.dungeon_level))
-    libtcod.console_print_ex(Game.panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns))
+    libtcod.console_print_ex(Game.panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')')
 
     #print the game messages, one line at a time
     y = 1
