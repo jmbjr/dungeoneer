@@ -292,10 +292,17 @@ class Fighter(object):
 
         if damage > 0:
             #make target take some damage
-            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' +str(damage) + ' HP.', Game, libtcod.yellow)
+            if self is Game.player:
+                message('You attack ' + target.name  + '!', Game, libtcod.yellow)
+            elif playersees(Game, self.owner):
+                message(self.owner.name.capitalize() + ' attacks ' + target.name, Game, libtcod.yellow)
+            elif playersees(Game, target):
+                message(target.name + ' has been attacked! ', Game, libtcod.yellow)
+
             target.fighter.take_damage(self.owner, damage, Game)
         else:
-            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but there is no effect.', Game, libtcod.white)
+            if self is Game.player:
+                message('You tried to attack ' + target.name + ' but there is no effect.', Game, libtcod.white)
 
 class Buff(object):
     def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=data.BUFF_DECAYRATE, duration=data.BUFF_DURATION):
@@ -512,6 +519,12 @@ class BasicMonster(object):
         else:
             return False
 
+def playersees(Game, target):
+    if libtcod.map_is_in_fov(Game.player.fighter.fov, target.x, target.y):
+        return True
+    else:
+        return False
+
 #spells/abilities functions
 def use_red_crystal(Game, user):
     if user is Game.player:
@@ -718,7 +731,7 @@ def monster_death(monster, Game):
     #doesn't block, can't be attacked, cannot move
     print Game.dungeon_level + ':' + monster.name + ' DIED!'
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
-    message('You gain ' + str(monster.fighter.xp) + 'XP', Game, libtcod.orange)
+    message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
     monster.send_to_back(Game)
 
     for equip in monster.fighter.inventory:
