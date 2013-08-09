@@ -452,10 +452,11 @@ class ConfusedMonster(object):
             #move in random direction
             self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1), Game)
             self.num_turns -= 1
+            message('The ' + self.owner.name + ' is STILL confused!', Game, libtcod.red)
 
         else:
             self.owner.ai = self.old_ai
-            message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.red)
+            message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.green)
 
         if self.owner.fighter:
             return True
@@ -571,18 +572,19 @@ def use_orange_crystal(Game, user):
 #spells
 def cast_confusion(Game, user):
     target = None
+    target = closest_nonclan(data.TORCH_RADIUS, Game, user)
 
     if user is Game.player:
         #ask player for target to confuse
         message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
         target = target_monster(Game, data.CONFUSE_RANGE)
     
-    elif libtcod.map_is_in_fov(Game.player.fighter.fov, user.x, user.y):
-        target = Game.player
+    elif not target is None:
+        target = closest_nonclan(data.TORCH_RADIUS, Game, user)
         print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' confused ' + target.name
 
-
-    if target is None:
+    else:
+        #target is None:
         return data.STATE_CANCELLED
 
     #replace target's AI with confuse
@@ -593,6 +595,7 @@ def cast_confusion(Game, user):
 
     target.ai = ConfusedMonster(old_ai)
     target.ai.owner = target #tell the new component who owns it
+
     if user is Game.player:
         message('The ' + target.name + ' is confused!', Game, libtcod.light_green)
     else:
