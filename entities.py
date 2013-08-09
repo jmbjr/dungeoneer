@@ -715,8 +715,8 @@ def player_death(player, killer, Game):
     Game.game_state = data.STATE_DEAD
 
     if killer.fighter:
-        killer.fighter.xp += player.xpvalue
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) 
+        killer.fighter.xp += player.fighter.xpvalue
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
        
 
     #turn player into corpse
@@ -731,11 +731,11 @@ def monster_death(monster, killer, Game):
     monster.send_to_back(Game)
     
     if killer.fighter:
-        killer.fighter.xp += monster.xpvalue
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) 
+        killer.fighter.xp += monster.fighter.xpvalue
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) + '(' + monster.name + ')'
     if killer is Game.player:
         message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
-        
+
     for equip in monster.fighter.inventory:
         equip.item.drop(Game, monster)
 
