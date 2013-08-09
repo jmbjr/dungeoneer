@@ -66,7 +66,6 @@ def prev_level(Game):
         if not Game.dungeon_level in Game.map:
             make_map(Game) #create fresh new level
 
-        print 'sending to level ' + str(Game.dungeon_level)
         Game.player.x = Game.downstairs[Game.dungeon_level].x
         Game.player.y = Game.downstairs[Game.dungeon_level].y
         initialize_fov(Game)
@@ -82,7 +81,7 @@ def from_dungeon_level(table, dungeon_level):
 def make_dungeon(Game):
     for index,level in enumerate(data.maplist):
         if index > 0: #skip intro level
-            print '=== creating level ' + level
+            print 'MAPGEN--\t creating level ' + level
             Game.player.dungeon_level = index
             Game.dungeon_level = level
             make_map(Game)
@@ -99,7 +98,7 @@ def make_map(Game):
     Game.objects[Game.dungeon_level] = [Game.player]
     #fill map with "blocked" tiles
 
-    print 'creating map:' + str(Game.dungeon_level)
+    print 'MAPGEN--\t creating map:' + str(Game.dungeon_level)
     Game.map[Game.dungeon_level] = [[ Tile(True)
         for y in range(data.MAP_HEIGHT) ]
             for x in range(data.MAP_WIDTH) ]            
@@ -196,7 +195,7 @@ def place_objects(room, Game):
             monster.fighter.set_fov(Game)
             monster.dungeon_level = data.maplist.index(Game.dungeon_level)
 
-            print 'made a ' + monster.name
+            print 'MAPGEN--\t made a ' + monster.name
 
             #give monster items if they have them
             if entitydata.mobitems[choice]:
@@ -205,7 +204,6 @@ def place_objects(room, Game):
                     monster.fighter.add_item(item)
 
             monster.set_location(x, y, Game)
-            #print 'Added a ' + choice
             Game.objects[Game.dungeon_level].append(monster)
 
 

@@ -62,6 +62,9 @@ def message(new_msg, Game, color = libtcod.white):
         #add the new line as a tuple, with the txt and the color
         Game.msg_history.append(Menuobj(str(turn) + ' : ' + line, color=color))
         Game.game_msgs.append((line, color))
+        if data.PRINT_MESSAGES:
+            print 'MSG--\t' + line
+
 
 def menu(header, options, width, Game, letterdelim=None):
     if len(options) > data.MAX_NUM_ITEMS: 
@@ -190,7 +193,6 @@ def get_distance(dx, dy):
 
 def roll_dice(dicelist):
     dice=[]
-    #print dicelist
     for [die_low, die_high] in dicelist:
         roll = libtcod.random_get_int(0,die_low,die_high)
         dice.append(roll)

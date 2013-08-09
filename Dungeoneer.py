@@ -86,7 +86,7 @@ def new_game():
 
 def save_game(filename='savegame'):
     #open a new empty shelve (or overwrite old one) to write the game data
-    print 'file saved!'
+    print 'SYSTEM--\t file saved!'
     file = shelve.open(filename, 'n')
     file['map'] = Game.map
     file['objects'] = Game.objects[Game.dungeon_level]
@@ -152,14 +152,12 @@ def play_game():
             Game.fov_recompute = True
 
             for index,Game.dungeon_level in enumerate(data.maplist):
-                #print index 
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_level]:
                         if object.fighter:
                             
                             if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
                                 if object.ai:
-                                    #print str(index) + ':' + object.name
                                     if object.ai.take_turn(Game): #only reset speed_counter if monster is still alive
                                         object.fighter.speed_counter = object.fighter.speed(Game)
 
@@ -184,7 +182,6 @@ def play_game():
                                         object.fighter.hp = object.fighter.max_hp(Game)
 
                         elif object.ai:
-                            #print str(index) + 'xxxx' + object.name
                             object.ai.take_turn(Game)
 
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
@@ -365,7 +362,7 @@ def handle_keys():
 
 
             if key_char == 'r':
-                print 'RELOADING GAME DATA'
+                print 'SYSTEM--\t RELOADING GAME DATA'
                 reload(data)
                 reload(entitydata) 
                 #update_entities()   #need to find a way to update all objects to current data

@@ -133,14 +133,12 @@ class Object(object):
             #vector from this object to the target, and distance
             dx1 = target.x - self.x
             dy1 = target.y - self.y
-            #print str(target_x) + '/' + str(target_y) + '::' + str(self.x) + '/' + str(self.y)
             distance = get_distance(dx1, dy1)
             
             #normalize vector and round accordingly and convert to int
             dx = int(round(dx1 / distance))
             dy = int(round(dy1 / distance))
 
-            #print str(dx) + '/' + str(dx1) + ', ' + str(dy) + '/' + str(dy) + ', ' + str(distance)
             if not self.move(dx, dy, Game):
             #if monster didn't move. Try diagonal
                 if dx1 != 0:
@@ -156,7 +154,6 @@ class Object(object):
                     dy = -1
                 else:
                     dy = 1
-                #print 'trying diagonal:' +str(dx) + ', ' + str(dy) + ', ' + str(distance)
                 self.move(dx, dy, Game)
 
     def distance_to(self, other):
@@ -283,7 +280,7 @@ class Fighter(object):
             
             if attacker.fighter:
                 attacker.fighter.xp += self.xpvalue
-                print Game.dungeon_level + ':' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
+                print 'STATUSx--\t ' + Game.dungeon_level + ':' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
 
 
     def attack(self, target, Game):
@@ -408,7 +405,7 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
-        print Game.dungeon_level + '::' + user.name + ' dropped ' + self.owner.name
+        print 'STATUSx--\t ' + Game.dungeon_level + '::' + user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
@@ -729,7 +726,7 @@ def player_death(player, Game):
 def monster_death(monster, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
-    print Game.dungeon_level + ':' + monster.name + ' DIED!'
+
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
     message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
     monster.send_to_back(Game)
@@ -746,11 +743,6 @@ def monster_death(monster, Game):
     monster.always_visible = True
     
 
-
-#check equip and inventory and buffs
-def get_buffs_in_slot(slot, Game):
-    for obj in Game.player.buffs:
-        print obj.name
 
 def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
     for obj in Game.player.fighter.inventory:
