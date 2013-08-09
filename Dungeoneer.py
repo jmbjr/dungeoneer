@@ -51,13 +51,14 @@ def main_menu():
 
 def new_game():
     #create object representing the player
-    fighter_component = entities.Fighter(hp=1000, defense=30, power=60, xp=0, xpvalue=10000, clan='player', death_function=entities.player_death, speed = 10)
+    fighter_component = entities.Fighter(hp=300, defense=10, power=20, xp=0, xpvalue=10000, clan='player', death_function=entities.player_death, speed = 10)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.player.dungeon_level = 1
     Game.dungeon_level = data.maplist[Game.player.dungeon_level]
     Game.player.xplevel = 1
     Game.game_state = data.STATE_PLAYING
     Game.player.game_turns = 0
+    Game.set_auto = False
 
     Game.map = {}
     Game.objects = {}
@@ -68,7 +69,6 @@ def new_game():
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
     Game.tick = 1
-
 
     Game.fov_recompute = True
     Game.player.fighter.set_fov(Game)
@@ -123,6 +123,10 @@ def play_game():
     Game.key = libtcod.Key()  
 
     (Game.camera_x, Game.camera_y) = (0, 0)  
+
+    if data.AUTOMODE:
+        set_objects_visible(Game)
+        set_map_explored(Game)          
     
     while not libtcod.console_is_window_closed():
         #render the screen
@@ -140,12 +144,13 @@ def play_game():
         #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
-        if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
-            Game.player_action = handle_keys()
+        if not data.AUTOMODE:    
+            if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
+                Game.player_action = handle_keys()
 
-            if Game.player_action != data.STATE_NOACTION:
-                #player actually did something. we can reset counter
-                Game.player.fighter.speed_counter = Game.player.fighter.speed(Game)
+                if Game.player_action != data.STATE_NOACTION:
+                    #player actually did something. we can reset counter
+                    Game.player.fighter.speed_counter = Game.player.fighter.speed(Game)
 
         if Game.player_action == data.STATE_EXIT:
             break
@@ -213,6 +218,8 @@ def check_level_up(Game):
             Game.player.fighter.base_defense += 2
 
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
+
+
 
 
 #KEYPRESS CHECKS
