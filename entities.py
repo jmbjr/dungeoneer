@@ -474,6 +474,7 @@ class BasicMonster(object):
         monster = self.owner
         #find nearest non-clan object
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
+        nearest_item    = closest_item(data.TORCH_RADIUS, Game, monster)
     
         if nearest_nonclan:
             if libtcod.map_is_in_fov(monster.fighter.fov, nearest_nonclan.x, nearest_nonclan.y): #nearest_nonclan ensures same level
@@ -808,6 +809,24 @@ def fov_map(max_range, Game, dude):
     libtcod.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
     return fov_map_dude
 
+def closest_item(max_range, Game, dude):
+    #find closest nonclan entity up to max range in the object's FOV
+    closest_item = None
+    closest_dist = max_range + 1 #start with slightly higher than max range
+
+    if dude.fighter.fov is None:
+        fov_map_dude = dude.fighter.set_fov(Game)
+
+    fov_map_dude = dude.fighter.fov_recompute(Game)
+
+    for object in Game.objects[Game.dungeon_level]:
+        if object.item and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level:
+            #calculate the distance between this and the dude
+            dist = dude.distance_to(object)
+            if dist < closest_dist:
+                closest_item = object
+                closest_dist = dist           
+    return closest_item
 
 def closest_nonclan(max_range, Game, dude):
     #find closest nonclan entity up to max range in the object's FOV
