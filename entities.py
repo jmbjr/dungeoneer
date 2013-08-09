@@ -294,9 +294,9 @@ class Fighter(object):
             #make target take some damage
             if self is Game.player:
                 message('You attack ' + target.name  + '!', Game, libtcod.yellow)
-            elif playersees(Game, self.owner):
+            elif entity_sees(Game.player, self.owner):
                 message(self.owner.name.capitalize() + ' attacks ' + target.name, Game, libtcod.yellow)
-            elif playersees(Game, target):
+            elif entity_sees(Game.player, target):
                 message(target.name + ' has been attacked! ', Game, libtcod.yellow)
 
             target.fighter.take_damage(self.owner, damage, Game)
@@ -519,8 +519,8 @@ class BasicMonster(object):
         else:
             return False
 
-def playersees(Game, target):
-    if libtcod.map_is_in_fov(Game.player.fighter.fov, target.x, target.y):
+def entity_sees(entity, target):
+    if libtcod.map_is_in_fov(entity.fighter.fov, target.x, target.y) and entity.dungeon_level == target.dungeon_level:
         return True
     else:
         return False
