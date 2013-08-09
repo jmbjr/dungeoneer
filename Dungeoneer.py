@@ -54,8 +54,8 @@ def new_game():
     fighter_component = entities.Fighter(hp=100, defense=3, power=6, xp=0, clan='player', death_function=entities.player_death, speed = 10)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.player.dungeon_level = 1
-    Game.level = data.maplist[Game.player.dungeon_level]
-    Game.player.level = 1
+    Game.dungeon_level = data.maplist[Game.player.dungeon_level]
+    Game.player.xplevel = 1
     Game.game_state = data.STATE_PLAYING
     Game.player.game_turns = 0
 
@@ -89,24 +89,24 @@ def save_game(filename='savegame'):
     print 'file saved!'
     file = shelve.open(filename, 'n')
     file['map'] = Game.map
-    file['objects'] = Game.objects[Game.level]
-    file['player_index'] = Game.objects[Game.level].index(Game.player) #index of player in the objects list
+    file['objects'] = Game.objects[Game.dungeon_level]
+    file['player_index'] = Game.objects[Game.dungeon_level].index(Game.player) #index of player in the objects list
     file['game_msgs'] = Game.game_msgs
     file['msg_history'] = Game.msg_history
     file['game_state'] = Game.game_state
-    file['stairs_index'] = Game.objects[Game.level].index(Game.stairs)
+    file['stairs_index'] = Game.objects[Game.dungeon_level].index(Game.stairs)
     file['dungeon_level'] = Game.player.dungeon_level
     file.close()
 
 def load_game(filename='savegame'):
     file = shelve.open(filename, 'r')
     Game.map = file['map']
-    Game.objects[Game.level] = file['objects'] 
-    Game.player = Game.objects[Game.level][file['player_index']]  #get index of player in the objects list
+    Game.objects[Game.dungeon_level] = file['objects'] 
+    Game.player = Game.objects[Game.dungeon_level][file['player_index']]  #get index of player in the objects list
     Game.game_msgs = file['game_msgs']
     Game.msg_history = file['msg_history']
     Game.game_state = file['game_state']
-    Game.stairs = Game.objects[Game.level][file['stairs_index']]
+    Game.stairs = Game.objects[Game.dungeon_level][file['stairs_index']]
     Game.player.dungeon_level = file['dungeon_level']
     file.close()
 
@@ -135,7 +135,7 @@ def play_game():
             object.clear(Game)
 
         #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
-        Game.level = data.maplist[Game.player.dungeon_level]
+        Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
         if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
             Game.player_action = handle_keys()
@@ -151,10 +151,10 @@ def play_game():
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
 
-            for index,Game.level in enumerate(data.maplist):
+            for index,Game.dungeon_level in enumerate(data.maplist):
                 print index 
                 if index > 0: #skip intro level
-                    for object in Game.objects[Game.level]:
+                    for object in Game.objects[Game.dungeon_level]:
                         if object.fighter:
                             
                             if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
@@ -187,15 +187,15 @@ def play_game():
                             print str(index) + 'xxxx' + object.name
                             object.ai.take_turn(Game)
 
-        Game.level = data.maplist[Game.player.dungeon_level]
+        Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
 def check_level_up(Game):
     #see if the player's experience is enough to level-up
-    level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
+    level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
     if Game.player.fighter.xp >= level_up_xp:
-        Game.player.level += 1
+        Game.player.xplevel += 1
         Game.player.fighter.xp -= level_up_xp
-        message('You have reached level ' + str(Game.player.level) + '!', Game, libtcod.yellow)
+        message('You have reached level ' + str(Game.player.xplevel) + '!', Game, libtcod.yellow)
 
         choice = None
         while choice == None: #keep asking till a choice is made
@@ -287,15 +287,15 @@ def handle_keys():
 
             if key_char == 'c':
                 #show character info
-                level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
-                msgbox('Character Information\n\nLevel: ' + str(Game.player.level) + '\nExperience: ' + str(Game.player.fighter.xp) +
+                level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
+                msgbox('Character Information\n\nLevel: ' + str(Game.player.xplevel) + '\nExperience: ' + str(Game.player.fighter.xp) +
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
                     '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, data.CHARACTER_SCREEN_WIDTH)
 
             if key_char == 'x':
                 #debug key to automatically level up
                 msgbox('You start to meditate!', Game, data.CHARACTER_SCREEN_WIDTH)
-                level_up_xp = data.LEVEL_UP_BASE + Game.player.level * data.LEVEL_UP_FACTOR
+                level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
                 check_level_up(Game)
                 Game.player.game_turns += 1       
