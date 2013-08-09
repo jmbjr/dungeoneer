@@ -18,6 +18,8 @@ class Object(object):
         self.always_visible = always_visible
         self.xplevel = xplevel
         self.dungeon_level = dungeon_level
+        self.id = id(self)
+        print self.name + ':' + str(self.id)
 
         self.tilechar = tilechar
         if self.tilechar is None:
