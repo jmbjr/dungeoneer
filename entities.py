@@ -276,11 +276,8 @@ class Fighter(object):
         if self.hp <= 0:
             function = self.death_function
             if function is not None:
-                function(self.owner, Game)
-            
-            if attacker.fighter:
-                attacker.fighter.xp += self.xpvalue
-                print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
+                function(self.owner, attacker, Game)
+
 
 
     def attack(self, target, Game):
@@ -490,8 +487,6 @@ class BasicMonster(object):
                 if useditem is not data.STATE_USED:
                     #move towards Game.player if far enough away
 
-                    if flip_coin() and flip_coin() and flip_coin():
-                         message('The ' + self.owner.name + ' clears its throat!', Game, monster.color)
                     if monster.distance_to(nearest_nonclan) >= 2:
                         monster.move_towards(nearest_nonclan, Game)
 
@@ -714,23 +709,33 @@ def cast_lightning(Game, user):
 
 
 #death routines
-def player_death(player, Game):
+def player_death(player, killer, Game):
     #the game has ended
     message('YOU DIED! YOU SUCK!', Game, libtcod.red)
     Game.game_state = data.STATE_DEAD
+
+    if killer.fighter:
+        killer.fighter.xp += player.xpvalue
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) 
+       
 
     #turn player into corpse
     player.char = '%'
     player.color = libtcod.dark_red
 
-def monster_death(monster, Game):
+def monster_death(monster, killer, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
 
     message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
-    message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
     monster.send_to_back(Game)
-
+    
+    if killer.fighter:
+        killer.fighter.xp += monster.xpvalue
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) 
+    if killer is Game.player:
+        message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
+        
     for equip in monster.fighter.inventory:
         equip.item.drop(Game, monster)
 
