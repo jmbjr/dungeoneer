@@ -71,10 +71,10 @@ def prev_level(Game):
         Game.player.y = Game.downstairs[Game.dungeon_level].y
         initialize_fov(Game)
 
-def from_dungeon_level(table, Game):
+def from_dungeon_level(table, dungeon_level):
         #returns a value that depends on level. table specifies what value occurs after each level. default = 0
         for (value, level) in reversed(table):
-            if Game.player.dungeon_level >= level:
+            if dungeon_level >= level:
                 return value
         return 0
 
@@ -171,11 +171,11 @@ def place_objects(room, Game):
     #choose random number of monsters
     #max number monsters per room
 
-    max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]], Game)
+    max_monsters = from_dungeon_level([[3, 1], [4, 3], [5, 6], [7, 10]], Game.dungeon_level)
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
 
-    max_items = from_dungeon_level([[1, 1], [2, 4]], Game)
+    max_items = from_dungeon_level([[1, 1], [2, 4]], Game.dungeon_level)
     num_items = libtcod.random_get_int(0, 0, max_items)
     item_chances = get_item_chances(Game)
 
@@ -232,7 +232,7 @@ def get_monster_chances(Game):
     monster_chances = {}
 
     for mobname in entitydata.mobchances:
-        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], Game)
+        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], Game.dungeon_level)
 
     return monster_chances
 
@@ -241,6 +241,6 @@ def get_item_chances(Game):
     item_chances = {}
 
     for itemname in entitydata.itemchances:
-        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], Game)
+        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], Game.dungeon_level)
 
     return item_chances
