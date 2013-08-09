@@ -280,7 +280,7 @@ class Fighter(object):
             
             if attacker.fighter:
                 attacker.fighter.xp += self.xpvalue
-                print 'STATUSx--\t ' + Game.dungeon_level + ':' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
+                print 'STATS--\t ' + str(Game.player.game_turns) + '\t' + Game.dungeon_level + '\t' + attacker.name + '.xp = ' + str(attacker.fighter.xp) 
 
 
     def attack(self, target, Game):
@@ -405,7 +405,7 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
-        print 'STATUSx--\t ' + Game.dungeon_level + '::' + user.name + ' dropped ' + self.owner.name
+        print 'STATS--\t ' + str(Game.player.game_turns) + '\t' + Game.dungeon_level + '\t' + user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
@@ -706,9 +706,9 @@ def cast_lightning(Game, user):
         theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
         if user is Game.player:
-            message('Your lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+            message('Your lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
         else:
-            message(user.name + '\'s lightning bolt strikes the ' + target.name + '! \n DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+            message(user.name + '\'s lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
 
         target.fighter.take_damage(user, theDmg, Game)
 

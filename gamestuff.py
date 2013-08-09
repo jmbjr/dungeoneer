@@ -50,6 +50,9 @@ def mapname(Game):
 #User Interface routines
 def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
+    if data.PRINT_MESSAGES:
+        print 'MSG--\t ' + str(Game.player.game_turns) + '\t' + Game.dungeon_level + '\t' + new_msg
+        
     turn = Game.player.game_turns
 
     new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
@@ -62,8 +65,7 @@ def message(new_msg, Game, color = libtcod.white):
         #add the new line as a tuple, with the txt and the color
         Game.msg_history.append(Menuobj(str(turn) + ' : ' + line, color=color))
         Game.game_msgs.append((line, color))
-        if data.PRINT_MESSAGES:
-            print 'MSG--\t' + line
+
 
 
 def menu(header, options, width, Game, letterdelim=None):
