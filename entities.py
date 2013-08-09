@@ -378,6 +378,8 @@ class Item(object):
             Game.objects[Game.dungeon_level].remove(self.owner)
             if user is Game.player:
                 message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
+            else:
+                print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' picked up ' + self.owner.name
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
@@ -576,6 +578,8 @@ def cast_confusion(Game, user):
     
     elif libtcod.map_is_in_fov(Game.player.fighter.fov, user.x, user.y):
         target = Game.player
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' confused ' + target.name
+
 
     if target is None:
         return data.STATE_CANCELLED
@@ -711,17 +715,18 @@ def cast_lightning(Game, user):
 #death routines
 def player_death(player, killer, Game):
     #the game has ended
-    message('YOU DIED! YOU SUCK!', Game, libtcod.red)
-    Game.game_state = data.STATE_DEAD
 
     if killer.fighter:
         killer.fighter.xp += player.fighter.xpvalue
         print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
-       
+    
+    if not data.AUTOMODE: 
+        message('YOU DIED! YOU SUCK!', Game, libtcod.red)
+        Game.game_state = data.STATE_DEAD
 
-    #turn player into corpse
-    player.char = '%'
-    player.color = libtcod.dark_red
+        #turn player into corpse
+        player.char = '%'
+        player.color = libtcod.dark_red
 
 def monster_death(monster, killer, Game):
     #transform into corpse
@@ -822,6 +827,14 @@ def closest_nonclan(max_range, Game, dude):
                 closest_nonclan = object
                 closest_dist = dist           
     return closest_nonclan
+
+
+def get_next_fighter(Game):
+    for index,level in enumerate(data.maplist):
+        if index > 0:
+            for object in Game.objects[data.maplist[index]]:
+                if object.fighter:
+                    return object
 
 def target_tile(Game, max_range = None):
     #return the position of a tile left-clicked in player's FOV (optionally in a range) or (None, None) if right-clicked
