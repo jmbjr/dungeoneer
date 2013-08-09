@@ -169,7 +169,7 @@ def make_map(Game):
 def place_objects(room, Game):
     #choose random number of monsters
     #max number monsters per room
-
+    nextid = 1
     max_monsters = from_dungeon_level([[300, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_level))
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
@@ -188,12 +188,15 @@ def place_objects(room, Game):
             choice = random_choice(monster_chances)
 
             monster             = entities.Object(**entitydata.mobs[choice])
-            monster.name        = choice  
+            monster.dungeon_level = data.maplist.index(Game.dungeon_level) 
             monster.blocks      = True        
             monster.ai          = entities.BasicMonster()  #how do I set different ai?
             monster.ai.owner    = monster
+            monster.id          = str(monster.dungeon_level) + '.' + str(nextid)
+            monster.name        = choice + '.' + str(monster.id)
+            nextid+=1
             monster.fighter.set_fov(Game)
-            monster.dungeon_level = data.maplist.index(Game.dungeon_level)
+
 
             print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + ' made a ' + monster.name
 

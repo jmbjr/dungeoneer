@@ -390,5 +390,3 @@ def to_camera_coordinates(x, y, Game):
     return (x, y)
 
 
-
-
