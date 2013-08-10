@@ -903,4 +903,10 @@ def is_blocked(x, y, Game):
 
     return False
 
+def total_alive_entities(Game):
+    alive_entities = []
+    for object in Game.objects[Game.dungeon_level]: 
+        if object.fighter and object.fighter.hp > 0:
+            alive_entities.append(object)
 
+    return alive_entities
