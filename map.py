@@ -194,7 +194,7 @@ def place_objects(room, Game):
             monster.ai.owner    = monster
             monster.id          = str(monster.dungeon_level) + '.' + str(nextid)
             monster.name        = choice + ' (' + str(monster.id) + ')'
-            monster.fighter.clan        = monster.name
+            #monster.fighter.clan        = monster.name
             nextid+=1
             monster.fighter.set_fov(Game)
 
