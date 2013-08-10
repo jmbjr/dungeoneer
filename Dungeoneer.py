@@ -143,7 +143,7 @@ def play_game():
         #render the screen
         render_all(Game)
         libtcod.console_flush()
-        check_level_up(Game)
+        check_level_up(Game, Game.player)
 
         #erase objects from old position on current map, before they move
         for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
@@ -199,6 +199,7 @@ def play_game():
 
                         elif object.ai:
                             object.ai.take_turn(Game)
+                        check_level_up(Game, object)
             Game.tick+=1
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
@@ -211,18 +212,18 @@ def play_game():
 
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
-def check_level_up(Game, xplevel, user):
+def check_level_up(Game, user):
     #see if the player's experience is enough to level-up
 
-        level_up_xp = data.LEVEL_UP_BASE + xplevel * data.LEVEL_UP_FACTOR
+        level_up_xp = data.LEVEL_UP_BASE + user.fighter.xplevel * data.LEVEL_UP_FACTOR
 
         if user.fighter.xp >= level_up_xp:
-            user.xplevel += 1
+            user.fighter.xplevel += 1
             user.fighter.xp -= level_up_xp
             if user is Game.player:
-                message('You have reached level ' + str(user.xplevel) + '!', Game, libtcod.yellow)
+                message('You have reached level ' + str(user.fighter.xplevel) + '!', Game, libtcod.yellow)
             else:
-                message(user.name + ' has reached level ' + str(user.xplevel) + '!', Game, libtcod.yellow)
+                message(user.name + ' has reached level ' + str(user.fighter.xplevel) + '!', Game, libtcod.yellow)
 
             choice = None
 

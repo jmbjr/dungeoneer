@@ -8,7 +8,7 @@ import data
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, id=None, xplevel = 1, dungeon_level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, id=None,  dungeon_level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -16,7 +16,6 @@ class Object(object):
         self.char = char
         self.color = color
         self.always_visible = always_visible
-        self.xplevel = xplevel
         self.dungeon_level = dungeon_level
 
         self.tilechar = tilechar
@@ -175,7 +174,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
+    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, xplevel=1, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -189,6 +188,7 @@ class Fighter(object):
         self.clan = clan
         self.fov = None
         self.xpvalue = xpvalue
+        self.xplevel = xplevel
 
         self.inventory = inventory
         if self.inventory:
