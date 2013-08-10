@@ -478,7 +478,7 @@ class BasicMonster(object):
         #find nearest non-clan object
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
         nearest_item    = closest_item(data.TORCH_RADIUS, Game, monster)
-
+        
         if nearest_nonclan is None:
             fight = False
 
@@ -491,7 +491,6 @@ class BasicMonster(object):
                 pickup = False
             else:
                 fight = False
-
         if fight:
             if libtcod.map_is_in_fov(monster.fighter.fov, nearest_nonclan.x, nearest_nonclan.y): #nearest_nonclan ensures same level
                 #move or use item
@@ -842,7 +841,7 @@ def closest_item(max_range, Game, dude):
             dist = dude.distance_to(object)
             if dist < closest_dist:
                 closest_item = object
-                closest_dist = dist
+                closest_dist = dist  
     return closest_item
 
 def closest_nonclan(max_range, Game, dude):
