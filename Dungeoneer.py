@@ -211,32 +211,38 @@ def play_game():
 
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
-def check_level_up(Game):
+def check_level_up(Game, xplevel, user):
     #see if the player's experience is enough to level-up
-    level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
-    if Game.player.fighter.xp >= level_up_xp:
-        Game.player.xplevel += 1
-        Game.player.fighter.xp -= level_up_xp
-        message('You have reached level ' + str(Game.player.xplevel) + '!', Game, libtcod.yellow)
 
-        choice = None
-        while choice == None: #keep asking till a choice is made
-                choice = menu('Level up! Choose a stat to raise:\n', 
-                [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=libtcod.green),
-                Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=libtcod.red), 
-                Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=libtcod.blue)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
+        level_up_xp = data.LEVEL_UP_BASE + xplevel * data.LEVEL_UP_FACTOR
 
-        if choice == 0:
-            Game.player.fighter.base_max_hp += 25
-        elif choice == 1:
-            Game.player.fighter.base_power += 2
-        elif choice == 2:
-            Game.player.fighter.base_defense += 2
+        if user.fighter.xp >= level_up_xp:
+            user.xplevel += 1
+            user.fighter.xp -= level_up_xp
+            if user is Game.player:
+                message('You have reached level ' + str(user.xplevel) + '!', Game, libtcod.yellow)
+            else:
+                message(user.name + ' has reached level ' + str(user.xplevel) + '!', Game, libtcod.yellow)
 
-        Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
+            choice = None
 
+            if user is Game.player:
+                while choice == None: #keep asking till a choice is made
+                        choice = menu('Level up! Choose a stat to raise:\n', 
+                        [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=libtcod.green),
+                        Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=libtcod.red), 
+                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=libtcod.blue)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
+            else:
+                choice = libtcod.random_get_int(0,0,2)
 
+            if choice == 0:
+                user.fighter.base_max_hp += 25
+            elif choice == 1:
+                user.fighter.base_power += 2
+            elif choice == 2:
+                user.fighter.base_defense += 2
 
+            user.fighter.hp = userr.fighter.max_hp(Game)
 
 #KEYPRESS CHECKS
 def handle_keys():
