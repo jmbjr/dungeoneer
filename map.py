@@ -166,6 +166,14 @@ def make_map(Game):
     Game.objects[Game.dungeon_level].append(Game.downstairs[Game.dungeon_level])
     Game.downstairs[Game.dungeon_level].send_to_back(Game) #so it's drawn below the monsters
 
+    #create generic fov map to use for this floor
+    Game.fov_map[Game.dungeon_level] = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
+    for yy in range(data.MAP_HEIGHT):
+        for xx in range(data.MAP_WIDTH):
+            libtcod.map_set_properties(Game.fov_map[Game.dungeon_level], xx, yy, not Game.map[Game.dungeon_level][xx][yy].block_sight, not Game.map[Game.dungeon_level][xx][yy].blocked)
+
+
+
 def place_objects(room, Game):
     #choose random number of monsters
     #max number monsters per room

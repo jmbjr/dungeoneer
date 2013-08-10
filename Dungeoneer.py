@@ -64,6 +64,7 @@ def new_game():
     Game.objects = {}
     Game.upstairs = {}
     Game.downstairs = {}
+    Game.fov_map = {}
     Game.tick = 0
 
     #generate map (at this point it's not drawn to screen)
