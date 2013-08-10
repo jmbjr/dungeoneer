@@ -225,6 +225,7 @@ def place_objects(room, Game):
             item.always_visible = True
 
             item.set_location(x, y, Game)
+            item.dungeon_level = data.maplist.index(Game.dungeon_level)
 
             Game.objects[Game.dungeon_level].append(item)
             item.send_to_back(Game) #items appear below other objects
