@@ -70,6 +70,7 @@ LEVEL_UP_FACTOR   = 150
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
 AUTOMODE          = True
+FREE_FOR_ALL_MODE = True  #if true, all monsters on diffent clans by default
 PRINT_MESSAGES	  = True
 TURNBASED         = True #not working yet
 SPEED_DEFAULT     = 5  # speed delay. higher = slower. How many game ticks to wait between turns
