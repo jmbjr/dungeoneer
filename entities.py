@@ -512,10 +512,13 @@ class BasicMonster(object):
                     elif nearest_nonclan.fighter.hp > 0:
                         monster.fighter.attack(nearest_nonclan, Game)
         elif pickup: 
-            if monster.distance_to(nearest_item) > 0:
+            if nearest_item.x == monster.x and nearest_item.y == monster.y and nearest_item.item and nearest_item.dungeon_level == monster.dungeon_level:
+                nearest_item.item.pick_up(Game, monster)
+            else:
                 monster.move_towards(nearest_item, Game)
-            elif nearest_item.x == monster.x and nearest_item.y == monster.y and nearest_item.item and nearest_item.dungeon_level == monster.dungeon_level:
+                 if nearest_item.x == monster.x and nearest_item.y == monster.y and nearest_item.item and nearest_item.dungeon_level == monster.dungeon_level:
                     nearest_item.item.pick_up(Game, monster)
+               
         else:
             monster.move_random(Game)
 
