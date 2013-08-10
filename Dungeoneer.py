@@ -192,6 +192,14 @@ def play_game():
                         elif object.ai:
                             object.ai.take_turn(Game)
             Game.tick+=1
+            if data.AUTOMODE:
+                alive_entities = entities.total_alive_entities(Game)
+                if len(alive_entities) == 1:
+                    message ('BATTLE ROYALE IS OVER! Winner is ' + alive_entities[0].name, Game, libtcod.blue)
+                    data.AUTOMODE = False
+                if len(alive_entities) <=0:
+                    message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
+                    data.AUTOMODE = False                    
 
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
