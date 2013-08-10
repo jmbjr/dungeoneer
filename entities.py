@@ -516,7 +516,7 @@ class BasicMonster(object):
                 nearest_item.item.pick_up(Game, monster)
             else:
                 monster.move_towards(nearest_item, Game)
-                 if nearest_item.x == monster.x and nearest_item.y == monster.y and nearest_item.item and nearest_item.dungeon_level == monster.dungeon_level:
+                if nearest_item.x == monster.x and nearest_item.y == monster.y and nearest_item.item and nearest_item.dungeon_level == monster.dungeon_level:
                     nearest_item.item.pick_up(Game, monster)
                
         else:
