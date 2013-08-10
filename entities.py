@@ -396,6 +396,7 @@ class Item(object):
         user.fighter.remove_item(self.owner)
         self.owner.x = user.x
         self.owner.y = user.y
+        self.owner.dungeon_level = data.maplist.index(Game.dungeon_level)
         self.owner.send_to_back(Game)
         if user is Game.player:
             message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
@@ -477,7 +478,7 @@ class BasicMonster(object):
         #find nearest non-clan object
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
         nearest_item    = closest_item(data.TORCH_RADIUS, Game, monster)
-    
+
         if nearest_nonclan is None:
             fight = False
 
@@ -841,7 +842,7 @@ def closest_item(max_range, Game, dude):
             dist = dude.distance_to(object)
             if dist < closest_dist:
                 closest_item = object
-                closest_dist = dist           
+                closest_dist = dist
     return closest_item
 
 def closest_nonclan(max_range, Game, dude):
