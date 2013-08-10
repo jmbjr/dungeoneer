@@ -369,7 +369,7 @@ class Item(object):
     #an item that can be picked up and used
     def pick_up(self, Game, user):
         #add to the player's inventory and remove from the map
-        if len(Game.player.fighter.inventory) >= 26:
+        if len(user.fighter.inventory) >= 26:
             if user is Game.player:
                 message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
             retval = data.STATE_NOACTION
@@ -736,14 +736,17 @@ def player_death(player, killer, Game):
     if killer.fighter:
         killer.fighter.xp += player.fighter.xpvalue
         print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
-    
+
+    Game.player.char = '%'
+    Game.player.color = libtcod.darkest_red
+    Game.player.blocks = False
+    Game.player.ai = None
+    Game.player.name = 'remains of ' + Game.player.name
+    Game.player.always_visible = True
+
     if not data.AUTOMODE: 
         message('YOU DIED! YOU SUCK!', Game, libtcod.red)
         Game.game_state = data.STATE_DEAD
-
-        #turn player into corpse
-        player.char = '%'
-        player.color = libtcod.dark_red
 
 def monster_death(monster, killer, Game):
     #transform into corpse
@@ -762,7 +765,7 @@ def monster_death(monster, killer, Game):
         equip.item.drop(Game, monster)
 
     monster.char = '%'
-    monster.color = libtcod.dark_red
+    monster.color = libtcod.darkest_red
     monster.blocks = False
     monster.fighter = None
     monster.ai = None
@@ -855,7 +858,7 @@ def closest_nonclan(max_range, Game, dude):
     fov_map_dude = dude.fighter.fov_recompute(Game)
 
     for object in Game.objects[Game.dungeon_level]:
-        if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level:
+        if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level and object.fighter.hp > 0:
             #calculate the distance between this and the dude
             dist = dude.distance_to(object)
             if dist < closest_dist:
