@@ -147,7 +147,7 @@ def play_game():
 
         #each time we loop, ensure that the Game.dungeon_levelname is equal to the current player dungeon level
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
-        
+
         #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
         if not data.AUTOMODE:    
             if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
@@ -160,10 +160,11 @@ def play_game():
         if Game.player_action == data.STATE_EXIT:
             break
 
-        #handle monsters
+        #handle monsters only if the game is still playing and the player isn't waiting for an action
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
             
+            #loop through all objects on all maps
             for index,Game.dungeon_levelname in enumerate(data.maplist):
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_levelname]:
@@ -192,6 +193,7 @@ def play_game():
                                 #always check to ensure hp <= max_hp
                                 if object.fighter.hp > object.fighter.max_hp(Game):
                                         object.fighter.hp = object.fighter.max_hp(Game)
+                                        
                                 check_level_up(Game, object)
 
                         elif object.ai:
