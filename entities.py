@@ -77,7 +77,7 @@ class Object(object):
 
     def draw(self, Game):
         #only draw if in field of view of Game.player or it's set to always visible and on explored tile
-        if (libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y) or (self.always_visible and Game.map[Game.dungeon_level][self.x][self.y].explored)):
+        if (libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y) or (self.always_visible and Game.map[Game.dungeon_levelname][self.x][self.y].explored)):
             (x, y) = to_camera_coordinates(self.x, self.y, Game)
 
             if x is not None:
@@ -167,8 +167,8 @@ class Object(object):
 
     def send_to_back(self, Game):
         #make this object be drawn first, so all others appear above it if they are in the same tile
-        Game.objects[Game.dungeon_level].remove(self)
-        Game.objects[Game.dungeon_level].insert(0, self)
+        Game.objects[Game.dungeon_levelname].remove(self)
+        Game.objects[Game.dungeon_levelname].insert(0, self)
 
 
 #fighters, spells, abilities
@@ -203,7 +203,7 @@ class Fighter(object):
         self.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
         for yy in range(data.MAP_HEIGHT):
             for xx in range(data.MAP_WIDTH):
-                libtcod.map_set_properties(self.fov, xx, yy, not Game.map[Game.dungeon_level][xx][yy].block_sight, not Game.map[Game.dungeon_level][xx][yy].blocked)
+                libtcod.map_set_properties(self.fov, xx, yy, not Game.map[Game.dungeon_levelname][xx][yy].block_sight, not Game.map[Game.dungeon_levelname][xx][yy].blocked)
         return self.fov   
 
     def fov_recompute(self, Game):
@@ -379,11 +379,11 @@ class Item(object):
             retval = data.STATE_NOACTION
         else:
             user.fighter.add_item(self.owner)
-            Game.objects[Game.dungeon_level].remove(self.owner)
+            Game.objects[Game.dungeon_levelname].remove(self.owner)
             if user is Game.player:
                 message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
             else:
-                print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' picked up ' + self.owner.name
+                print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' picked up ' + self.owner.name
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
@@ -396,11 +396,11 @@ class Item(object):
 
     def drop(self, Game, user):
         #add to the map and remove from the player's inventory. also, place it at the Game.player's coordinates
-        Game.objects[Game.dungeon_level].append(self.owner)
+        Game.objects[Game.dungeon_levelname].append(self.owner)
         user.fighter.remove_item(self.owner)
         self.owner.x = user.x
         self.owner.y = user.y
-        self.owner.dungeon_level = data.maplist.index(Game.dungeon_level)
+        self.owner.dungeon_level = data.maplist.index(Game.dungeon_levelname)
         self.owner.send_to_back(Game)
         if user is Game.player:
             message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
@@ -409,7 +409,7 @@ class Item(object):
         if self.owner.equipment:
             self.owner.equipment.dequip(Game)
 
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' dropped ' + self.owner.name
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
@@ -598,7 +598,7 @@ def cast_confusion(Game, user):
     
     elif not target is None:
         target = closest_nonclan(data.TORCH_RADIUS, Game, user)
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + user.name + ' confused ' + target.name
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' confused ' + target.name
 
     else:
         #target is None:
@@ -640,10 +640,10 @@ def cast_fireball(Game, user):
         theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
         
         #create fireball fov based on x,y coords of target
-        fov_map_fireball = Game.fov_map[Game.dungeon_level]
+        fov_map_fireball = Game.fov_map[Game.dungeon_levelname]
         libtcod.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
 
-        for obj in Game.objects[Game.dungeon_level]: #damage all fighters within range
+        for obj in Game.objects[Game.dungeon_levelname]: #damage all fighters within range
             if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
                 message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
                 obj.fighter.take_damage(user, theDmg, Game)
@@ -735,7 +735,7 @@ def player_death(player, killer, Game):
 
     if killer.fighter:
         killer.fighter.xp += player.fighter.xpvalue
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
+        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
 
     if Game.player.fighter.alive:
         Game.player.char = '%'
@@ -760,7 +760,7 @@ def monster_death(monster, killer, Game):
         
         if killer.fighter:
             killer.fighter.xp += monster.fighter.xpvalue
-            print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) + '(' + monster.name + ')'
+            print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) + '(' + monster.name + ')'
         if killer is Game.player:
             message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
 
@@ -791,7 +791,7 @@ def get_all_equipped(obj, Game): #returns list of equipped items
                 equipped_list.append(item.equipment)
         return equipped_list
     else:
-        return [] #other Game.objects[Game.dungeon_level] have no equipment
+        return [] #other Game.objects[Game.dungeon_levelname] have no equipment
 
 
 #target monsters/tiles and check for blocked tiles
@@ -803,7 +803,7 @@ def target_monster(Game, max_range = None):
             return None
 
         #return the first clicked monster, otherwise continue looping
-        for obj in Game.objects[Game.dungeon_level]:
+        for obj in Game.objects[Game.dungeon_levelname]:
             if obj.x == x and obj.y == y and obj.fighter and obj != Game.player and obj.dungeon_level == Game.player.dungeon_level:
                 return obj
 
@@ -812,7 +812,7 @@ def closest_monster(max_range, Game):
     closest_enemy = None
     closest_dist = max_range + 1 #start with slightly higher than max range
 
-    for object in Game.objects[Game.dungeon_level]:
+    for object in Game.objects[Game.dungeon_levelname]:
         if object.fighter and not object == Game.player and libtcod.map_is_in_fov(Game.player.fighter.fov, object.x, object.y):
             #calculate the distance between this and the player
             dist = Game.player.distance_to(object)
@@ -826,7 +826,7 @@ def fov_map(max_range, Game, dude):
     fov_map_dude = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for yy in range(data.MAP_HEIGHT):
         for xx in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(fov_map_dude, xx, yy, not Game.map[Game.dungeon_level][xx][yy].block_sight, not Game.map[Game.dungeon_level][xx][yy].blocked)
+            libtcod.map_set_properties(fov_map_dude, xx, yy, not Game.map[Game.dungeon_levelname][xx][yy].block_sight, not Game.map[Game.dungeon_levelname][xx][yy].blocked)
 
     libtcod.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
     return fov_map_dude
@@ -841,7 +841,7 @@ def closest_item(max_range, Game, dude):
 
     fov_map_dude = dude.fighter.fov_recompute(Game)
 
-    for object in Game.objects[Game.dungeon_level]:
+    for object in Game.objects[Game.dungeon_levelname]:
         if object.item and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level:
             #calculate the distance between this and the dude
             dist = dude.distance_to(object)
@@ -860,7 +860,7 @@ def closest_nonclan(max_range, Game, dude):
 
     fov_map_dude = dude.fighter.fov_recompute(Game)
 
-    for object in Game.objects[Game.dungeon_level]:
+    for object in Game.objects[Game.dungeon_levelname]:
         if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level and object.fighter.hp > 0:
             #calculate the distance between this and the dude
             dist = dude.distance_to(object)
@@ -896,11 +896,11 @@ def target_tile(Game, max_range = None):
 
 def is_blocked(x, y, Game):
     #first test the map tile
-    if Game.map[Game.dungeon_level][x][y].blocked:
+    if Game.map[Game.dungeon_levelname][x][y].blocked:
         return True
 
     #now check for any blocking objects
-    for object in Game.objects[Game.dungeon_level]:
+    for object in Game.objects[Game.dungeon_levelname]:
         if object.blocks and object.x == x and object.y == y:
             return True
 
@@ -908,7 +908,7 @@ def is_blocked(x, y, Game):
 
 def total_alive_entities(Game):
     alive_entities = []
-    for object in Game.objects[Game.dungeon_level]: 
+    for object in Game.objects[Game.dungeon_levelname]: 
         if object.fighter and object.fighter.hp > 0:
             alive_entities.append(object)
 

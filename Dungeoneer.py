@@ -49,6 +49,34 @@ def main_menu():
                 msgbox('Bye!', Game, 24)
             break
 
+def save_game(filename='savegame'):
+    #open a new empty shelve (or overwrite old one) to write the game data
+    print 'SYSTEM--\t file saved!'
+    file = shelve.open(filename, 'n')
+    file['map'] = Game.map
+    file['objects'] = Game.objects[Game.dungeon_levelname]
+    file['player_index'] = Game.objects[Game.dungeon_levelname].index(Game.player) #index of player in the objects list
+    file['game_msgs'] = Game.game_msgs
+    file['msg_history'] = Game.msg_history
+    file['game_state'] = Game.game_state
+    file['stairs_index'] = Game.objects[Game.dungeon_levelname].index(Game.stairs)
+    file['dungeon_level'] = Game.player.dungeon_level
+    file.close()
+
+def load_game(filename='savegame'):
+    file = shelve.open(filename, 'r')
+    Game.map = file['map']
+    Game.objects[Game.dungeon_levelname] = file['objects'] 
+    Game.player = Game.objects[Game.dungeon_levelname][file['player_index']]  #get index of player in the objects list
+    Game.game_msgs = file['game_msgs']
+    Game.msg_history = file['msg_history']
+    Game.game_state = file['game_state']
+    Game.stairs = Game.objects[Game.dungeon_levelname][file['stairs_index']]
+    Game.player.dungeon_level = file['dungeon_level']
+    file.close()
+
+    map.initialize_fov(Game)
+
 def new_game():
     #create object representing the player
     if data.AUTOMODE:
@@ -58,14 +86,13 @@ def new_game():
         hp = 300
 
     fighter_component = entities.Fighter(hp=hp, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
-    
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
+
     Game.player.dungeon_level = 1
-    Game.dungeon_level = data.maplist[Game.player.dungeon_level]
-    Game.player.xplevel = 1
     Game.game_state = data.STATE_PLAYING
     Game.player.game_turns = 0
-    Game.set_auto = False
+
+    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
     Game.map = {}
     Game.objects = {}
@@ -83,45 +110,17 @@ def new_game():
     libtcod.console_clear(Game.con)
 
     #initial equipment
-    equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
-    obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
-    Game.player.fighter.add_item(obj)
-
-    equipment_component.equip(Game)
-    obj.always_visible = True
-    Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
+    if not data.AUTOMODE:
+        equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
+        obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
+        Game.player.fighter.add_item(obj)
+        equipment_component.equip(Game)
+        obj.always_visible = True
+        Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
     libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
-
-def save_game(filename='savegame'):
-    #open a new empty shelve (or overwrite old one) to write the game data
-    print 'SYSTEM--\t file saved!'
-    file = shelve.open(filename, 'n')
-    file['map'] = Game.map
-    file['objects'] = Game.objects[Game.dungeon_level]
-    file['player_index'] = Game.objects[Game.dungeon_level].index(Game.player) #index of player in the objects list
-    file['game_msgs'] = Game.game_msgs
-    file['msg_history'] = Game.msg_history
-    file['game_state'] = Game.game_state
-    file['stairs_index'] = Game.objects[Game.dungeon_level].index(Game.stairs)
-    file['dungeon_level'] = Game.player.dungeon_level
-    file.close()
-
-def load_game(filename='savegame'):
-    file = shelve.open(filename, 'r')
-    Game.map = file['map']
-    Game.objects[Game.dungeon_level] = file['objects'] 
-    Game.player = Game.objects[Game.dungeon_level][file['player_index']]  #get index of player in the objects list
-    Game.game_msgs = file['game_msgs']
-    Game.msg_history = file['msg_history']
-    Game.game_state = file['game_state']
-    Game.stairs = Game.objects[Game.dungeon_level][file['stairs_index']]
-    Game.player.dungeon_level = file['dungeon_level']
-    file.close()
-
-    map.initialize_fov(Game)
 
 def play_game():
     Game.player_action = None
@@ -129,7 +128,6 @@ def play_game():
     #mouse stuff
     Game.mouse = libtcod.Mouse()
     Game.key = libtcod.Key()  
-
     (Game.camera_x, Game.camera_y) = (0, 0)  
 
     if data.AUTOMODE:
@@ -137,7 +135,6 @@ def play_game():
         set_map_explored(Game)          
     
     while not libtcod.console_is_window_closed():
-        #render the screen
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
 
         #render the screen
@@ -148,9 +145,10 @@ def play_game():
         for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
             object.clear(Game)
 
+        #each time we loop, ensure that the Game.dungeon_levelname is equal to the current player dungeon level
+        Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+        
         #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
-        Game.dungeon_level = data.maplist[Game.player.dungeon_level]
-
         if not data.AUTOMODE:    
             if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
                 Game.player_action = handle_keys()
@@ -166,9 +164,9 @@ def play_game():
         if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
             Game.fov_recompute = True
             
-            for index,Game.dungeon_level in enumerate(data.maplist):
+            for index,Game.dungeon_levelname in enumerate(data.maplist):
                 if index > 0: #skip intro level
-                    for object in Game.objects[Game.dungeon_level]:
+                    for object in Game.objects[Game.dungeon_levelname]:
                         if object.fighter:
                             if object.fighter.speed_counter <= 0 and object.fighter.alive: #only allow a turn if the counter = 0. 
                                 if object.ai:
@@ -211,7 +209,7 @@ def play_game():
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
                     data.AUTOMODE = False                    
 
-        Game.dungeon_level = data.maplist[Game.player.dungeon_level]
+        Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
 def check_level_up(Game, user):
     #see if the user's experience is enough to level-up

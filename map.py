@@ -11,20 +11,20 @@ import itertools
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
     for x in range(min(x1, x2), max(x1, x2) + 1):
-        Game.map[Game.dungeon_level][x][y].blocked = False
-        Game.map[Game.dungeon_level][x][y].block_sight = False
+        Game.map[Game.dungeon_levelname][x][y].blocked = False
+        Game.map[Game.dungeon_levelname][x][y].block_sight = False
 
 def create_v_tunnel(y1, y2, x, Game):
     for y in range(min(y1, y2), max(y1, y2) + 1):
-        Game.map[Game.dungeon_level][x][y].blocked = False
-        Game.map[Game.dungeon_level][x][y].block_sight = False
+        Game.map[Game.dungeon_levelname][x][y].blocked = False
+        Game.map[Game.dungeon_levelname][x][y].block_sight = False
 
 def create_room(room, Game):
     #go through tiles in rect to make them passable
     for x in range(room.x1 + 1, room.x2):
         for y in range(room.y1 + 1, room.y2):
-                Game.map[Game.dungeon_level][x][y].blocked = False
-                Game.map[Game.dungeon_level][x][y].block_sight = False
+                Game.map[Game.dungeon_levelname][x][y].blocked = False
+                Game.map[Game.dungeon_levelname][x][y].block_sight = False
 
 #map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
 def initialize_fov(Game):
@@ -33,7 +33,7 @@ def initialize_fov(Game):
     Game.player.fighter.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.player.fighter.fov, x, y, not Game.map[Game.dungeon_level][x][y].block_sight, not Game.map[Game.dungeon_level][x][y].blocked)
+            libtcod.map_set_properties(Game.player.fighter.fov, x, y, not Game.map[Game.dungeon_levelname][x][y].block_sight, not Game.map[Game.dungeon_levelname][x][y].blocked)
 
     libtcod.console_clear(Game.con)
 
@@ -41,20 +41,20 @@ def next_level(Game):
     #advance to next level
     message('You head down the stairs', Game, libtcod.red)
     Game.player.dungeon_level +=1
-    Game.dungeon_level = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
-    if not Game.dungeon_level in Game.map:
+    if not Game.dungeon_levelname in Game.map:
         make_map(Game) #create fresh new level
 
-    Game.player.x = Game.upstairs[Game.dungeon_level].x
-    Game.player.y = Game.upstairs[Game.dungeon_level].y
+    Game.player.x = Game.upstairs[Game.dungeon_levelname].x
+    Game.player.y = Game.upstairs[Game.dungeon_levelname].y
     initialize_fov(Game)
 
 def prev_level(Game):
     #advance to next level
     message('You head up the stairs', Game, libtcod.red)
     Game.player.dungeon_level -=1
-    Game.dungeon_level = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
     if Game.player.dungeon_level <= 0: #leave dungeon      
         message('You\'ve left the dungeon!', Game, libtcod.red)
@@ -63,11 +63,11 @@ def prev_level(Game):
     else:
         #make_map(Game) #create fresh new level
         #assume map already made. bad long-term assumption
-        if not Game.dungeon_level in Game.map:
+        if not Game.dungeon_levelname in Game.map:
             make_map(Game) #create fresh new level
 
-        Game.player.x = Game.downstairs[Game.dungeon_level].x
-        Game.player.y = Game.downstairs[Game.dungeon_level].y
+        Game.player.x = Game.downstairs[Game.dungeon_levelname].x
+        Game.player.y = Game.downstairs[Game.dungeon_levelname].y
         initialize_fov(Game)
 
 def from_dungeon_level(table, dungeon_level):
@@ -81,25 +81,25 @@ def from_dungeon_level(table, dungeon_level):
 def make_dungeon(Game):
     for index,level in enumerate(data.maplist):
         if index > 0: #skip intro level
-            print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + ' creating level ' + level
+            print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating level ' + level
             Game.player.dungeon_level = index
-            Game.dungeon_level = level
+            Game.dungeon_levelname = level
             make_map(Game)
 
     Game.player.dungeon_level = 1
-    Game.dungeon_level = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
-    Game.player.x = Game.upstairs[Game.dungeon_level].x
-    Game.player.y = Game.upstairs[Game.dungeon_level].y
+    Game.player.x = Game.upstairs[Game.dungeon_levelname].x
+    Game.player.y = Game.upstairs[Game.dungeon_levelname].y
     initialize_fov(Game)
 
 #Primary map generator and object placement routines.
 def make_map(Game):
-    Game.objects[Game.dungeon_level] = [Game.player]
+    Game.objects[Game.dungeon_levelname] = [Game.player]
     #fill map with "blocked" tiles
 
-    print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + ' creating map:' + str(Game.dungeon_level)
-    Game.map[Game.dungeon_level] = [[ Tile(True)
+    print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating map:' + str(Game.dungeon_levelname)
+    Game.map[Game.dungeon_levelname] = [[ Tile(True)
         for y in range(data.MAP_HEIGHT) ]
             for x in range(data.MAP_WIDTH) ]            
 
@@ -137,9 +137,9 @@ def make_map(Game):
                 Game.player.x = new_x
                 Game.player.y = new_y
                 #create upstairs at the center of the first room
-                Game.upstairs[Game.dungeon_level] = entities.Object(new_x, new_y, '<', 'upstairs', libtcod.white, always_visible = True)
-                Game.objects[Game.dungeon_level].append(Game.upstairs[Game.dungeon_level])
-                Game.upstairs[Game.dungeon_level].send_to_back(Game) #so it's drawn below the monsters
+                Game.upstairs[Game.dungeon_levelname] = entities.Object(new_x, new_y, '<', 'upstairs', libtcod.white, always_visible = True)
+                Game.objects[Game.dungeon_levelname].append(Game.upstairs[Game.dungeon_levelname])
+                Game.upstairs[Game.dungeon_levelname].send_to_back(Game) #so it's drawn below the monsters
 
             else:
                 #for all other rooms, need to connect to previous room with a tunnel
@@ -162,15 +162,15 @@ def make_map(Game):
             num_rooms +=1
 
     #create stairs at the center of the last room
-    Game.downstairs[Game.dungeon_level] = entities.Object(new_x, new_y, '>', 'downstairs', libtcod.white, always_visible = True)
-    Game.objects[Game.dungeon_level].append(Game.downstairs[Game.dungeon_level])
-    Game.downstairs[Game.dungeon_level].send_to_back(Game) #so it's drawn below the monsters
+    Game.downstairs[Game.dungeon_levelname] = entities.Object(new_x, new_y, '>', 'downstairs', libtcod.white, always_visible = True)
+    Game.objects[Game.dungeon_levelname].append(Game.downstairs[Game.dungeon_levelname])
+    Game.downstairs[Game.dungeon_levelname].send_to_back(Game) #so it's drawn below the monsters
 
     #create generic fov map to use for this floor
-    Game.fov_map[Game.dungeon_level] = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
+    Game.fov_map[Game.dungeon_levelname] = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for yy in range(data.MAP_HEIGHT):
         for xx in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.fov_map[Game.dungeon_level], xx, yy, not Game.map[Game.dungeon_level][xx][yy].block_sight, not Game.map[Game.dungeon_level][xx][yy].blocked)
+            libtcod.map_set_properties(Game.fov_map[Game.dungeon_levelname], xx, yy, not Game.map[Game.dungeon_levelname][xx][yy].block_sight, not Game.map[Game.dungeon_levelname][xx][yy].blocked)
 
 
 
@@ -178,11 +178,11 @@ def place_objects(room, Game):
     #choose random number of monsters
     #max number monsters per room
     nextid = 1
-    max_monsters = from_dungeon_level([[100, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_level))
+    max_monsters = from_dungeon_level([[100, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_levelname))
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
 
-    max_items = from_dungeon_level([[100, 1], [2, 4]], data.maplist.index(Game.dungeon_level))
+    max_items = from_dungeon_level([[100, 1], [2, 4]], data.maplist.index(Game.dungeon_levelname))
     num_items = libtcod.random_get_int(0, 0, max_items)
     item_chances = get_item_chances(Game)
 
@@ -196,7 +196,7 @@ def place_objects(room, Game):
             choice = random_choice(monster_chances)
 
             monster             = entities.Object(**entitydata.mobs[choice])
-            monster.dungeon_level = data.maplist.index(Game.dungeon_level) 
+            monster.dungeon_level = data.maplist.index(Game.dungeon_levelname) 
             monster.blocks      = True        
             monster.ai          = entities.BasicMonster()  #how do I set different ai?
             monster.ai.owner    = monster
@@ -208,7 +208,7 @@ def place_objects(room, Game):
             monster.fighter.set_fov(Game)
 
 
-            print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + ' made a ' + monster.name
+            print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' made a ' + monster.name
 
             #give monster items if they have them
             if entitydata.mobitems[choice]:
@@ -217,7 +217,7 @@ def place_objects(room, Game):
                     monster.fighter.add_item(item)
 
             monster.set_location(x, y, Game)
-            Game.objects[Game.dungeon_level].append(monster)
+            Game.objects[Game.dungeon_levelname].append(monster)
 
 
     for i in range(num_items):
@@ -234,9 +234,9 @@ def place_objects(room, Game):
             item.always_visible = True
 
             item.set_location(x, y, Game)
-            item.dungeon_level = data.maplist.index(Game.dungeon_level)
+            item.dungeon_level = data.maplist.index(Game.dungeon_levelname)
 
-            Game.objects[Game.dungeon_level].append(item)
+            Game.objects[Game.dungeon_levelname].append(item)
             item.send_to_back(Game) #items appear below other objects
 
 def get_monster_chances(Game):
@@ -244,7 +244,7 @@ def get_monster_chances(Game):
     monster_chances = {}
 
     for mobname in entitydata.mobchances:
-        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], data.maplist.index(Game.dungeon_level))
+        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], data.maplist.index(Game.dungeon_levelname))
 
     return monster_chances
 
@@ -253,6 +253,6 @@ def get_item_chances(Game):
     item_chances = {}
 
     for itemname in entitydata.itemchances:
-        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], data.maplist.index(Game.dungeon_level))
+        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], data.maplist.index(Game.dungeon_levelname))
 
     return item_chances
