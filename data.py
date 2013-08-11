@@ -65,8 +65,8 @@ MAX_ROOMS = 2
 
 #.............................................
 #EDITABLE ENTITIES GENERAL DATA
-LEVEL_UP_BASE     = 200
-LEVEL_UP_FACTOR   = 150
+LEVEL_UP_BASE     = 2
+LEVEL_UP_FACTOR   = 2
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
 AUTOMODE          = True
