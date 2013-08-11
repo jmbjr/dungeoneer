@@ -216,6 +216,7 @@ class Fighter(object):
             self.inventory = []
 
         self.inventory.append(item)
+        item.owner = self
 
     def remove_item(self, item):
         try:
@@ -429,6 +430,8 @@ class Equipment(object):
             self.equip(Game)
 
     def equip(self, Game):
+        entity = self.owner.owner.owner
+
         #if the slot is already being used, dequip whatever is there
         old_equipment = get_equipped_in_slot(self.slot, Game)
         if old_equipment is not None:
@@ -792,7 +795,7 @@ def get_all_equipped(obj, Game): #returns list of equipped items
                 if item.equipment and item.equipment.is_equipped:
                     equipped_list.append(item.equipment)
             return equipped_list
-            
+
     return [] #other Game.objects[Game.dungeon_levelname] have no equipment
 
 
