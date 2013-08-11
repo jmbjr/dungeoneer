@@ -792,10 +792,8 @@ def get_all_equipped(obj, Game): #returns list of equipped items
                 if item.equipment and item.equipment.is_equipped:
                     equipped_list.append(item.equipment)
             return equipped_list
-        else:
-            return []
-    else:
-        return [] #other Game.objects[Game.dungeon_levelname] have no equipment
+            
+    return [] #other Game.objects[Game.dungeon_levelname] have no equipment
 
 
 #target monsters/tiles and check for blocked tiles
