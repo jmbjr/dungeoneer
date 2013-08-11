@@ -755,7 +755,7 @@ def monster_death(monster, killer, Game):
     #doesn't block, can't be attacked, cannot move
     if monster.fighter.alive:
         message(monster.name.capitalize() + ' is DEAD! Level ', Game, libtcod.orange)
-        printstats(monster)
+        printstats(monster, Game)
         monster.send_to_back(Game)
         
         if killer.fighter:
@@ -916,8 +916,8 @@ def total_alive_entities(Game):
 
 def printstats(entity, Game):
     message(entity.name, Game, libtcod.white)
-    message('Level =' + entity.fighter.xplevel, Game, libtcod.white)
-    message('XP =' + entity.fighter.xp, Game, libtcod.white)
-    message('HP =' + entity.fighter.hp + '/' + entity.fighter.max_hp, Game, libtcod.white)
-    message('power =' + entity.fighter.power, Game, libtcod.white)
-    message('defense =' + entity.fighter.defense, Game, libtcod.white)     
+    message('Level =' + str(entity.fighter.xplevel), Game, libtcod.white)
+    message('XP =' + str(entity.fighter.xp), Game, libtcod.white)
+    message('HP =' + str(entity.fighter.hp) + '/' + str(entity.fighter.max_hp(Game)), Game, libtcod.white)
+    message('power =' + str(entity.fighter.power(Game)), Game, libtcod.white)
+    message('defense =' + str(entity.fighter.defense(Game)), Game, libtcod.white)     
