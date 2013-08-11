@@ -778,18 +778,22 @@ def monster_death(monster, killer, Game):
 
 
 def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
-    for obj in Game.player.fighter.inventory:
-        if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
-            return obj.equipment
+    if Game.player.fighter.inventory:
+        for obj in Game.player.fighter.inventory:
+            if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
+                return obj.equipment
     return None
 
 def get_all_equipped(obj, Game): #returns list of equipped items
     if obj == Game.player:
         equipped_list = []
-        for item in Game.player.fighter.inventory:
-            if item.equipment and item.equipment.is_equipped:
-                equipped_list.append(item.equipment)
-        return equipped_list
+        if Game.player.fighter.inventory:
+            for item in Game.player.fighter.inventory:
+                if item.equipment and item.equipment.is_equipped:
+                    equipped_list.append(item.equipment)
+            return equipped_list
+        else:
+            return []
     else:
         return [] #other Game.objects[Game.dungeon_levelname] have no equipment
 
