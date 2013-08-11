@@ -178,7 +178,7 @@ def place_objects(room, Game):
     #choose random number of monsters
     #max number monsters per room
     nextid = 1
-    max_monsters = from_dungeon_level([[300, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_level))
+    max_monsters = from_dungeon_level([[100, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_level))
     num_monsters = libtcod.random_get_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
 
