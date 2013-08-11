@@ -22,10 +22,10 @@ mobs = {
 
 mobitems = {}
 mobitems = {
-	'johnstein':   ['heal', 'heal', 'heal', 'heal'],
+	'johnstein':   ['heal', 'fireball', 'lightning', 'confuse', 'push', 'bigpush'],
 	'greynaab':    ['fireball', 'fireball', 'fireball'],
-	'jerbear':     ['confuse', 'confuse', 'confuse'],
-	'zombiesheep': ['lightning','lightning','lightning','lightning'],
+	'jerbear':     ['fireball', 'fireball', 'fireball'],
+	'zombiesheep': ['fireball','fireball','fireball','fireball'],
 	'pushy':       ['push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push','push'],
 	'JOHNSTEIN':   ['heal', 'heal', 'heal', 'heal'],
 	'GREYNAAB':    ['fireball', 'heal', 'fireball'],
@@ -41,17 +41,17 @@ mobitems = {
 
 mobchances = {}
 mobchances = {
-	'johnstein':    [[100,1], [50, 3]],
-	'greynaab':     [[60, 1], [25, 3]],
-	'jerbear':      [[50, 1], [25, 3]],
-	'zombiesheep':  [[40, 1], [25, 3]],
-	'pushy'      :  [[100,1], [50,3]],
+	'johnstein':    [[10, 1], [50, 3]],
+	'greynaab':     [[10, 2], [25, 3]],
+	'jerbear':      [[10, 2], [25, 3]],
+	'zombiesheep':  [[10, 2], [25, 3]],
+	'pushy'      :  [[10, 2], [50,3]],
 
-	'JOHNSTEIN':    [[100,3], [35, 5]],
-	'GREYNAAB':     [[60, 3], [35, 5]],
-	'JERBEAR':      [[50, 3], [30, 5]],
-	'ZOMBIESHEEP':  [[40, 3], [25, 5]],
-	'PUSHY':        [[100, 3],[50, 5]]
+	'JOHNSTEIN':    [[10, 3], [35, 5]],
+	'GREYNAAB':     [[10, 3], [35, 5]],
+	'JERBEAR':      [[10, 3], [30, 5]],
+	'ZOMBIESHEEP':  [[10, 3], [25, 5]],
+	'PUSHY':        [[10, 3], [50, 5]]
 }
 
 items={}

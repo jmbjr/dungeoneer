@@ -53,11 +53,11 @@ def new_game():
     #create object representing the player
     if data.AUTOMODE:
         #set player hp = 0
-        hp = 0
+        hp = -1
     else:
         hp = 300
 
-    fighter_component = entities.Fighter(hp=hp, defense=10, power=20, xp=0, xpvalue=10000, clan='monster', death_function=entities.player_death, speed = 10)
+    fighter_component = entities.Fighter(hp=hp, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
     
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
     Game.player.dungeon_level = 1
@@ -143,7 +143,6 @@ def play_game():
         #render the screen
         render_all(Game)
         libtcod.console_flush()
-        check_level_up(Game, Game.player)
 
         #erase objects from old position on current map, before they move
         for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
@@ -171,14 +170,13 @@ def play_game():
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_level]:
                         if object.fighter:
-                            
-                            if object.fighter.speed_counter <= 0: #only allow a turn if the counter = 0. 
+                            if object.fighter.speed_counter <= 0 and object.fighter.alive: #only allow a turn if the counter = 0. 
                                 if object.ai:
                                     if object.ai.take_turn(Game): #only reset speed_counter if monster is still alive
                                         object.fighter.speed_counter = object.fighter.speed(Game)
 
                             #this is clunky, but have to again check if monster is still alive
-                            if object.fighter:
+                            if object.fighter.alive:
                                 if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
                                     object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
                                     object.fighter.regen_counter = object.fighter.regen(Game)
@@ -196,15 +194,18 @@ def play_game():
                                 #always check to ensure hp <= max_hp
                                 if object.fighter.hp > object.fighter.max_hp(Game):
                                         object.fighter.hp = object.fighter.max_hp(Game)
+                                check_level_up(Game, object)
 
                         elif object.ai:
                             object.ai.take_turn(Game)
-                        check_level_up(Game, object)
+                        
             Game.tick+=1
+
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
                 if len(alive_entities) == 1:
-                    message ('BATTLE ROYALE IS OVER! Winner is ' + alive_entities[0].name, Game, libtcod.blue)
+                    message ('BATTLE ROYALE IS OVER! Winner is ', Game, libtcod.blue)
+                    entities.printstats(alive_entities[0], Game)
                     data.AUTOMODE = False
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
@@ -213,13 +214,14 @@ def play_game():
         Game.dungeon_level = data.maplist[Game.player.dungeon_level]
 
 def check_level_up(Game, user):
-    #see if the player's experience is enough to level-up
+    #see if the user's experience is enough to level-up
 
         level_up_xp = data.LEVEL_UP_BASE + user.fighter.xplevel * data.LEVEL_UP_FACTOR
 
         if user.fighter.xp >= level_up_xp:
             user.fighter.xplevel += 1
             user.fighter.xp -= level_up_xp
+
             if user is Game.player:
                 message('You have reached level ' + str(user.fighter.xplevel) + '!', Game, libtcod.yellow)
             else:
@@ -243,7 +245,7 @@ def check_level_up(Game, user):
             elif choice == 2:
                 user.fighter.base_defense += 2
 
-            user.fighter.hp = userr.fighter.max_hp(Game)
+            user.fighter.hp = user.fighter.max_hp(Game)
 
 #KEYPRESS CHECKS
 def handle_keys():

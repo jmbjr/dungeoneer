@@ -174,7 +174,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, xplevel=1, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
+    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, xplevel=1, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -189,6 +189,7 @@ class Fighter(object):
         self.fov = None
         self.xpvalue = xpvalue
         self.xplevel = xplevel
+        self.alive = alive
 
         self.inventory = inventory
         if self.inventory:
@@ -217,7 +218,10 @@ class Fighter(object):
         self.inventory.append(item)
 
     def remove_item(self, item):
-        self.inventory.remove(item)
+        try:
+            self.inventory.remove(item)
+        except:
+            print 'ERROR in remove_item--\t ' + self.owner.name + '/' + item.name
 
     def add_buff(self, buff):
         if not self.buffs:
@@ -523,7 +527,7 @@ class BasicMonster(object):
             monster.move_random(Game)
 
         #check if monster is still alive
-        if monster.fighter:
+        if monster.fighter.alive:
             return True
         else:
             return False
@@ -733,12 +737,14 @@ def player_death(player, killer, Game):
         killer.fighter.xp += player.fighter.xpvalue
         print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
 
-    Game.player.char = '%'
-    Game.player.color = libtcod.darkest_red
-    Game.player.blocks = False
-    Game.player.ai = None
-    Game.player.name = 'remains of ' + Game.player.name
-    Game.player.always_visible = True
+    if Game.player.fighter.alive:
+        Game.player.char = '%'
+        Game.player.color = libtcod.darkest_red
+        Game.player.blocks = False
+        Game.player.ai = None
+        Game.player.name = 'remains of ' + Game.player.name
+        Game.player.always_visible = True
+        Game.player.fighter.alive = False
 
     if not data.AUTOMODE: 
         message('YOU DIED! YOU SUCK!', Game, libtcod.red)
@@ -747,26 +753,27 @@ def player_death(player, killer, Game):
 def monster_death(monster, killer, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
+    if monster.fighter.alive:
+        message(monster.name.capitalize() + ' is DEAD! Level ', Game, libtcod.orange)
+        printstats(monster)
+        monster.send_to_back(Game)
+        
+        if killer.fighter:
+            killer.fighter.xp += monster.fighter.xpvalue
+            print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) + '(' + monster.name + ')'
+        if killer is Game.player:
+            message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
 
-    message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
-    monster.send_to_back(Game)
-    
-    if killer.fighter:
-        killer.fighter.xp += monster.fighter.xpvalue
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_level + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) + '(' + monster.name + ')'
-    if killer is Game.player:
-        message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
+        for equip in monster.fighter.inventory:
+            equip.item.drop(Game, monster)
 
-    for equip in monster.fighter.inventory:
-        equip.item.drop(Game, monster)
-
-    monster.char = '%'
-    monster.color = libtcod.darkest_red
-    monster.blocks = False
-    monster.fighter = None
-    monster.ai = None
-    monster.name = 'remains of ' + monster.name
-    monster.always_visible = True
+        monster.char = '%'
+        monster.color = libtcod.darkest_red
+        monster.blocks = False
+        monster.ai = None
+        monster.name = 'remains of ' + monster.name
+        monster.always_visible = True
+        monster.fighter.alive = False
     
 
 
@@ -906,3 +913,11 @@ def total_alive_entities(Game):
             alive_entities.append(object)
 
     return alive_entities
+
+def printstats(entity, Game):
+    message(entity.name, Game, libtcod.white)
+    message('Level =' + entity.fighter.xplevel, Game, libtcod.white)
+    message('XP =' + entity.fighter.xp, Game, libtcod.white)
+    message('HP =' + entity.fighter.hp + '/' + entity.fighter.max_hp, Game, libtcod.white)
+    message('power =' + entity.fighter.power, Game, libtcod.white)
+    message('defense =' + entity.fighter.defense, Game, libtcod.white)     
