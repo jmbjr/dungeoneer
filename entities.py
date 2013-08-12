@@ -389,7 +389,7 @@ class Item(object):
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
             if equipment and get_equipped_in_slot(equipment.slot, Game, user) is None and data.AUTOEQUIP:
-                equipment.equip(Game)
+                equipment.equip(Game, user)
 
             retval = data.STATE_PLAYING
 
@@ -408,7 +408,7 @@ class Item(object):
 
         #special case: if the object has the equip component, dequip before dropping it
         if self.owner.equipment:
-            self.owner.equipment.dequip(Game)
+            self.owner.equipment.dequip(Game, user)
 
         print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' dropped ' + self.owner.name
 
@@ -437,13 +437,13 @@ class Equipment(object):
 
         #equip object and show a message about it
         self.is_equipped = True
-        message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, libtcod.light_green)
+        message(user.name + ' equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, libtcod.light_green)
 
     def dequip(self, Game, user):
         #dequip object and show a message about it
         if not self.is_equipped: return
         self.is_equipped = False
-        message('Unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)          
+        message(user.name + ' unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)          
 
 
 #AI
@@ -504,7 +504,8 @@ class BasicMonster(object):
                     #get random item from inv
                     index = libtcod.random_get_int(0, 0, len(monster.fighter.inventory)-1)
                     item = monster.fighter.inventory[index].item
-                    useditem = item.use(Game, user=monster)
+                    if not item.owner.equipment:
+                        useditem = item.use(Game, user=monster)
 
                 #if monster didn't use item, then move
                 if useditem is not data.STATE_USED:
@@ -734,9 +735,10 @@ def cast_lightning(Game, user):
 def player_death(player, killer, Game):
     #the game has ended
 
-    if killer.fighter:
-        killer.fighter.xp += player.fighter.xpvalue
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
+    if killer:
+        if killer.fighter:
+            killer.fighter.xp += player.fighter.xpvalue
+            print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
 
     if Game.player.fighter.alive:
         Game.player.char = '%'
@@ -747,7 +749,7 @@ def player_death(player, killer, Game):
         Game.player.always_visible = True
         Game.player.fighter.alive = False
 
-    if not data.AUTOMODE: 
+    if not data.AUTOMODE and Game.player.fighter.alive: 
         message('YOU DIED! YOU SUCK!', Game, libtcod.red)
         Game.game_state = data.STATE_DEAD
 
@@ -863,7 +865,7 @@ def closest_nonclan(max_range, Game, dude):
     fov_map_dude = dude.fighter.fov_recompute(Game)
 
     for object in Game.objects[Game.dungeon_levelname]:
-        if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level and object.fighter.hp > 0:
+        if object.fighter and  object.fighter.clan != dude.fighter.clan and libtcod.map_is_in_fov(fov_map_dude, object.x, object.y) and object.dungeon_level == dude.dungeon_level and object.fighter.alive:
             #calculate the distance between this and the dude
             dist = dude.distance_to(object)
             if dist < closest_dist:
@@ -921,5 +923,5 @@ def printstats(entity, Game):
     message('Level =' + str(entity.fighter.xplevel), Game, libtcod.white)
     message('XP =' + str(entity.fighter.xp), Game, libtcod.white)
     message('HP =' + str(entity.fighter.hp) + '/' + str(entity.fighter.max_hp(Game)), Game, libtcod.white)
-    message('power =' + str(entity.fighter.power(Game)), Game, libtcod.white)
-    message('defense =' + str(entity.fighter.defense(Game)), Game, libtcod.white)     
+    message('power =' + str(entity.fighter.power(Game)) + '/' + str(entity.fighter.base_power), Game, libtcod.white)
+    message('defense =' + str(entity.fighter.defense(Game)) + '/' + str(entity.fighter.base_defense), Game, libtcod.white)     
