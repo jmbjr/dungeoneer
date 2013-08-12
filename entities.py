@@ -170,7 +170,6 @@ class Object(object):
         Game.objects[Game.dungeon_levelname].remove(self)
         Game.objects[Game.dungeon_levelname].insert(0, self)
 
-
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
@@ -221,6 +220,7 @@ class Fighter(object):
     def remove_item(self, item):
         try:
             self.inventory.remove(item)
+            item.owner = None
         except:
             print 'ERROR in remove_item--\t ' + self.owner.name + '/' + item.name
 
@@ -353,7 +353,7 @@ class Item(object):
     def use(self, Game, user):
         #special case: if the object has the equipment component, the "use" action is to equip/dequip
         if self.owner.equipment:
-            self.owner.equipment.toggle_equip(Game)
+            self.owner.equipment.toggle_equip(Game, user)
             return
 
         #call the 'use_function' if defined
@@ -388,7 +388,7 @@ class Item(object):
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
-            if equipment and get_equipped_in_slot(equipment.slot, Game) is None and data.AUTOEQUIP:
+            if equipment and get_equipped_in_slot(equipment.slot, Game, user) is None and data.AUTOEQUIP:
                 equipment.equip(Game)
 
             retval = data.STATE_PLAYING
@@ -423,25 +423,23 @@ class Equipment(object):
         self.speed_bonus = speed_bonus
         self.regen_bonus = regen_bonus
 
-    def toggle_equip(self, Game): #toggle equip/dequip status
+    def toggle_equip(self, Game, user): #toggle equip/dequip status
         if self.is_equipped:
-            self.dequip(Game)
+            self.dequip(Game, user)
         else:
-            self.equip(Game)
+            self.equip(Game, user)
 
-    def equip(self, Game):
-        entity = self.owner.owner.owner
-
+    def equip(self, Game, user):
         #if the slot is already being used, dequip whatever is there
-        old_equipment = get_equipped_in_slot(self.slot, Game)
+        old_equipment = get_equipped_in_slot(self.slot, Game, user)
         if old_equipment is not None:
-            old_equipment.dequip(Game)
+            old_equipment.dequip(Game, user)
 
         #equip object and show a message about it
         self.is_equipped = True
         message('Equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, libtcod.light_green)
 
-    def dequip(self, Game):
+    def dequip(self, Game, user):
         #dequip object and show a message about it
         if not self.is_equipped: return
         self.is_equipped = False
@@ -780,21 +778,20 @@ def monster_death(monster, killer, Game):
     
 
 
-def get_equipped_in_slot(slot, Game): #returns the equipment in a slot, or None if it's empty
-    if Game.player.fighter.inventory:
-        for obj in Game.player.fighter.inventory:
+def get_equipped_in_slot(slot, Game, user): #returns the equipment in a slot, or None if it's empty
+    if user.fighter.inventory:
+        for obj in user.fighter.inventory:
             if obj.equipment and obj.equipment.slot == slot and obj.equipment.is_equipped:
                 return obj.equipment
     return None
 
-def get_all_equipped(obj, Game): #returns list of equipped items
-    if obj == Game.player:
-        equipped_list = []
-        if Game.player.fighter.inventory:
-            for item in Game.player.fighter.inventory:
-                if item.equipment and item.equipment.is_equipped:
-                    equipped_list.append(item.equipment)
-            return equipped_list
+def get_all_equipped(user, Game): #returns list of equipped items
+    equipped_list = []
+    if user.fighter.inventory:
+        for item in user.fighter.inventory:
+            if item.equipment and item.equipment.is_equipped:
+                equipped_list.append(item.equipment)
+        return equipped_list
 
     return [] #other Game.objects[Game.dungeon_levelname] have no equipment
 
