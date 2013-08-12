@@ -113,9 +113,11 @@ def new_game():
     if not data.AUTOMODE:
         equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
         obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
+        obj.always_visible = True
+        
         Game.player.fighter.add_item(obj)
         equipment_component.equip(Game)
-        obj.always_visible = True
+
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
     #a warm welcoming message!
