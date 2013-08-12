@@ -29,20 +29,26 @@ def main_menu():
         libtcod.console_print_ex(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
 
         #show options and wait for the player's choice
-        choice = menu('', [Menuobj('Play a new game'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
+        choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
 
         if choice == 0: #new game
             new_game()
             play_game()
 
-        if choice == 1: #load last game
+        if choice == 1: #new game
+            data.AUTOMODE = True
+            new_game()
+            play_game()
+
+        if choice == 2: #load last game
             try:
                 load_game()
             except:
                 msgbox('\n No saved game to load. \n', Game, 24)
                 continue
             play_game()
-        elif choice == 2: #quit
+            
+        elif choice == 3: #quit
             try:
                 save_game()
             except:
@@ -114,9 +120,9 @@ def new_game():
         equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
         obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
         obj.always_visible = True
-        
+
         Game.player.fighter.add_item(obj)
-        equipment_component.equip(Game)
+        equipment_component.equip(Game, Game.player)
 
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
@@ -134,10 +140,16 @@ def play_game():
 
     if data.AUTOMODE:
         set_objects_visible(Game)
-        set_map_explored(Game)          
+        set_map_explored(Game)  
+        battleover = False
+
+    player_death_function =  Game.player.fighter.death_function        
     
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
+
+        #check for player death
+        player_death_function(Game.player, None, Game)
 
         #render the screen
         render_all(Game)
@@ -200,6 +212,7 @@ def play_game():
 
                         elif object.ai:
                             object.ai.take_turn(Game)
+
                         
             Game.tick+=1
 
@@ -209,11 +222,18 @@ def play_game():
                     message ('BATTLE ROYALE IS OVER! Winner is ', Game, libtcod.blue)
                     entities.printstats(alive_entities[0], Game)
                     data.AUTOMODE = False
+
+                    #render the screen
+                    render_all(Game)
+                    libtcod.console_flush()
+                    chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
+
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
-                    data.AUTOMODE = False                    
+                    data.AUTOMODE = False                                
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+
 
 def check_level_up(Game, user):
     #see if the user's experience is enough to level-up
@@ -308,14 +328,14 @@ def handle_keys():
 
             if key_char == 'i':
                 #show inv. if an item is selected, use it
-                chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game)
+                chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game, Game.player)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
                     return chosen_item.use(Game, user=Game.player)
 
             if key_char == 'd':
                 #show the inventory. if item is selected, drop it
-                chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game)
+                chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game, Game.player)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
                     chosen_item.drop(Game, Game.player)
