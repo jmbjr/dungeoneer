@@ -88,7 +88,7 @@ def menu(header, options, width, Game, letterdelim=None):
     #print all the options
     y = header_height
     letter_index = ord('a')
-    
+
     for obj in options:
         text = obj.text
         color = obj.color
@@ -139,28 +139,33 @@ def menu(header, options, width, Game, letterdelim=None):
 def msgbox(text, Game, width = 50):
     menu(text, [], width, Game) #use menu as a sort-of message box
 
-def inventory_menu(header, Game):
-    #show a menu with each item of the inventory as an option
-    if len(Game.player.fighter.inventory) == 0:
-        options = ['inventory is empty!']
-    else:
-        #options = [item.name for item in inventory]
+def inventory_menu(header, Game, user):
+    if user.fighter:
         options = []
-        for item in Game.player.fighter.inventory:
-            text = item.name
-            #show additional info, in case it's equipped
-            if item.equipment and item.equipment.is_equipped:
-                text = text + ' (on ' + item.equipment.slot + ')'
-            
-            obj = Menuobj(text, color=item.color, char=item.char)    
+        #show a menu with each item of the inventory as an option
+        if not len(user.fighter.inventory):
+            obj = Menuobj('inventory is empty!', color=libtcod.white, char='?')
             options.append(obj)
+        else:
+            #options = [item.name for item in inventory]
+            
+            for item in user.fighter.inventory:
+                text = item.name
+                #show additional info, in case it's equipped
+                if item.equipment and item.equipment.is_equipped:
+                    text = text + ' (on ' + item.equipment.slot + ')'
+                
+                obj = Menuobj(text, color=item.color, char=item.char)    
+                options.append(obj)
 
-    index = menu(header, options, data.INVENTORY_WIDTH, Game, letterdelim='')
+        index = menu(header, options, data.INVENTORY_WIDTH, Game, letterdelim='')
 
-    if (index is None or len(Game.player.fighter.inventory) == 0) or index == 'ESC':
-        return None
+        if (index is None or len(user.fighter.inventory) == 0) or index == 'ESC':
+            return None
+        else:
+            return user.fighter.inventory[index].item
     else:
-        return Game.player.fighter.inventory[index].item
+        return None
 
 
 
