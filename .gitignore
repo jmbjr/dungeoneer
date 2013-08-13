@@ -8,3 +8,5 @@ dist/
 dist_1/
 *.csv
 *.zip
+*.xls
+*.xlsx

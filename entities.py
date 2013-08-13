@@ -748,6 +748,7 @@ def player_death(player, killer, Game):
         #Game.player.name = 'remains of ' + Game.player.name
         Game.player.always_visible = True
         Game.player.fighter.alive = False
+        Game.player.send_to_back(Game)
 
     if not data.AUTOMODE and Game.player.fighter.alive: 
         message('YOU DIED! YOU SUCK!', Game, libtcod.red)

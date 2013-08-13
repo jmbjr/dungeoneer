@@ -9,6 +9,8 @@ import shelve #for save and load
 import entities
 import map
 import csv
+import glob, xlwt, os
+import time
 
 #global class pattern
 class Game(object): 
@@ -250,12 +252,22 @@ def play_game():
                     for thefile in Game.ofile:
                         Game.ofile[thefile].close()
 
+                    make_excel()
+
+                    for thefile in Game.ofile:
+                        os.remove(Game.ofile[thefile].name)
+
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
                     data.AUTOMODE = False  
 
                     for thefile in Game.ofile:
                         Game.ofile[thefile].close()
+
+                    make_excel()
+
+                    for thefile in Game.ofile:
+                        os.remove(Game.ofile[thefile].name)
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
@@ -292,6 +304,23 @@ def check_level_up(Game, user):
                 user.fighter.base_defense += 2
 
             user.fighter.hp = user.fighter.max_hp(Game)
+
+def make_excel(thedir='.'):
+    wb = xlwt.Workbook()
+
+    for filename in glob.glob(thedir + '/*.csv'):
+        (f_path, f_name) = os.path.split(filename)
+        (f_short_name, f_extension) = os.path.splitext(f_name)
+        ws = wb.add_sheet(f_short_name)
+        spamReader = csv.reader(open(filename, 'rb'))
+
+        for rowx, row in enumerate(spamReader):
+            for colx, value in enumerate(row):
+                ws.write(rowx, colx, value)
+
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+
+    wb.save(thedir+'/dungeoneer' + timestr + '.xls')
 
 #KEYPRESS CHECKS
 def handle_keys():
