@@ -7,6 +7,7 @@ import data
 import entities
 import entitydata
 import itertools
+import csv
 
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
@@ -201,7 +202,7 @@ def place_objects(room, Game):
             monster.ai          = entities.BasicMonster()  #how do I set different ai?
             monster.ai.owner    = monster
             monster.id          = str(monster.dungeon_level) + '.' + str(nextid)
-            monster.name        = choice + ' (' + str(monster.id) + ')'
+            monster.name        = choice + '(' + str(monster.id) + ')'
             if data.FREE_FOR_ALL_MODE:
                 monster.fighter.clan        = monster.name
             nextid+=1
@@ -218,6 +219,15 @@ def place_objects(room, Game):
 
             monster.set_location(x, y, Game)
             Game.objects[Game.dungeon_levelname].append(monster)
+
+            if data.FREE_FOR_ALL_MODE:
+                Game.ofile[monster.name] = open(monster.name + '.csv', "wb")
+                Game.writer[monster.name] = csv.writer(Game.ofile[monster.name], dialect='excel')
+
+                thedata = []
+                for key, value in sorted(getcsvdata(Game, monster).iteritems()):
+                    thedata.append(key)
+                Game.writer[monster.name].writerow(thedata)
 
 
     for i in range(num_items):

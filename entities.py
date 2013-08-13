@@ -745,7 +745,7 @@ def player_death(player, killer, Game):
         Game.player.color = libtcod.darkest_red
         Game.player.blocks = False
         Game.player.ai = None
-        Game.player.name = 'remains of ' + Game.player.name
+        #Game.player.name = 'remains of ' + Game.player.name
         Game.player.always_visible = True
         Game.player.fighter.alive = False
 
@@ -757,7 +757,7 @@ def monster_death(monster, killer, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
     if monster.fighter.alive:
-        message(monster.name.capitalize() + ' is DEAD! Level ', Game, libtcod.orange)
+        message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
         printstats(monster, Game)
         monster.send_to_back(Game)
         
@@ -774,7 +774,7 @@ def monster_death(monster, killer, Game):
         monster.color = libtcod.darkest_red
         monster.blocks = False
         monster.ai = None
-        monster.name = 'remains of ' + monster.name
+        #monster.name = 'remains of ' + monster.name
         monster.always_visible = True
         monster.fighter.alive = False
     

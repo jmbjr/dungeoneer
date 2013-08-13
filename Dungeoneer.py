@@ -8,7 +8,7 @@ import entitydata
 import shelve #for save and load
 import entities
 import map
-
+import csv
 
 #global class pattern
 class Game(object): 
@@ -100,12 +100,24 @@ def new_game():
 
     Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
+    Game.ofile = {}
+    Game.writer = {}
     Game.map = {}
     Game.objects = {}
     Game.upstairs = {}
     Game.downstairs = {}
     Game.fov_map = {}
     Game.tick = 0
+
+    #set up player csv file
+    if data.FREE_FOR_ALL_MODE:
+        Game.ofile[Game.player.name] = (open(Game.player.name + '.csv', "wb"))
+        Game.writer[Game.player.name] = (csv.writer(Game.ofile[Game.player.name], dialect='excel'))
+        thedata = []
+        for key, value in sorted(getcsvdata(Game, Game.player).iteritems()):
+            thedata.append(key)
+
+        Game.writer[Game.player.name].writerow(thedata)
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
@@ -210,11 +222,18 @@ def play_game():
                                         
                                 check_level_up(Game, object)
 
+                            if data.FREE_FOR_ALL_MODE:
+                                thedata = []
+                                for key, value in sorted(getcsvdata(Game, object).iteritems()):
+                                    thedata.append(value)
+
+                                Game.writer[object.name].writerow(thedata)    
+
                         elif object.ai:
                             object.ai.take_turn(Game)
-
-                        
+        
             Game.tick+=1
+
 
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
@@ -228,12 +247,17 @@ def play_game():
                     libtcod.console_flush()
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
 
+                    for thefile in Game.ofile:
+                        Game.ofile[thefile].close()
+
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
-                    data.AUTOMODE = False                                
+                    data.AUTOMODE = False  
+
+                    for thefile in Game.ofile:
+                        Game.ofile[thefile].close()
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
-
 
 def check_level_up(Game, user):
     #see if the user's experience is enough to level-up

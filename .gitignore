@@ -6,3 +6,5 @@ savegame
 build/
 dist/
 dist_1/
+*.csv
+*.zip

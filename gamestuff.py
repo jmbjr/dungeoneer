@@ -395,3 +395,35 @@ def to_camera_coordinates(x, y, Game):
     return (x, y)
 
 
+def getcsvdata(Game, entity):
+    thedata = {}
+    prefix = ''
+    if not entity:
+        fighter_component = entities.Fighter(name='',hp=0, defense=0, power=0, xp=0)
+        entity = entities.Object(fighter=fighter_component)
+   
+    thedata['_tick']    = Game.tick
+    thedata['name']     = entity.name
+    prefix = 'stats-'
+
+    thedata[prefix + 'hp']              = entity.fighter.hp
+    thedata[prefix + 'hp_max']          = entity.fighter.max_hp(Game)
+    thedata[prefix + 'power']           = entity.fighter.power(Game)
+    thedata[prefix + 'power_base']      = entity.fighter.base_power
+    thedata[prefix + 'defense']         = entity.fighter.defense(Game)
+    thedata[prefix + 'defense_base']    = entity.fighter.base_defense
+    thedata[prefix + 'xp']              = entity.fighter.xp
+    thedata[prefix + 'xplevel']         = entity.fighter.xplevel
+
+    thedata[prefix + 'speed_counter']         = entity.fighter.speed_counter
+    thedata[prefix + 'regen_counter']         = entity.fighter.regen_counter
+    thedata[prefix + 'alive_or_dead']         = int(entity.fighter.alive)
+
+    prefix = 'loc-'
+    thedata[prefix + 'x']                     = entity.x
+    thedata[prefix + 'y']                     = entity.y
+    thedata[prefix + 'dungeon_level']         = entity.dungeon_level
+    thedata[prefix + 'dungeon_levelname']     = data.maplist[entity.dungeon_level]
+
+
+    return thedata
