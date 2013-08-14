@@ -195,14 +195,7 @@ def random_choice_index(chances): #choose one option from list of chances. retur
             return choice
         choice +=1
 
-def get_distance(location1, location2):
-    try:
-        dx = location1.x - location2.x
-        dy = location1.y - location2.y
-    except:
-        dx = location1
-        dy = location2
-
+def get_distance(dx, dy):
     return math.sqrt(dx ** 2 + dy ** 2)
 
 def roll_dice(dicelist):
