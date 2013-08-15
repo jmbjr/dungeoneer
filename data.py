@@ -71,7 +71,7 @@ AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
 ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
 AUTOMODE          = False
 FREE_FOR_ALL_MODE = True  #if true, all monsters on diffent clans by default
-PRINT_MESSAGES	  = True
+PRINT_MESSAGES	  = True  #if true, print messages to log
 TURNBASED         = True #not working yet
 SPEED_DEFAULT     = 5  # speed delay. higher = slower. How many game ticks to wait between turns
 REGEN_DEFAULT     = 100000  # regen delay. higher = slower. How many game ticks to wait between regeneration

@@ -5,6 +5,9 @@ import data
 #specific imports needed for this module
 import math
 import textwrap
+import glob, xlwt, os
+import time
+import csv
 
 #common class objects for shapes and tiles
 class Rect(object):
@@ -54,7 +57,6 @@ def message(new_msg, Game, color = libtcod.white):
         print 'MSG--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + new_msg
 
     turn = Game.player.game_turns
-
     new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
 
     for line in new_msg_lines:
@@ -205,7 +207,6 @@ def roll_dice(dicelist):
         dice.append(roll)
 
     return [sum(dice), dice]
-
 
 
 #render routines
@@ -387,6 +388,22 @@ def to_camera_coordinates(x, y, Game):
  
     return (x, y)
 
+def make_excel(thedir='.'):
+    wb = xlwt.Workbook()
+
+    for filename in glob.glob(thedir + '/*.csv'):
+        (f_path, f_name) = os.path.split(filename)
+        (f_short_name, f_extension) = os.path.splitext(f_name)
+        ws = wb.add_sheet(f_short_name)
+        spamReader = csv.reader(open(filename, 'rb'))
+
+        for rowx, row in enumerate(spamReader):
+            for colx, value in enumerate(row):
+                ws.write(rowx, colx, value)
+
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+
+    wb.save(thedir+'/dungeoneer' + timestr + '.xls')
 
 def getcsvdata(Game, entity):
     thedata = {}
@@ -418,5 +435,15 @@ def getcsvdata(Game, entity):
     thedata[prefix + 'dungeon_level']         = entity.dungeon_level
     thedata[prefix + 'dungeon_levelname']     = data.maplist[entity.dungeon_level]
 
-
     return thedata
+
+def outputdata(Game):
+    for thefile in Game.ofile:
+        Game.ofile[thefile].close()
+
+    make_excel()
+
+    for thefile in Game.ofile:
+        os.remove(Game.ofile[thefile].name)
+
+    
