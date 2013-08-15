@@ -11,3 +11,4 @@ dist_1/
 *.xls
 *.xlsx
 *.dylib
+stats.db
