@@ -382,9 +382,11 @@ class Item(object):
             user.fighter.add_item(self.owner)
             Game.objects[Game.dungeon_levelname].remove(self.owner)
             if user is Game.player:
-                message('You picked up a ' + self.owner.name + '!', Game, libtcod.green)
+                name = 'You'
             else:
-                print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' picked up ' + self.owner.name
+                name = user.name
+
+            message(name + ' picked up a ' + self.owner.name + '!', Game, libtcod.green, isplayer(user,Game))
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
@@ -409,8 +411,6 @@ class Item(object):
         #special case: if the object has the equip component, dequip before dropping it
         if self.owner.equipment:
             self.owner.equipment.dequip(Game, user)
-
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' dropped ' + self.owner.name
 
 class Equipment(object):
     #an object that can be equipped, yielding bonuses. automatically adds the Item component
@@ -437,14 +437,21 @@ class Equipment(object):
 
         #equip object and show a message about it
         self.is_equipped = True
-        message(user.name + ' equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, libtcod.light_green)
+        if isplayer(user, Game):
+            name = 'You '
+        else:
+            name = user.name
+        message(name + ' equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, libtcod.light_green, isplayer(user, Game))
 
     def dequip(self, Game, user):
         #dequip object and show a message about it
         if not self.is_equipped: return
-        self.is_equipped = False
-        message(user.name + ' unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)          
-
+        self.is_equipped = False        
+        if isplayer(user, Game):
+            name = 'You '
+        else:
+            name = user.name
+        message(name + ' unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)  
 
 #AI
 class ConfusedMonster(object):
@@ -597,10 +604,11 @@ def cast_confusion(Game, user):
         #ask player for target to confuse
         message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
         target = target_monster(Game, data.CONFUSE_RANGE)
+        name = 'You'
     
     elif not target is None:
         target = closest_nonclan(data.TORCH_RADIUS, Game, user)
-        print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + user.name + ' confused ' + target.name
+        name = user.name
 
     else:
         #target is None:
@@ -615,10 +623,8 @@ def cast_confusion(Game, user):
     target.ai = ConfusedMonster(old_ai)
     target.ai.owner = target #tell the new component who owns it
 
-    if user is Game.player:
-        message('The ' + target.name + ' is confused!', Game, libtcod.light_green)
-    else:
-        message('You\'ve been confused!!', Game, libtcod.red)
+    message(name + ' is confused!', Game, libtcod.light_green, isplayer(user, Game))
+
 
 def cast_fireball(Game, user):
     (x,y) = (None, None)
@@ -738,7 +744,7 @@ def player_death(player, killer, Game):
     if killer:
         if killer.fighter:
             killer.fighter.xp += player.fighter.xpvalue
-            print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')'
+            message(killer.name + ' killed you! New xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')', libtcod.red, isplayer(killer, Game))
 
     if Game.player.fighter.alive:
         Game.player.char = '%'
@@ -764,9 +770,14 @@ def monster_death(monster, killer, Game):
         
         if killer.fighter:
             killer.fighter.xp += monster.fighter.xpvalue
-            print 'STATS--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + killer.name + '.xp = ' + str(killer.fighter.xp) + '(' + monster.name + ')'
+
         if killer is Game.player:
-            message('You gain ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange)
+            name = 'You'
+
+        else:
+            name = killer.name
+
+        message(name + ' killed ' + monster.name + ' and gains ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange, isplayer(killer, Game))
 
         for equip in monster.fighter.inventory:
             equip.item.drop(Game, monster)
@@ -926,3 +937,10 @@ def printstats(entity, Game):
     message('HP =' + str(entity.fighter.hp) + '/' + str(entity.fighter.max_hp(Game)), Game, libtcod.white)
     message('power =' + str(entity.fighter.power(Game)) + '/' + str(entity.fighter.base_power), Game, libtcod.white)
     message('defense =' + str(entity.fighter.defense(Game)) + '/' + str(entity.fighter.base_defense), Game, libtcod.white)     
+
+
+def isplayer(entity, Game):
+    if entity is Game.player:
+        return True
+    else:
+        return False

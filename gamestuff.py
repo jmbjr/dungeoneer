@@ -48,24 +48,25 @@ def mapname(Game):
     return(data.maplist[Game.player.dungeon_level])
 
 #User Interface routines
-def message(new_msg, Game, color = libtcod.white):
+def message(new_msg, Game, color = libtcod.white, displaymsg=True):
     #split message if necessary
     if data.PRINT_MESSAGES:
-        Game.message_sql.log_entity(Game, Game.player)
+        Game.message_sql.log_entity(Game, new_msg)
         Game.message_sql.log_flush()
         print 'MSG--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + new_msg
 
-    turn = Game.player.game_turns
-    new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
+    if displaymsg:
+        turn = Game.player.game_turns
+        new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
 
-    for line in new_msg_lines:
-        #if the buffer is full, remove the first line to make room for the new one
-        if len(Game.game_msgs) == data.MSG_HEIGHT:
-            del Game.game_msgs[0]
+        for line in new_msg_lines:
+            #if the buffer is full, remove the first line to make room for the new one
+            if len(Game.game_msgs) == data.MSG_HEIGHT:
+                del Game.game_msgs[0]
 
-        #add the new line as a tuple, with the txt and the color
-        Game.msg_history.append(Menuobj(str(turn) + ' : ' + line, color=color))
-        Game.game_msgs.append((line, color))
+            #add the new line as a tuple, with the txt and the color
+            Game.msg_history.append(Menuobj(str(turn) + ' : ' + line, color=color))
+            Game.game_msgs.append((line, color))
 
 
 
