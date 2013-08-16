@@ -8,15 +8,14 @@ import entitydata
 import shelve #for save and load
 import entities
 import map
-import os
 import logging
-import time
+
+
 
 #global class pattern
 class Game(object): 
     game_msgs = []
     msg_history = []
-
 
 def game_initialize():
     libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
@@ -56,7 +55,6 @@ def main_menu():
             data.AUTOMODE = True
             new_game()
             play_game()
-            Game.timestr = time.strftime("%Y%m%d-%H%M%S")
 
         if choice == 2: #load last game
             try:
@@ -124,6 +122,8 @@ def new_game():
     Game.downstairs = {}
     Game.fov_map = {}
     Game.tick = 0
+
+    Game.sqlobj = logging.Sqlobj()
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
@@ -230,12 +230,12 @@ def play_game():
 
                             if data.FREE_FOR_ALL_MODE:
                                 # log object state
-                                logging.log_entity(Game, object)
+                                Game.sqlobj.log_entity(Game, object)
 
                         elif object.ai:
                             object.ai.take_turn(Game)
 
-            logging.log_flush()
+            Game.sqlobj.log_flush()
             Game.tick += 1
 
             if data.AUTOMODE:
@@ -249,10 +249,14 @@ def play_game():
                     render_all(Game)
                     libtcod.console_flush()
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
+                    
+                    Game.sqlobj.export_csv()
 
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
                     data.AUTOMODE = False  
+
+                    Game.sqlobj.export_csv()
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
