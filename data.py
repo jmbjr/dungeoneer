@@ -60,8 +60,10 @@ MAX_ROOMS          = ((MAP_WIDTH - CAMERA_WIDTH) + (MAP_HEIGHT - CAMERA_HEIGHT))
 MAX_ROOMS = 2
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-
-
+#.............................................
+#SQL DATA
+ENTITY_DB          = 'entity_stats'
+MESSAGE_DB         = 'game_log'
 
 #.............................................
 #EDITABLE ENTITIES GENERAL DATA

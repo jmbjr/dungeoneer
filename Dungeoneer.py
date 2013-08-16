@@ -123,7 +123,8 @@ def new_game():
     Game.fov_map = {}
     Game.tick = 0
 
-    Game.sqlobj = logging.Sqlobj()
+    Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
+    Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
@@ -230,12 +231,12 @@ def play_game():
 
                             if data.FREE_FOR_ALL_MODE:
                                 # log object state
-                                Game.sqlobj.log_entity(Game, object)
+                                Game.entity_sql.log_entity(Game, object)
 
                         elif object.ai:
                             object.ai.take_turn(Game)
 
-            Game.sqlobj.log_flush()
+            Game.entity_sql.log_flush()
             Game.tick += 1
 
             if data.AUTOMODE:
@@ -250,13 +251,14 @@ def play_game():
                     libtcod.console_flush()
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
-                    Game.sqlobj.export_csv()
+                    Game.entity_sql.export_csv()
+                    Game.message_sql.export_csv()
 
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
                     data.AUTOMODE = False  
 
-                    Game.sqlobj.export_csv()
+                    Game.entity_sql.export_csv()
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 

@@ -51,6 +51,8 @@ def mapname(Game):
 def message(new_msg, Game, color = libtcod.white):
     #split message if necessary
     if data.PRINT_MESSAGES:
+        Game.message_sql.log_entity(Game, Game.player)
+        Game.message_sql.log_flush()
         print 'MSG--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + new_msg
 
     turn = Game.player.game_turns
