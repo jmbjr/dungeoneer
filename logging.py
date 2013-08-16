@@ -12,6 +12,7 @@ cursor.executescript("""
 CREATE TABLE IF NOT EXISTS entity_stats (
     game_id INT,
     entity_id INT,
+    name TEXT,
     tick INT,
     hp INT,
     hp_max INT,
@@ -45,7 +46,7 @@ def dict_insert(cursor, table, data):
         return None
 
 
-def log_entity(game, entity):
+def log_entity(Game, entity):
     global entity_counter, game_id
 
     if not hasattr(entity, 'entity_id'):
@@ -55,12 +56,13 @@ def log_entity(game, entity):
     entity_data = {
         "game_id": game_id,
         "entity_id": entity.entity_id,
-        "tick": game.tick,
+        "name": entity.name,
+        "tick": Game.tick,
         "hp": entity.fighter.hp,
-        "hp_max": entity.fighter.max_hp(game),
-        "power": entity.fighter.power(game),
+        "hp_max": entity.fighter.max_hp(Game),
+        "power": entity.fighter.power(Game),
         "power_base": entity.fighter.base_power,
-        "defense": entity.fighter.defense(game),
+        "defense": entity.fighter.defense(Game),
         "defense_base": entity.fighter.base_defense,
         "xp": entity.fighter.xp,
         "xp_level": entity.fighter.xplevel,
