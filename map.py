@@ -6,8 +6,7 @@ import data
 #specific imports needed for this module
 import entities
 import entitydata
-import itertools
-import csv
+
 
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
@@ -219,16 +218,6 @@ def place_objects(room, Game):
 
             monster.set_location(x, y, Game)
             Game.objects[Game.dungeon_levelname].append(monster)
-
-            if data.FREE_FOR_ALL_MODE:
-                Game.ofile[monster.name] = open(monster.name + '.csv', "wb")
-                Game.writer[monster.name] = csv.writer(Game.ofile[monster.name], dialect='excel')
-
-                thedata = []
-                for key, value in sorted(getcsvdata(Game, monster).iteritems()):
-                    thedata.append(key)
-                Game.writer[monster.name].writerow(thedata)
-
 
     for i in range(num_items):
         #choose random spot for this item

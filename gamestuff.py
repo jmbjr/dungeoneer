@@ -5,9 +5,6 @@ import data
 #specific imports needed for this module
 import math
 import textwrap
-import glob, xlwt, os
-import time
-import csv
 
 #common class objects for shapes and tiles
 class Rect(object):
@@ -387,63 +384,3 @@ def to_camera_coordinates(x, y, Game):
         return (None, None)  #if it's outside the view, return nothing
  
     return (x, y)
-
-def make_excel(thedir='.'):
-    wb = xlwt.Workbook()
-
-    for filename in glob.glob(thedir + '/*.csv'):
-        (f_path, f_name) = os.path.split(filename)
-        (f_short_name, f_extension) = os.path.splitext(f_name)
-        ws = wb.add_sheet(f_short_name)
-        spamReader = csv.reader(open(filename, 'rb'))
-
-        for rowx, row in enumerate(spamReader):
-            for colx, value in enumerate(row):
-                ws.write(rowx, colx, value)
-
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-
-    wb.save(thedir+'/dungeoneer' + timestr + '.xls')
-
-def getcsvdata(Game, entity):
-    thedata = {}
-    prefix = ''
-    if not entity:
-        fighter_component = entities.Fighter(name='',hp=0, defense=0, power=0, xp=0)
-        entity = entities.Object(fighter=fighter_component)
-   
-    thedata['_tick']    = Game.tick
-    thedata['name']     = entity.name
-    prefix = 'stats-'
-
-    thedata[prefix + 'hp']              = entity.fighter.hp
-    thedata[prefix + 'hp_max']          = entity.fighter.max_hp(Game)
-    thedata[prefix + 'power']           = entity.fighter.power(Game)
-    thedata[prefix + 'power_base']      = entity.fighter.base_power
-    thedata[prefix + 'defense']         = entity.fighter.defense(Game)
-    thedata[prefix + 'defense_base']    = entity.fighter.base_defense
-    thedata[prefix + 'xp']              = entity.fighter.xp
-    thedata[prefix + 'xplevel']         = entity.fighter.xplevel
-
-    thedata[prefix + 'speed_counter']         = entity.fighter.speed_counter
-    thedata[prefix + 'regen_counter']         = entity.fighter.regen_counter
-    thedata[prefix + 'alive_or_dead']         = int(entity.fighter.alive)
-
-    prefix = 'loc-'
-    thedata[prefix + 'x']                     = entity.x
-    thedata[prefix + 'y']                     = entity.y
-    thedata[prefix + 'dungeon_level']         = entity.dungeon_level
-    thedata[prefix + 'dungeon_levelname']     = data.maplist[entity.dungeon_level]
-
-    return thedata
-
-def outputdata(Game):
-    for thefile in Game.ofile:
-        Game.ofile[thefile].close()
-
-    make_excel()
-
-    for thefile in Game.ofile:
-        os.remove(Game.ofile[thefile].name)
-
-    

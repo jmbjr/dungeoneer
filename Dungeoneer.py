@@ -8,12 +8,29 @@ import entitydata
 import shelve #for save and load
 import entities
 import map
-import csv
+import os
+import logging
+
 
 #global class pattern
 class Game(object): 
     game_msgs = []
     msg_history = []
+
+
+def game_initialize():
+    libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+    libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_SDL)
+    libtcod.sys_set_fps(data.LIMIT_FPS)
+
+    libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
+    libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
+
+    Game.con = libtcod.console_new(data.MAP_WIDTH,data.MAP_HEIGHT)
+    Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
+
+    main_menu()
+
 
 #MAIN MENU GAME OPTIONS
 def main_menu():
@@ -100,28 +117,12 @@ def new_game():
 
     Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
-    Game.ofile = {}
-    Game.writer = {}
     Game.map = {}
     Game.objects = {}
     Game.upstairs = {}
     Game.downstairs = {}
     Game.fov_map = {}
     Game.tick = 0
-
-    #set up player csv file
-    if data.FREE_FOR_ALL_MODE:
-        Game.ofile[Game.player.name] = open(Game.player.name + '.csv', "wb")
-        Game.writer[Game.player.name] = csv.writer(Game.ofile[Game.player.name], dialect='excel')
-
-        Game.logfile = (open('Logfile.csv', "wb"))
-        Game.logwriter = csv.writer(Game.logfile, dialect='excel')
-
-        thedata = []
-        for key, value in sorted(getcsvdata(Game, Game.player).iteritems()):
-            thedata.append(key)
-
-        Game.writer[Game.player.name].writerow(thedata)
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
@@ -227,17 +228,14 @@ def play_game():
                                 check_level_up(Game, object)
 
                             if data.FREE_FOR_ALL_MODE:
-                                thedata = []
-                                for key, value in sorted(getcsvdata(Game, object).iteritems()):
-                                    thedata.append(value)
-
-                                Game.writer[object.name].writerow(thedata)    
+                                # log object state
+                                logging.log_entity(Game, object)
 
                         elif object.ai:
                             object.ai.take_turn(Game)
-        
-            Game.tick+=1
 
+            logging.log_flush()
+            Game.tick += 1
 
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
@@ -251,13 +249,9 @@ def play_game():
                     libtcod.console_flush()
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
 
-                    outputdata(Game)
-
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
-                    data.AUTOMODE = False
-
-                    outputdata(Game)  
+                    data.AUTOMODE = False  
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
@@ -487,18 +481,5 @@ def set_objects_visible(Game):
         object.always_visible = True
 
 
-########################################################
-#init and main loop
-########################################################
-libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
-libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_SDL)
-libtcod.sys_set_fps(data.LIMIT_FPS)
-
-libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
-libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
-
-Game.con = libtcod.console_new(data.MAP_WIDTH,data.MAP_HEIGHT)
-Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
-
-main_menu()
-
+if __name__ == '__main__':
+    game_initialize()
