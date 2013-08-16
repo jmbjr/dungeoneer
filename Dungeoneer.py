@@ -126,6 +126,9 @@ def new_game():
     Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
     Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
 
+    Game.entity_commonsql = logging.Sqlobj(data.ENTITY_DB, commondb=True)
+    Game.message_commonsql = logging.Sqlobj(data.MESSAGE_DB, commondb=True)
+
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
     Game.tick = 1
@@ -232,11 +235,13 @@ def play_game():
                             if data.FREE_FOR_ALL_MODE:
                                 # log object state
                                 Game.entity_sql.log_entity(Game, object)
+                                Game.entity_commonsql.log_entity(Game, object)
 
                         elif object.ai:
                             object.ai.take_turn(Game)
 
             Game.entity_sql.log_flush()
+            Game.entity_commonsql.log_flush()
             Game.tick += 1
 
             if data.AUTOMODE:
@@ -252,6 +257,7 @@ def play_game():
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
                     Game.entity_sql.export_csv()
+                    Game.entity_commonsql.export_csv()
                     Game.message_sql.export_csv()
 
                 if len(alive_entities) <=0:
@@ -259,6 +265,8 @@ def play_game():
                     data.AUTOMODE = False  
 
                     Game.entity_sql.export_csv()
+                    Game.entity_commonsql.export_csv()
+                    Game.message_sql.export_csv()
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 

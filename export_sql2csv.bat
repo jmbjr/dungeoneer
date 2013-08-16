@@ -1,1 +1,1 @@
-sqlite3 -csv %1 "SELECT * FROM entity_stats" > %1.csv
+sqlite3 -csv %2 "SELECT * FROM  %1 " > %2.csv

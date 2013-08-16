@@ -65,6 +65,7 @@ MAX_ROOMS = 2
 ENTITY_DB          = 'entity_stats'
 MESSAGE_DB         = 'game_log'
 
+
 #.............................................
 #EDITABLE ENTITIES GENERAL DATA
 LEVEL_UP_BASE     = 2

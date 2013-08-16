@@ -5,11 +5,12 @@ from subprocess import Popen
 
 
 class Sqlobj(object):
-    def __init__(self, dbtype):
-        timestr = time.strftime("%Y%m%d-%H%M%S")
+    def __init__(self, dbtype, commondb=False):
+        
         # initialize
         self.entity_counter = 0
         self.dbtype = dbtype
+        self.commondb = commondb
 
         if self.dbtype == data.ENTITY_DB:
             script="""
@@ -64,6 +65,11 @@ class Sqlobj(object):
             CREATE INDEX IF NOT EXISTS entity_idx ON game_log(entity_id);
             """
         
+        if commondb:
+            timestr=''
+        else:
+            timestr = '_' + time.strftime("%Y%m%d-%H%M%S")
+
         self.DB_FILE = self.dbtype + '_' + timestr + '.db'
         self.conn = sql.connect(self.DB_FILE)
         self.cursor = self.conn.cursor()
@@ -131,7 +137,7 @@ class Sqlobj(object):
         self.conn.commit()
 
     def export_csv(self):
-        p = Popen("export_sql2csv.bat " + self.DB_FILE )
+        p = Popen("export_sql2csv.bat " + self.dbtype + ' ' + self.DB_FILE )
         p.communicate()
 
 # this is silly, should be builtin
