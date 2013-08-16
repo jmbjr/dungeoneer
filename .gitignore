@@ -12,5 +12,4 @@ dist_1/
 *.xlsx
 *.dylib
 stats.db
-*.bat
 *.db
