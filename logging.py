@@ -1,7 +1,8 @@
 import sqlite3 as sql
 import data
 
-DB_FILE = "stats.db"
+
+DB_FILE = "stats_" + Game.timestr + ".db"
 
 # initialize
 conn = sql.connect(DB_FILE)

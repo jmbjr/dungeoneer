@@ -10,7 +10,7 @@ import entities
 import map
 import os
 import logging
-
+import time
 
 #global class pattern
 class Game(object): 
@@ -56,6 +56,7 @@ def main_menu():
             data.AUTOMODE = True
             new_game()
             play_game()
+            Game.timestr = time.strftime("%Y%m%d-%H%M%S")
 
         if choice == 2: #load last game
             try:
