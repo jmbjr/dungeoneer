@@ -101,13 +101,7 @@ def load_game(filename='savegame'):
 
 def new_game():
     #create object representing the player
-    if data.AUTOMODE:
-        #set player hp = 0
-        hp = -1
-    else:
-        hp = 300
-
-    fighter_component = entities.Fighter(hp=hp, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
+    fighter_component = entities.Fighter(hp=300, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
     Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.dungeon_level = 1
@@ -145,7 +139,10 @@ def new_game():
         equipment_component.equip(Game, Game.player)
 
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
-
+    else:
+        #Kill player
+        Game.player.fighter.hp = 0
+        
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
     libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
