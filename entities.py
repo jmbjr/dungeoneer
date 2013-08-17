@@ -744,7 +744,7 @@ def player_death(player, killer, Game):
     if killer:
         if killer.fighter:
             killer.fighter.xp += player.fighter.xpvalue
-            message(killer.name + ' killed you! New xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')', libtcod.red, isplayer(killer, Game))
+            message(killer.name + ' killed you! New xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')', Game, libtcod.red, isplayer(killer, Game))
 
     if Game.player.fighter.alive:
         Game.player.char = '%'
