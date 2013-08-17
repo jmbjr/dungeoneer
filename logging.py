@@ -105,8 +105,11 @@ class Sqlobj(object):
     def log_event(self):
         pass
 
-    def log_flush(self):
-        self.conn.commit()
+    def log_flush(self, Game):
+        if Game.sql_commit_counter <= 0:
+            self.conn.commit()
+            Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
+            
 
     def export_csv(self):
         p = Popen("export_sql2csv.bat " + self.dbtype + ' ' + self.DB_FILE )

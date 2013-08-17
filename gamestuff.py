@@ -52,7 +52,7 @@ def message(new_msg, Game, color = libtcod.white, displaymsg=True):
     #split message if necessary
     if data.PRINT_MESSAGES:
         Game.message_sql.log_entity(Game, new_msg)
-        Game.message_sql.log_flush()
+        Game.message_sql.log_flush(Game)
         print 'MSG--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + new_msg
 
     if displaymsg:

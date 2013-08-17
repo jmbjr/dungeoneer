@@ -125,6 +125,7 @@ def new_game():
 
     Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
     Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
+    Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
@@ -236,8 +237,9 @@ def play_game():
                         elif object.ai:
                             object.ai.take_turn(Game)
 
-            Game.entity_sql.log_flush()
+            Game.entity_sql.log_flush(Game)
             Game.tick += 1
+            Game.sql_commit_counter -= 1
 
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)

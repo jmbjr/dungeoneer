@@ -13,3 +13,4 @@ dist_1/
 *.dylib
 stats.db
 *.db
+*.db-journal

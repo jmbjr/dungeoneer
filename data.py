@@ -64,7 +64,7 @@ MAX_ROOMS = 2
 #SQL DATA
 ENTITY_DB          = 'entity_stats'
 MESSAGE_DB         = 'game_log'
-
+SQL_COMMIT_TICK_COUNT = 5
 
 #.............................................
 #EDITABLE ENTITIES GENERAL DATA
