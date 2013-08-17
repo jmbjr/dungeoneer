@@ -465,11 +465,11 @@ class ConfusedMonster(object):
             #move in random direction
             self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1), Game)
             self.num_turns -= 1
-            message('The ' + self.owner.name + ' is STILL confused!', Game, libtcod.red)
+            message(self.owner.name + ' is STILL confused!', Game, libtcod.red)
 
         else:
             self.owner.ai = self.old_ai
-            message('The ' + self.owner.name + ' is no longer confused', Game, libtcod.green)
+            message(self.owner.name + ' is no longer confused', Game, libtcod.green)
 
         if self.owner.fighter:
             return True
@@ -612,6 +612,10 @@ def cast_confusion(Game, user):
 
     else:
         #target is None:
+        if user is Game.player:
+            message('Cancelling confuse', Game, libtcod.red, False)
+        else:
+            message(user.name + ' cancels Confuse', Game, libtcod.red, False)
         return data.STATE_CANCELLED
 
     #replace target's AI with confuse
@@ -622,8 +626,10 @@ def cast_confusion(Game, user):
 
     target.ai = ConfusedMonster(old_ai)
     target.ai.owner = target #tell the new component who owns it
-
-    message(name + ' is confused!', Game, libtcod.light_green, isplayer(user, Game))
+    if user is Game.player:
+        message('You confused ' + target.name + '!', Game, libtcod.light_green)
+    else:
+        message(name + ' confused  ' + target.name + '!', Game, libtcod.light_green, isplayer(user, Game))
 
 
 def cast_fireball(Game, user):
@@ -635,7 +641,7 @@ def cast_fireball(Game, user):
         #ask the player for a target tile to throw a fireball at
         message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, libtcod.light_cyan)
         (x,y) = target_tile(Game)
-        message('The fireball explodes', Game, libtcod.orange)
+        
 
     #otherwise this is a mob
     elif target:
@@ -643,7 +649,12 @@ def cast_fireball(Game, user):
             (x,y) = (target.x, target.y)
 
     if x is None or y is None:
+        if user is Game.player:
+            message('Cancelling fireball', Game, libtcod.red)
+        else:
+            message(user.name + ' cancels Fireball', Game, libtcod.red, False)
         return data.STATE_CANCELLED
+
     else:
         theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
         
@@ -653,7 +664,8 @@ def cast_fireball(Game, user):
 
         for obj in Game.objects[Game.dungeon_levelname]: #damage all fighters within range
             if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
-                message('The ' + obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
+                message('The fireball explodes', Game, libtcod.orange)
+                message(obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
                 obj.fighter.take_damage(user, theDmg, Game)
         
 def cast_heal(Game, user):
@@ -661,12 +673,14 @@ def cast_heal(Game, user):
     if user.fighter.hp == user.fighter.max_hp(Game):
         if user is Game.player:
             message('You are already at full health.', Game, libtcod.red)
+        else:
+            message(user.name + ' cancels Heal', Game, libtcod.red, False)
         return data.STATE_CANCELLED
 
     if user is Game.player:
         message('You feel better', Game, libtcod.light_violet)
     else:
-        message('The ' + user.name + ' looks healthier!', Game, libtcod.red)
+        message(user.name + ' looks healthier!', Game, libtcod.red)
     user.fighter.heal(data.HEAL_AMOUNT, Game)
 
 def cast_push(Game, user):
@@ -687,7 +701,9 @@ def push(Game, user, numpushes):
 
     if target is None:
         if user is Game.player:
-            message('No enemy is close enough to strike', Game, libtcod.red)
+            message('No enemy is close enough to push', Game, libtcod.red)
+        else:
+            message(user.name + ' cancels Push', Game, libtcod.red, False)
         return 'cancelled'
     else:
         dist = user.distance_to(target)
@@ -705,7 +721,9 @@ def push(Game, user, numpushes):
 
         else:
             if user is Game.player:
-                message('Too Far away to push!', Game, libtcod.red)
+                message(target.name + ' is too far away to push!', Game, libtcod.red)
+            else:
+                message(target.name + ' is too far away for ' + user.name + ' to push!', Game, libtcod.red, False)
             return 'cancelled'
 
 def cast_lightning(Game, user):
@@ -725,6 +743,8 @@ def cast_lightning(Game, user):
     if target is None:
         if user is Game.player:
             message('No enemy is close enough to strike', Game, libtcod.red)
+        else:
+            message(user.name + ' cancels Lightning', Game, libtcod.red, False)
         return 'cancelled'
     else:
         theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
@@ -764,18 +784,18 @@ def monster_death(monster, killer, Game):
     #transform into corpse
     #doesn't block, can't be attacked, cannot move
     if monster.fighter.alive:
-        message(monster.name.capitalize() + ' is DEAD!', Game, libtcod.orange)
-        printstats(monster, Game)
-        monster.send_to_back(Game)
-        
-        if killer.fighter:
-            killer.fighter.xp += monster.fighter.xpvalue
-
         if killer is Game.player:
             name = 'You'
 
         else:
             name = killer.name
+
+        message(monster.name.capitalize() + ' is DEAD! (killed by ' + name + ')', Game, libtcod.orange)
+        printstats(monster, Game)
+        monster.send_to_back(Game)
+        
+        if killer.fighter:
+            killer.fighter.xp += monster.fighter.xpvalue
 
         message(name + ' killed ' + monster.name + ' and gains ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange, isplayer(killer, Game))
 
