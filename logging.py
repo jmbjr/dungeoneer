@@ -42,7 +42,8 @@ class Sqlobj(object):
                 game_id INT,
                 msg_id INT,
                 name TEXT,
-                tick INT
+                tick INT,
+                dungeon_levelname TEXT
             );
             CREATE INDEX IF NOT EXISTS game_idx ON game_log(game_id);
             CREATE INDEX IF NOT EXISTS msg_idx ON game_log(msg_id);
@@ -97,7 +98,8 @@ class Sqlobj(object):
                 "game_id": self.game_id,
                 "msg_id": msg_id,
                 "name": message,
-                "tick": Game.tick
+                "tick": Game.tick,
+                "dungeon_levelname": Game.dungeon_levelname
             }
 
         dict_insert(self.cursor, self.dbtype, the_data)
@@ -109,7 +111,7 @@ class Sqlobj(object):
         if Game.sql_commit_counter <= 0:
             self.conn.commit()
             Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
-            
+
 
     def export_csv(self):
         p = Popen("export_sql2csv.bat " + self.dbtype + ' ' + self.DB_FILE )
