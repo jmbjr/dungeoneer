@@ -117,9 +117,10 @@ def new_game():
     Game.fov_map = {}
     Game.tick = 0
 
-    Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
-    Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
-    Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
+    if data.FREE_FOR_ALL_MODE:
+        Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
+        Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
+        Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
 
     #generate map (at this point it's not drawn to screen)
     map.make_dungeon(Game)
@@ -142,7 +143,10 @@ def new_game():
     else:
         #Kill player
         Game.player.fighter.hp = 0
-        
+        function = Game.player.fighter.death_function
+        if function is not None:
+            function(Game.player, None, Game)
+
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
     libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
@@ -218,7 +222,7 @@ def play_game():
                                     for buff in object.fighter.buffs:
                                         buff.duration -= buff.decay_rate
                                         if buff.duration <= 0:
-                                            message('*The effects of ' + buff.name + ' has worn off!', Game, libtcod.light_red)
+                                            message(object.name + ' feels the effects of ' + buff.name + ' wear off!', Game, libtcod.light_red)
                                             object.fighter.remove_buff(buff)
 
                                 #always check to ensure hp <= max_hp
@@ -234,9 +238,11 @@ def play_game():
                         elif object.ai:
                             object.ai.take_turn(Game)
 
-            Game.entity_sql.log_flush(Game)
-            Game.tick += 1
-            Game.sql_commit_counter -= 1
+            if data.FREE_FOR_ALL_MODE:
+                Game.entity_sql.log_flush(Game)
+                Game.message_sql.log_flush(Game)            
+                Game.tick += 1
+                Game.sql_commit_counter -= 1
 
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
@@ -250,15 +256,13 @@ def play_game():
                     libtcod.console_flush()
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
-                    Game.entity_sql.export_csv()
-                    Game.message_sql.export_csv()
+                    save_final_sql_csv(Game)
 
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
                     data.AUTOMODE = False  
 
-                    Game.entity_sql.export_csv()
-                    Game.message_sql.export_csv()
+                    save_final_sql_csv(Game)
 
         Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
@@ -486,6 +490,20 @@ def set_map_explored(Game):
 def set_objects_visible(Game):
     for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
         object.always_visible = True
+
+def save_final_sql_csv(Game):
+    #save last batch of enemies after final tick
+    if data.FREE_FOR_ALL_MODE:
+        for object in Game.objects[Game.dungeon_levelname]:
+            if object.fighter:
+                # log object state
+                Game.entity_sql.log_entity(Game, object)            
+
+        Game.entity_sql.log_flush(Game, force_flush=True)
+        Game.message_sql.log_flush(Game, force_flush=True) 
+
+        Game.entity_sql.export_csv()
+        Game.message_sql.export_csv()
 
 
 if __name__ == '__main__':
