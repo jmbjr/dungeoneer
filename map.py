@@ -8,6 +8,18 @@ import entities
 import entitydata
 
 
+class Maplevel(object):
+    def __init__(self, height, width, levelnum, levelname):
+        self.levelnum = levelnum
+        self.levelname = levelname
+        self.height = height
+        self.width = width
+
+        self.map= [[ Tile(True)
+            for y in range(self.height) ]
+                for x in range(self.width) ]     
+
+
 #functions to create matp shapes and rooms
 def create_h_tunnel(x1, x2, y, Game):
     for x in range(min(x1, x2), max(x1, x2) + 1):
