@@ -161,7 +161,7 @@ def play_game():
 
     if data.AUTOMODE:
         set_objects_visible(Game)
-        set_map_explored(Game)  
+        Game.map[Game.dungeon_levelname].set_map_explored()  
         battleover = False
         Game.fov_recompute = True   
 
@@ -395,7 +395,7 @@ def handle_keys():
             if key_char == 'q':
                 #go down stairs, if the player is on them
                 msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, data.CHARACTER_SCREEN_WIDTH)
-                set_map_explored(Game)   
+                Game.map[Game.dungeon_levelname].set_map_explored()   
                 Game.fov_recompute = True   
 
             if key_char == 'z':
