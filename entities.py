@@ -932,7 +932,7 @@ def target_tile(Game, max_range = None):
 
 def is_blocked(x, y, Game):
     #first test the map tile
-    if Game.map[Game.dungeon_levelname][x][y].blocked:
+    if Game.map[Game.dungeon_levelname].isblocked(x,y):
         return True
 
     #now check for any blocking objects
