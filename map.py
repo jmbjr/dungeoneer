@@ -50,7 +50,7 @@ def initialize_fov(Game):
     Game.player.fighter.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for y in range(data.MAP_HEIGHT):
         for x in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.player.fighter.fov, x, y, not Game.map[Game.dungeon_levelname][x][y].block_sight, not Game.map[Game.dungeon_levelname][x][y].blocked)
+            libtcod.map_set_properties(Game.player.fighter.fov, x, y, not Game.map[Game.dungeon_levelname].block_sight(x, y), not Game.map[Game.dungeon_levelname].blocked(x, y))
 
     libtcod.console_clear(Game.con)
 
@@ -184,7 +184,7 @@ def make_map(Game, levelnum, levelname):
     Game.fov_map[Game.dungeon_levelname] = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for yy in range(data.MAP_HEIGHT):
         for xx in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.fov_map[Game.dungeon_levelname], xx, yy, not Game.map[Game.dungeon_levelname][xx][yy].block_sight, not Game.map[Game.dungeon_levelname][xx][yy].blocked)
+            libtcod.map_set_properties(Game.fov_map[Game.dungeon_levelname], xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
 
 
 

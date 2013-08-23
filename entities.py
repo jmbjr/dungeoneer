@@ -202,7 +202,7 @@ class Fighter(object):
         self.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
         for yy in range(data.MAP_HEIGHT):
             for xx in range(data.MAP_WIDTH):
-                libtcod.map_set_properties(self.fov, xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname][xx][yy].blocked)
+                libtcod.map_set_properties(self.fov, xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
         return self.fov   
 
     def fov_recompute(self, Game):
