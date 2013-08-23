@@ -43,6 +43,9 @@ class Maplevel(object):
     def block_sight(self, x, y):
         return self.map[x][y].block_sight
 
+    def explored(self, x, y):
+        return self.map[x][y].explored
+
     def set_map_explored(self):
         for y in range(self.height):
             for x in range(self.width):

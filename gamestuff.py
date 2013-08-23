@@ -224,7 +224,7 @@ def render_all(Game):
             for x in range(data.CAMERA_WIDTH):
                 (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
                 visible = libtcod.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
-                wall = Game.map[Game.dungeon_levelname][map_x][map_y].block_sight
+                wall = Game.map[Game.dungeon_levelname].block_sight(map_x, map_y)
 
                 if data.ASCIIMODE:
                     thewallchar  = data.WALL_CHAR
@@ -254,7 +254,7 @@ def render_all(Game):
                         char_wall_ground = thegroundchar
                     fov_wall_ground = libtcod.white
 
-                if Game.map[Game.dungeon_levelname][map_x][map_y].explored:
+                if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
                     libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
                 
 
