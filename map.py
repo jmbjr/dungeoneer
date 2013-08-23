@@ -37,8 +37,11 @@ class Maplevel(object):
                     self.map[x][y].blocked = False
                     self.map[x][y].block_sight = False
 
-    def isblocked(self, x, y):
+    def blocked(self, x, y):
         return self.map[x][y].blocked
+
+    def block_sight(self, x, y):
+        return self.map[x][y].block_sight
 
 #map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
 def initialize_fov(Game):
