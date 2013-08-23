@@ -46,6 +46,9 @@ class Maplevel(object):
     def explored(self, x, y):
         return self.map[x][y].explored
 
+    def set_explored(self, x, y):
+        self.map[x][y].explored = True
+
     def set_map_explored(self):
         for y in range(self.height):
             for x in range(self.width):

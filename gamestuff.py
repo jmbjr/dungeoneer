@@ -245,7 +245,7 @@ def render_all(Game):
                     fov_wall_ground = libtcod.grey
                 else:
                     #tile is visible
-                    Game.map[Game.dungeon_levelname][map_x][map_y].explored = True
+                    Game.map[Game.dungeon_levelname].set_explored(map_x, map_y)
                     if wall:
                         color_wall_ground = data.COLOR_LIGHT_WALL
                         char_wall_ground = thewallchar
