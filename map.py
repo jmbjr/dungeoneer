@@ -96,7 +96,7 @@ def make_dungeon(Game):
             print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating level ' + level
             Game.player.dungeon_level = index
             Game.dungeon_levelname = level
-            make_map(Game)
+            make_map(Game, index, level)
 
     Game.player.dungeon_level = 1
     Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
@@ -106,14 +106,12 @@ def make_dungeon(Game):
     initialize_fov(Game)
 
 #Primary map generator and object placement routines.
-def make_map(Game):
+def make_map(Game, levelnum, levelname):
     Game.objects[Game.dungeon_levelname] = [Game.player]
     #fill map with "blocked" tiles
 
     print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating map:' + str(Game.dungeon_levelname)
-    Game.map[Game.dungeon_levelname] = [[ Tile(True)
-        for y in range(data.MAP_HEIGHT) ]
-            for x in range(data.MAP_WIDTH) ]            
+    Game.map[Game.dungeon_levelname] = Maplevel(data.MAP_HEIGHT, data.MAP_WIDTH, levelnum, levelname)          
 
     rooms = []
     num_rooms = 0
