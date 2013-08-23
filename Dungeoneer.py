@@ -163,6 +163,7 @@ def play_game():
         set_objects_visible(Game)
         set_map_explored(Game)  
         battleover = False
+        Game.fov_recompute = True   
 
     player_death_function =  Game.player.fighter.death_function        
     
@@ -395,6 +396,7 @@ def handle_keys():
                 #go down stairs, if the player is on them
                 msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, data.CHARACTER_SCREEN_WIDTH)
                 set_map_explored(Game)   
+                Game.fov_recompute = True   
 
             if key_char == 'z':
                 #debug key to automatically go to next level
@@ -481,11 +483,7 @@ def give_items(Game):
         theitem.always_visible = True
         Game.player.fighter.add_item(theitem)
 
-def set_map_explored(Game):
-    for y in range(data.MAP_HEIGHT):
-        for x in range(data.MAP_WIDTH):
-            Game.map[data.maplist[Game.player.dungeon_level]][x][y].explored = True
-    Game.fov_recompute = True        
+     
 
 def set_objects_visible(Game):
     for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
