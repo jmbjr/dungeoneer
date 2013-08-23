@@ -134,7 +134,7 @@ def make_map(Game, levelnum, levelname):
         if not failed:
             #no intersections
 
-            create_room(new_room, Game)
+            Game.map[Game.dungeon_levelname].create_room(new_room)
             (new_x, new_y) = new_room.center()
 
             #add some contents to the room
@@ -158,12 +158,12 @@ def make_map(Game, levelnum, levelname):
                 #flip coin
                 if flip_coin() == 1:
                     #move h then v
-                    create_h_tunnel(prev_x, new_x, prev_y, Game)
-                    create_v_tunnel(prev_y, new_y, new_x, Game)
+                    Game.map[Game.dungeon_levelname].create_h_tunnel(prev_x, new_x, prev_y)
+                    Game.map[Game.dungeon_levelname].create_v_tunnel(prev_y, new_y, new_x)
                 else:
                     #move v then h
-                    create_v_tunnel(prev_y, new_y, prev_x, Game)
-                    create_h_tunnel(prev_x, new_x, new_y, Game)
+                    Game.map[Game.dungeon_levelname].create_v_tunnel(prev_y, new_y, prev_x)
+                    Game.map[Game.dungeon_levelname].create_h_tunnel(prev_x, new_x, new_y)
             
             #add to rooms list
             rooms.append(new_room)
