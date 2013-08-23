@@ -77,7 +77,7 @@ class Object(object):
 
     def draw(self, Game):
         #only draw if in field of view of Game.player or it's set to always visible and on explored tile
-        if (libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y) or (self.always_visible and Game.map[Game.dungeon_levelname][self.x][self.y].explored)):
+        if (libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y) or (self.always_visible and Game.map[Game.dungeon_levelname].explored(self.x, self.y))):
             (x, y) = to_camera_coordinates(self.x, self.y, Game)
 
             if x is not None:
@@ -862,7 +862,7 @@ def fov_map(max_range, Game, dude):
     fov_map_dude = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
     for yy in range(data.MAP_HEIGHT):
         for xx in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(fov_map_dude, xx, yy, not Game.map[Game.dungeon_levelname][xx][yy].block_sight, not Game.map[Game.dungeon_levelname][xx][yy].blocked)
+            libtcod.map_set_properties(fov_map_dude, xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
 
     libtcod.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
     return fov_map_dude

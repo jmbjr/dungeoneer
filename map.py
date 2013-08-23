@@ -72,7 +72,7 @@ def next_level(Game):
     Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
     if not Game.dungeon_levelname in Game.map:
-        make_map(Game) #create fresh new level
+        make_map(Game, Game.player.dungeon_level, Game.dungeon_levelname) #create fresh new level
 
     Game.player.x = Game.upstairs[Game.dungeon_levelname].x
     Game.player.y = Game.upstairs[Game.dungeon_levelname].y
