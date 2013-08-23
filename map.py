@@ -19,24 +19,23 @@ class Maplevel(object):
             for y in range(self.height) ]
                 for x in range(self.width) ]     
 
+    #functions to create matp shapes and rooms
+    def create_h_tunnel(x1, x2, y):
+        for x in range(min(x1, x2), max(x1, x2) + 1):
+            self.map[x][y].blocked = False
+            self.map[x][y].block_sight = False
 
-#functions to create matp shapes and rooms
-def create_h_tunnel(x1, x2, y, Game):
-    for x in range(min(x1, x2), max(x1, x2) + 1):
-        Game.map[Game.dungeon_levelname][x][y].blocked = False
-        Game.map[Game.dungeon_levelname][x][y].block_sight = False
+    def create_v_tunnel(y1, y2, x):
+        for y in range(min(y1, y2), max(y1, y2) + 1):
+            self.map[x][y].blocked = False
+            self.map[x][y].block_sight = False
 
-def create_v_tunnel(y1, y2, x, Game):
-    for y in range(min(y1, y2), max(y1, y2) + 1):
-        Game.map[Game.dungeon_levelname][x][y].blocked = False
-        Game.map[Game.dungeon_levelname][x][y].block_sight = False
-
-def create_room(room, Game):
-    #go through tiles in rect to make them passable
-    for x in range(room.x1 + 1, room.x2):
-        for y in range(room.y1 + 1, room.y2):
-                Game.map[Game.dungeon_levelname][x][y].blocked = False
-                Game.map[Game.dungeon_levelname][x][y].block_sight = False
+    def create_room(room):
+        #go through tiles in rect to make them passable
+        for x in range(room.x1 + 1, room.x2):
+            for y in range(room.y1 + 1, room.y2):
+                    self.map[x][y].blocked = False
+                    self.map[x][y].block_sight = False
 
 #map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
 def initialize_fov(Game):
@@ -88,7 +87,6 @@ def from_dungeon_level(table, dungeon_level):
             if dungeon_level >= level:
                 return value
         return 0
-
 
 def make_dungeon(Game):
     for index,level in enumerate(data.maplist):
