@@ -7,7 +7,7 @@ import entitydata
 #specific imports needed for this module
 import shelve #for save and load
 import entities
-import map
+import maplevel
 import logging
 
 
