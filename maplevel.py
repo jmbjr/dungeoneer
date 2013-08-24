@@ -19,6 +19,9 @@ class Maplevel(object):
             for y in range(self.height) ]
                 for x in range(self.width) ]     
 
+        self.fov_map = libtcod.map_new(self.width, self.height)
+        self.fov_recompute = True
+
     #functions to create matp shapes and rooms
     def create_h_tunnel(self, x1, x2, y):
         for x in range(min(x1, x2), max(x1, x2) + 1):
@@ -54,16 +57,14 @@ class Maplevel(object):
             for x in range(self.width):
                 self.map[x][y].explored = True
 
-#map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
-def initialize_fov(Game):
-    Game.fov_recompute = True
-    #create FOV map according to the generated map
-    Game.player.fighter.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
-    for y in range(data.MAP_HEIGHT):
-        for x in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.player.fighter.fov, x, y, not Game.map[Game.dungeon_levelname].block_sight(x, y), not Game.map[Game.dungeon_levelname].blocked(x, y))
+    #map helper functions. create the fov map, go to next level, and lookup dungeon level percentages for objects
+    def initialize_fov(self):
+        self.fov_recompute = True
 
-    libtcod.console_clear(Game.con)
+        for y in range(self.height):
+            for x in range(self.width):
+                libtcod.map_set_properties(self.fov_map, x, y, not self.block_sight(x, y), not self.blocked(x, y))
+
 
 def next_level(Game):
     #advance to next level
@@ -76,7 +77,7 @@ def next_level(Game):
 
     Game.player.x = Game.upstairs[Game.dungeon_levelname].x
     Game.player.y = Game.upstairs[Game.dungeon_levelname].y
-    initialize_fov(Game)
+    Game.map[Game.dungeon_levelname].initialize_fov()
 
 def prev_level(Game):
     #advance to next level
@@ -96,7 +97,7 @@ def prev_level(Game):
 
         Game.player.x = Game.downstairs[Game.dungeon_levelname].x
         Game.player.y = Game.downstairs[Game.dungeon_levelname].y
-        initialize_fov(Game)
+        Game.map[Game.dungeon_levelname].initialize_fov()
 
 def from_dungeon_level(table, dungeon_level):
         #returns a value that depends on level. table specifies what value occurs after each level. default = 0
@@ -118,7 +119,7 @@ def make_dungeon(Game):
 
     Game.player.x = Game.upstairs[Game.dungeon_levelname].x
     Game.player.y = Game.upstairs[Game.dungeon_levelname].y
-    initialize_fov(Game)
+    Game.map[Game.dungeon_levelname].initialize_fov()
 
 #Primary map generator and object placement routines.
 def make_map(Game, levelnum, levelname):
@@ -191,12 +192,7 @@ def make_map(Game, levelnum, levelname):
     Game.objects[Game.dungeon_levelname].append(Game.downstairs[Game.dungeon_levelname])
     Game.downstairs[Game.dungeon_levelname].send_to_back(Game) #so it's drawn below the monsters
 
-    #create generic fov map to use for this floor
-    Game.fov_map[Game.dungeon_levelname] = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
-    for yy in range(data.MAP_HEIGHT):
-        for xx in range(data.MAP_WIDTH):
-            libtcod.map_set_properties(Game.fov_map[Game.dungeon_levelname], xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
-
+    Game.map[Game.dungeon_levelname].initialize_fov()
 
 
 def place_objects(room, Game):

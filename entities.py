@@ -659,7 +659,7 @@ def cast_fireball(Game, user):
         theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
         
         #create fireball fov based on x,y coords of target
-        fov_map_fireball = Game.fov_map[Game.dungeon_levelname]
+        fov_map_fireball = Game.map[Game.dungeon_levelname].fov_map
         libtcod.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
 
         for obj in Game.objects[Game.dungeon_levelname]: #damage all fighters within range

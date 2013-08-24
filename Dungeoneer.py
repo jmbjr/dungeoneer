@@ -96,8 +96,8 @@ def load_game(filename='savegame'):
     Game.stairs = Game.objects[Game.dungeon_levelname][file['stairs_index']]
     Game.player.dungeon_level = file['dungeon_level']
     file.close()
-
-    map.initialize_fov(Game)
+    
+    Game.map[Game.dungeon_levelname].initialize_fov()
 
 def new_game():
     #create object representing the player
@@ -114,7 +114,6 @@ def new_game():
     Game.objects = {}
     Game.upstairs = {}
     Game.downstairs = {}
-    Game.fov_map = {}
     Game.tick = 0
 
     if data.FREE_FOR_ALL_MODE:
