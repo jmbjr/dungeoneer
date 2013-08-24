@@ -123,7 +123,7 @@ def new_game():
         Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
 
     #generate map (at this point it's not drawn to screen)
-    map.make_dungeon(Game)
+    maplevel.make_dungeon(Game)
     Game.tick = 1
 
     Game.fov_recompute = True
