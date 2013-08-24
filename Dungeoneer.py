@@ -96,7 +96,7 @@ def load_game(filename='savegame'):
     Game.stairs = Game.objects[Game.dungeon_levelname][file['stairs_index']]
     Game.player.dungeon_level = file['dungeon_level']
     file.close()
-    
+
     Game.map[Game.dungeon_levelname].initialize_fov()
 
 def new_game():
@@ -126,7 +126,7 @@ def new_game():
     Game.tick = 1
 
     Game.fov_recompute = True
-    Game.player.fighter.set_fov(Game)
+    Game.player.fighter.fov = Game.map[Game.dungeon_levelname].fov_map
     libtcod.console_clear(Game.con)
 
     #initial equipment

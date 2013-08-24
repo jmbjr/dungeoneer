@@ -198,13 +198,6 @@ class Fighter(object):
         if self.buffs:
             self.buffs.owner = self
 
-    def set_fov(self, Game):
-        self.fov = libtcod.map_new(data.MAP_WIDTH, data.MAP_HEIGHT)
-        for yy in range(data.MAP_HEIGHT):
-            for xx in range(data.MAP_WIDTH):
-                libtcod.map_set_properties(self.fov, xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
-        return self.fov   
-
     def fov_recompute(self, Game):
         libtcod.map_compute_fov(self.fov, self.owner.x, self.owner.y, data.TORCH_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
         return self.fov
@@ -873,7 +866,7 @@ def closest_item(max_range, Game, dude):
     closest_dist = max_range + 1 #start with slightly higher than max range
 
     if dude.fighter.fov is None:
-        fov_map_dude = dude.fighter.set_fov(Game)
+        fov_map_dude = Game.map[Game.dungeon_levelname].fov_map
 
     fov_map_dude = dude.fighter.fov_recompute(Game)
 

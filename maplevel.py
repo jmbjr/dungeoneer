@@ -226,7 +226,7 @@ def place_objects(room, Game):
             if data.FREE_FOR_ALL_MODE:
                 monster.fighter.clan        = monster.name
             nextid+=1
-            monster.fighter.set_fov(Game)
+            monster.fighter.fov = Game.map[Game.dungeon_levelname].fov_map
 
 
             print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' made a ' + monster.name
