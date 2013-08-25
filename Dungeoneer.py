@@ -10,8 +10,6 @@ import entities
 import maplevel
 import logging
 
-
-
 #global class pattern
 class Game(object): 
     game_msgs = []

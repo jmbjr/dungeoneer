@@ -296,6 +296,15 @@ class Fighter(object):
             if self is Game.player:
                 message('You tried to attack ' + target.name + ' but there is no effect.', Game, libtcod.white)
 
+class Ai(object):
+    def __init__(self, ai):
+        self.ai = ai
+        self.ai.owner = self
+
+    def take_turn(self, Game):
+        return self.ai.take_turn(Game)
+
+
 class Buff(object):
     def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=data.BUFF_DECAYRATE, duration=data.BUFF_DURATION):
         self.name = name
@@ -479,7 +488,7 @@ class BasicMonster(object):
         fight = True
         pickup = True
 
-        monster = self.owner
+        monster = self.owner.owner
         #find nearest non-clan object
         nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
         nearest_item    = closest_item(data.TORCH_RADIUS, Game, monster)

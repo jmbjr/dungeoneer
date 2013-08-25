@@ -219,7 +219,7 @@ def place_objects(room, Game):
             monster             = entities.Object(**entitydata.mobs[choice])
             monster.dungeon_level = data.maplist.index(Game.dungeon_levelname) 
             monster.blocks      = True        
-            monster.ai          = entities.BasicMonster()  #how do I set different ai?
+            monster.ai          = entities.Ai(entities.BasicMonster())  #how do I set different ai?
             monster.ai.owner    = monster
             monster.id          = str(monster.dungeon_level) + '.' + str(nextid)
             monster.name        = choice + '(' + str(monster.id) + ')'
