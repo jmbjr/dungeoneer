@@ -46,6 +46,8 @@ def main_menu():
         choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
 
         if choice == 0: #new game
+            data.FREE_FOR_ALL_MODE = False
+            data.AUTOMODE = False
             new_game()
             play_game()
 
@@ -114,10 +116,12 @@ def new_game():
     Game.downstairs = {}
     Game.tick = 0
 
-    if data.FREE_FOR_ALL_MODE:
+    if data.FREE_FOR_ALL_MODE: #turn on SQL junk and kill player.
         Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
         Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
         Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
+        Game.player.fighter.alive = False
+        Game.player.fighter.hp = 0
 
     #generate map (at this point it's not drawn to screen)
     maplevel.make_dungeon(Game)
@@ -137,12 +141,6 @@ def new_game():
         equipment_component.equip(Game, Game.player)
 
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
-    else:
-        #Kill player
-        Game.player.fighter.hp = 0
-        function = Game.player.fighter.death_function
-        if function is not None:
-            function(Game.player, None, Game)
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
@@ -161,14 +159,14 @@ def play_game():
         Game.map[Game.dungeon_levelname].set_map_explored()  
         battleover = False
         Game.fov_recompute = True   
-
-    player_death_function =  Game.player.fighter.death_function        
+   
     
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
 
         #check for player death
-        player_death_function(Game.player, None, Game)
+        if not Game.player.fighter.alive: #this is sorta dumb and probably needs fixed.
+            Game.player.fighter.death_function(Game.player, None, Game)
 
         #render the screen
         render_all(Game)
