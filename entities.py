@@ -173,7 +173,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, xplevel=1, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
+    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, killed=False, xplevel=1, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -189,6 +189,7 @@ class Fighter(object):
         self.xpvalue = xpvalue
         self.xplevel = xplevel
         self.alive = alive
+        self.killed = killed
 
         self.inventory = inventory
         if self.inventory:
@@ -768,19 +769,19 @@ def player_death(player, killer, Game):
             killer.fighter.xp += player.fighter.xpvalue
             message(killer.name + ' killed you! New xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')', Game, libtcod.red, isplayer(killer, Game))
 
-    if Game.player.fighter.alive:
+    if not Game.player.fighter.killed:
         Game.player.char = '%'
         Game.player.color = libtcod.darkest_red
         Game.player.blocks = False
         Game.player.ai = None
         #Game.player.name = 'remains of ' + Game.player.name
         Game.player.always_visible = True
-        Game.player.fighter.alive = False
+        Game.player.fighter.killed = False
         Game.player.send_to_back(Game)
 
-    if not data.AUTOMODE and Game.player.fighter.alive: 
-        message('YOU DIED! YOU SUCK!', Game, libtcod.red)
-        Game.game_state = data.STATE_DEAD
+        if not data.AUTOMODE: 
+            message('YOU DIED! YOU SUCK!', Game, libtcod.red)
+            Game.game_state = data.STATE_DEAD
 
 def monster_death(monster, killer, Game):
     #transform into corpse
