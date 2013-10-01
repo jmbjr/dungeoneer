@@ -10,32 +10,67 @@ class World(object):
 		self.nheight = nheight
 		self.alive = alivechar
 		self.dead = deadchar
-		self.world =[]
+		self.population =[]
+
 		self.con = libtcod.console_new(self.nwidth,self.nheight)
 
 		self.init_world()
 
 	def init_world(self):
-		self.world = [[ self.random_cell()
+		self.population = [[ flip_coin()
 		for yy in range(self.nheight) ]
 			for xx in range(self.nwidth) ]
 
 	def get_world(self):
 		libtcod.console_clear(self.con)
 		for yy in range(self.nheight):		
-			for xx in range(self.nwidth):	
-				libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT,self.world[xx][yy])
+			for xx in range(self.nwidth):
+				my_color=self.random_color()	
+				libtcod.console_set_default_foreground(self.con, my_color)
+				libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, self.get_entity(self.population[xx][yy]))
 		return self.con
 
+	def get_entity(self, entity):
+
+		if entity == 0:
+			return ' '
+		elif entity < 10:
+			return '.'
+		elif entity >=10 and entity < 20:
+			return ','
+		elif entity >=20 and entity < 30:
+			return '_'
+		elif entity >=30 and entity < 40:
+			return '-'
+		elif entity >=40 and entity < 50:
+			return '|'
+		elif entity >=50 and entity < 60:
+			return '+'
+		elif entity >=60 and entity < 70:
+			return 'x'
+		elif entity >=70 and entity < 80:
+			return '='
+		elif entity >=80 and entity < 90:
+			return '#'
+		elif entity >=90 and entity < 100:
+			return 'o'
+		else:
+			return '@'
+
 	def update(self):
-		new_world = []
-		new_world = [[ self.dead
+		new_population = []
+		new_population = [[ 0
 			for yy in range(self.nheight) ]
 				for xx in range(self.nwidth) ]
 
 		for yy in range(self.nheight):		
 			for xx in range(self.nwidth):	
-				state = self.world[xx][yy]
+
+				if self.isalive(self.population[xx][yy]):
+					state = self.alive
+				else:
+					state = self.dead
+
 				num_neighbors = self.neighbors(xx,yy)
 				#print str(xx) + '/' + str(yy) + ':' + str(state) + '\t' + str(num_neighbors)
 				if state == self.alive:
@@ -43,19 +78,19 @@ class World(object):
 					if num_neighbors <2 or num_neighbors >3:
 						#rule 1: #neighbors < 2, alive->dead
 						#rule 3: #neighbors = 4, alive->dead
-						new_world[xx][yy] = self.dead
+						new_population[xx][yy] = 0
 						#print '!!! DEATH !!!'
 					else:
-						new_world[xx][yy] = self.alive
+						new_population[xx][yy] = self.population[xx][yy]+1
 						#print 'STAYIN ALIVE!'
 				else: #dead
 					#check rule 4
 					if num_neighbors == 3:
 						#rule 4: #neighbors = 3 alive, dead->alive
-						new_world[xx][yy] = self.alive
+						new_population[xx][yy] = self.population[xx][yy]+1
 						#print '??? BACK FROM DEATH ???'
 
-		self.world = new_world
+		self.population = new_population
 			
 	def random_cell(self):
 		if flip_coin() == 0:
@@ -63,39 +98,51 @@ class World(object):
 		else:
 			return self.alive
 
+	def random_color(self):
+		rr = libtcod.random_get_int(0,0,255)
+		gg = libtcod.random_get_int(0,0,255)
+		bb = libtcod.random_get_int(0,0,255)
+		return libtcod.Color(rr,gg,bb)
+
+	def isalive(self,entity):
+		if entity > 0:
+			return True
+		else:
+			return False
+
 	def neighbors(self, xx,yy):
 		num_neighbors=0
 
 		if xx != 0: #not far left
-			if self.world[xx-1][yy] == self.alive:
+			if self.isalive(self.population[xx-1][yy]):
 				num_neighbors+=1
 
 		if xx !=self.nwidth-1: #not far right
-			if self.world[xx+1][yy] == self.alive:
+			if self.isalive(self.population[xx+1][yy]):
 				num_neighbors+=1			
 
 		if yy != 0: #not far bottom
-			if self.world[xx][yy-1] == self.alive:
+			if self.isalive(self.population[xx][yy-1]):
 				num_neighbors+=1
 
 		if yy != self.nheight-1: #not far top
-			if self.world[xx][yy+1] == self.alive:
+			if self.isalive(self.population[xx][yy+1]):
 				num_neighbors+=1
 
 		if xx != 0 and yy != 0: #not bottom left
-			if self.world[xx-1][yy-1] == self.alive:
+			if self.isalive(self.population[xx-1][yy-1]):
 				num_neighbors+=1
 
 		if xx != 0 and yy != self.nheight-1: #not top left
-			if self.world[xx-1][yy+1] == self.alive:
+			if self.isalive(self.population[xx-1][yy+1]):
 				num_neighbors+=1
 
 		if xx != nwidth-1 and yy != 0: #not bottom right
-			if self.world[xx+1][yy-1] == self.alive:
+			if self.isalive(self.population[xx+1][yy-1]):
 				num_neighbors+=1
 
 		if xx != nwidth-1 and yy != nheight-1: #not top right
-			if self.world[xx+1][yy+1] == self.alive:
+			if self.isalive(self.population[xx+1][yy+1]):
 				num_neighbors+=1
 
 		return num_neighbors
@@ -107,18 +154,18 @@ class World(object):
 		for yy in range(self.nheight):	
 			ret= ret + '|'		
 			for xx in range(self.nwidth):
-				ret= ret + str(self.world[xx][yy])
+				ret= ret + str(self.population[xx][yy])
 			ret= ret + '|\n'
 		return(ret)
 
 
 #create world
-nwidth = 50
-nheight = 50
+nwidth = 100
+nheight = 60
 alivechar = '+'
 deadchar = ' '
-speed = .5
-inc = 0.1
+speed = .1
+inc = 0.01
 
 world = World(nwidth,nheight, alivechar, deadchar)
 
@@ -161,44 +208,3 @@ while not libtcod.console_is_window_closed():
 	#replace old population with new one
 	time.sleep(speed)
 	world.update()
-
-
-
-def draw_world(world):
-	for y in range(data.CAMERA_HEIGHT):
-		for x in range(data.CAMERA_WIDTH):
-			(map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
-			visible = libtcod.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
-			wall = Game.map[Game.dungeon_levelname].block_sight(map_x, map_y)
-
-			if data.ASCIIMODE:
-				thewallchar  = data.WALL_CHAR
-				thegroundchar = data.GROUND_CHAR
-			else:
-				thewallchar  = data.TILE_WALL
-				thegroundchar = data.TILE_GROUND
-
-			#thegroundchar = data.GROUND_CHAR
-			if not visible:
-				#tile not visible
-				if wall:
-					color_wall_ground = data.COLOR_DARK_WALL
-					char_wall_ground = thewallchar
-				else:
-					color_wall_ground = data.COLOR_DARK_GROUND
-					char_wall_ground = thegroundchar
-				fov_wall_ground = libtcod.grey
-			else:
-				#tile is visible
-				Game.map[Game.dungeon_levelname].set_explored(map_x, map_y)
-				if wall:
-					color_wall_ground = data.COLOR_LIGHT_WALL
-					char_wall_ground = thewallchar
-				else:
-					color_wall_ground = data.COLOR_LIGHT_GROUND
-					char_wall_ground = thegroundchar
-				fov_wall_ground = libtcod.white
-
-			if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
-				libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
-			
