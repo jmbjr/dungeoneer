@@ -173,8 +173,10 @@ def inventory_menu(header, Game, user):
 
 
 #common gamestuff routines.  random number routines and distance calculators
-def flip_coin():
-    return (libtcod.random_get_int(0,0,1))
+def flip_coin(rndgen=False):
+    if not rndgen:
+        rndgen = 0
+    return (libtcod.random_get_int(rndgen,0,1))
 
 def random_choice(chances_dict):
     #choose one option from dict of chances and return key
