@@ -21,9 +21,9 @@ def game_initialize():
 
     libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_SDL)
     libtcod.sys_set_fps(data.LIMIT_FPS)
-
-    libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
-    libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
+    if data.GRAPHICSMODE:
+        libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
+        libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
 
     Game.con = libtcod.console_new(data.MAP_WIDTH,data.MAP_HEIGHT)
     Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
