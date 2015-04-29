@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 
 #DON'T EDIT DATA BETWEEN X's WHILE GAME IS RUNNING, UNLESS YOU WANT THE GAME TO CRASH
-
+GRAPHCISMODE       = False
 #.............................................
 #EDITABLE MAP DATA
 WALL_CHAR          = 'X'

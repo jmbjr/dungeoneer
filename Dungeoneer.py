@@ -35,7 +35,8 @@ def main_menu():
 
     while not libtcod.console_is_window_closed():
         #show the background image, at twice the regular console resolution
-        libtcod.image_blit_2x(img, 0, 0, 0)
+        if data.GRAPHICSMODE:
+            libtcod.image_blit_2x(img, 0, 0, 0)
 
         #show game title and credits
         libtcod.console_set_default_foreground(0, libtcod.light_yellow)
