@@ -14,10 +14,13 @@ on linux, get libtcod 1.5.1 via:
 wget -O libtcod-1.5.1_linux_64bit.tar.gz http://roguecentral.org/doryen/?file_id=28
 tar -vxzf libtcod-1.5.1_linux_64bit.tar.gz
 
-sudo apt-get install libsdl1.2debian
-
 mv libtcodpy.py libtcodpy-win.py
 cp libtcod-1.5.1/libtcodpy.py ./
+cp libtcod-1.5.1/terminal.png ./
+
+sudo apt-get install libsdl1.2debian
+
+in data.py set ASCIIMODE to True and GRAPHICSMODE to False
 
 To move, use arrow keys, num pad, or hjklyubn
 
