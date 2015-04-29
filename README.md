@@ -10,6 +10,15 @@ To use, download this code and follow the instructions in the tutorial for setti
 
 namely, put SDL.dll and libtcod-mingw.dll in the same directory as the .py and .png files
 
+on linux, get libtcod 1.5.1 via:
+wget -O libtcod-1.5.1_linux_64bit.tar.gz http://roguecentral.org/doryen/?file_id=28
+tar -vxzf libtcod-1.5.1_linux_64bit.tar.gz
+
+sudo apt-get install libsdl1.2debian
+
+mv libtcodpy.py libtcodpy-win.py
+cp libtcod-1.5.1/libtcodpy.py ./
+
 To move, use arrow keys, num pad, or hjklyubn
 
 Pick up items with 'g'
