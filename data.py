@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 
 #DON'T EDIT DATA BETWEEN X's WHILE GAME IS RUNNING, UNLESS YOU WANT THE GAME TO CRASH
-GRAPHCISMODE       = False
+GRAPHICSMODE       = False
 #.............................................
 #EDITABLE MAP DATA
 WALL_CHAR          = 'X'
@@ -71,8 +71,9 @@ SQL_COMMIT_TICK_COUNT = 5
 LEVEL_UP_BASE     = 2
 LEVEL_UP_FACTOR   = 2
 AUTOEQUIP         = True #ARE ITEMS AUTO-EQUIPPED ON PICKUP?
-ASCIIMODE         = False #use Object.char for graphics if True. use tilechar if False.
+ASCIIMODE         = True #use Object.char for graphics if True. use tilechar if False.
 AUTOMODE          = False
+GRAPHICSMODE      = False #this avoids printing any graphics. similar but not yet the same as ASCIIMODE
 FREE_FOR_ALL_MODE = True  #if true, all monsters on diffent clans by default
 PRINT_MESSAGES	  = True  #if true, print messages to log
 TURNBASED         = True #not working yet
