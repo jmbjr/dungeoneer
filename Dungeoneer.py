@@ -18,8 +18,10 @@ class Game(object):
 def game_initialize():
     if data.GRAPHICSMODE:
         libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+    else:
+        libtcod.console_set_custom_font("arial10x10.png",libtcod.FONT_LAYOUT_ASCII_INCOL)
 
-    libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_SDL)
+    libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_OPENGL )
     libtcod.sys_set_fps(data.LIMIT_FPS)
     if data.GRAPHICSMODE:
         libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
