@@ -198,11 +198,11 @@ class World(object):
             if self.isalive(self.population[xx-1][yy+1]):
                 num_neighbors+=1
 
-        if xx != nwidth-1 and yy != 0: #not bottom right
+        if xx != self.nwidth-1 and yy != 0: #not bottom right
             if self.isalive(self.population[xx+1][yy-1]):
                 num_neighbors+=1
 
-        if xx != nwidth-1 and yy != nheight-1: #not top right
+        if xx != self.nwidth-1 and yy != self.nheight-1: #not top right
             if self.isalive(self.population[xx+1][yy+1]):
                 num_neighbors+=1
 
