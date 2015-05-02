@@ -221,12 +221,6 @@ class World(object):
 
 def main(stdscr):
     print('hi!')
-#iniitialize curses
-#    if data.GRAPHICSMODE == 'curses':
-#        stdscr = curses.initscr()
-#        curses.noecho()
-#        curses.cbreak()
-#        stdscr.keypad(1)
 
     #create world
     nwidth = 100
@@ -279,13 +273,13 @@ def main(stdscr):
             if data.GRAPHICSMODE == 'libtcod':
             #just break
                 break
-            if data.GRAPHICSMODE == 'curses':
+            elif data.GRAPHICSMODE == 'curses':
             #take care of properly shutting down curses
                 world.con.addstr(1,0,'Bye!')
-                curses.nocbreak()
-                world.con.keypad(0)
-                curses.echo()
-                curses.endwin()
+                break
+            else:
+                print('Error in ESC. wrong GRAPHICSMODE'
+             
         if thekey == libtcod.KEY_TAB:
             world.init_world()
         if thekey == libtcod.KEY_UP:
