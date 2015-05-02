@@ -1,8 +1,17 @@
 import libtcodpy as libtcod
+import curses
 from gamestuff import *
 import data
 import entitydata
 import time
+
+def isgameover():
+    if data.GRAPHICSMODE == 'libtcod': 
+        return libtcod.console_is_window_closed()
+    elif data.GRAPHICSMODE == 'curses':
+        return False
+    else:
+        print('Error in isgameover. wrong GRAPHICSMODE')
 
 class World(object):
     def __init__(self, nwidth, nheight, alivechar, deadchar,char_option, rndgen):
@@ -15,8 +24,15 @@ class World(object):
         self.population =[]
         self.generation = 0
         self.rndgen = rndgen
-
-        self.con = libtcod.console_new(self.nwidth,self.nheight)
+        
+        if data.GRAPHICSMODE == 'libtcod':
+            self.con = libtcod.console_new(self.nwidth,self.nheight)
+            print('Created libtcod world!')
+        elif data.GRAPHICSMODE == 'curses':
+            self.con =  curses.newwin(self.nheight, self.nwidth)
+            print('Created curses world!')
+        else:
+            print('ERROR in world _init_. GRAPHICSMODE incorrect')
 
         self.init_world()
 
@@ -38,7 +54,13 @@ class World(object):
             self.init_world()    
 
     def get_world(self):
-        libtcod.console_clear(self.con)
+        if data.GRAPHICSMODE == 'libtcod':
+            libtcod.console_clear(self.con)
+        elif data.GRAPHICSMODE == 'curses':
+            self.con.clear()
+        else:
+            print('ERROR in get_world(). GRAPHICSMODE incorrect')
+
         for yy in range(self.nheight):        
             for xx in range(self.nwidth):
                 #my_color=self.random_color() 
@@ -197,6 +219,12 @@ class World(object):
             ret= ret + '|\n'
         return(ret)
 
+#iniitialize curses
+if data.GRAPHICSMODE == 'curses':
+    stdscr = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    stdscr.keypad(1)
 
 #create world
 nwidth = 100
@@ -216,41 +244,57 @@ my_determinist_random = libtcod.random_new_from_seed(0xdeadbeef)
 
 world = World(nwidth,nheight, alivechar, deadchar, char_option, my_determinist_random)
 
-libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
-libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
-libtcod.sys_set_fps(30)
+if data.GRAPHICSMODE == 'libtcod':
+    libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+    libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
+    libtcod.sys_set_fps(30)
 
-libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
-libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
+    libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
+    libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
 
-mouse = libtcod.Mouse()
-key = libtcod.Key()  
+    mouse = libtcod.Mouse()
+    key = libtcod.Key()  
+elif data.GRAPHICSMODE == 'curses':
+    print('cursing!')
+else:
+    print('Error in setup. wrong GRAPHICSMODE')
 
 #initialize population
 
 #enter game loop and check for user input
-while not libtcod.console_is_window_closed():
-    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+while not isgameover():
+    if data.GRAPHICSMODE == 'libtcod':
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+        thekey = key.vk
+    elif data.GRAPHICSMODE == 'curses':
+        thekey = 'curses'
+    else:
+        print('Error in isgameover(). wrong GRAPHICSMODE')
 
-    if key.vk == libtcod.KEY_ESCAPE:
+    if thekey == libtcod.KEY_ESCAPE:
         break
-    if key.vk == libtcod.KEY_TAB:
+    if thekey == libtcod.KEY_TAB:
         world.init_world()
-    if key.vk == libtcod.KEY_UP:
+    if thekey == libtcod.KEY_UP:
         speed-=inc
-    if key.vk ==libtcod.KEY_DOWN:
+    if thekey ==libtcod.KEY_DOWN:
         speed+=inc
-    if key.vk == libtcod.KEY_RIGHT:
+    if thekey == libtcod.KEY_RIGHT:
         inc+=.01
-    if key.vk ==libtcod.KEY_LEFT:
+    if thekey ==libtcod.KEY_LEFT:
         inc-=.01
 
     if speed <0:
         speed = .001
     #display world
-    con_world = world.get_world()
-    libtcod.console_blit(con_world, 0, 0, nwidth, nheight, 0, 0, 0)
-    libtcod.console_flush()
+    if data.GRAPHICSMODE == 'libtcod':
+        con_world = world.get_world()
+        libtcod.console_blit(con_world, 0, 0, nwidth, nheight, 0, 0, 0)
+        libtcod.console_flush()
+    elif data.GRAPHICSMODE == 'curses':
+        world.con.addstr(0, 0, 'Hello World!')
+        world.con.refresh()
+
     #waitkey = libtcod.console_wait_for_keypress(True)
     
     #check rules and create new population
@@ -258,3 +302,4 @@ while not libtcod.console_is_window_closed():
     time.sleep(speed)
     world.update()
     world.check_stable()
+
