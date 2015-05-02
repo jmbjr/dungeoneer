@@ -278,8 +278,8 @@ def main(stdscr):
                 world.con.addstr(1,0,'Bye!')
                 break
             else:
-                print('Error in ESC. wrong GRAPHICSMODE'
-             
+                print('Error in ESC. wrong GRAPHICSMODE')
+                break             
         if thekey == libtcod.KEY_TAB:
             world.init_world()
         if thekey == libtcod.KEY_UP:
