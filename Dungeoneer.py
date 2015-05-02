@@ -16,14 +16,14 @@ class Game(object):
     msg_history = []
 
 def game_initialize():
-    if data.GRAPHICSMODE:
+    if data.GRAPHICSMODE == 'libtcod':
         libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
     else:
         libtcod.console_set_custom_font("arial10x10.png",libtcod.FONT_LAYOUT_ASCII_INCOL)
 
     libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_OPENGL )
     libtcod.sys_set_fps(data.LIMIT_FPS)
-    if data.GRAPHICSMODE:
+    if data.GRAPHICSMODE == 'libtcod':
         libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
         libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
 
@@ -39,7 +39,7 @@ def main_menu():
 
     while not libtcod.console_is_window_closed():
         #show the background image, at twice the regular console resolution
-        if data.GRAPHICSMODE:
+        if data.GRAPHICSMODE == 'libtcod':
             libtcod.image_blit_2x(img, 0, 0, 0)
 
         #show game title and credits

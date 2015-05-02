@@ -20,7 +20,7 @@ cp libtcod-1.5.1/terminal.png ./
 
 sudo apt-get install libsdl1.2debian
 
-in data.py set ASCIIMODE to True and GRAPHICSMODE to False
+In data.py set ASCIIMODE to True and GRAPHICSMODE to 'libtcod'
 
 To move, use arrow keys, num pad, or hjklyubn
 
