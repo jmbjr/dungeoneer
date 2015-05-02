@@ -219,89 +219,108 @@ class World(object):
             ret= ret + '|\n'
         return(ret)
 
+def main(stdscr):
+    print('hi!')
 #iniitialize curses
-if data.GRAPHICSMODE == 'curses':
-    stdscr = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    stdscr.keypad(1)
+#    if data.GRAPHICSMODE == 'curses':
+#        stdscr = curses.initscr()
+#        curses.noecho()
+#        curses.cbreak()
+#        stdscr.keypad(1)
 
-#create world
-nwidth = 100
-nheight = 60
-alivechar = '+'
-deadchar = ' '
-char_option = 'ascii'
-speed = .1
-inc = 0.01
+    #create world
+    nwidth = 100
+    nheight = 60
+    alivechar = '+'
+    deadchar = ' '
+    char_option = 'ascii'
+    speed = .1
+    inc = 0.01
 
-# default generator
-default = libtcod.random_get_instance()
-# another random generator
-my_random = libtcod.random_new()
-# a random generator with a specific seed
-my_determinist_random = libtcod.random_new_from_seed(0xdeadbeef)
+    # default generator
+    default = libtcod.random_get_instance()
+    # another random generator
+    my_random = libtcod.random_new()
+    # a random generator with a specific seed
+    my_determinist_random = libtcod.random_new_from_seed(0xdeadbeef)
 
-world = World(nwidth,nheight, alivechar, deadchar, char_option, my_determinist_random)
+    world = World(nwidth,nheight, alivechar, deadchar, char_option, my_determinist_random)
 
-if data.GRAPHICSMODE == 'libtcod':
-    libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
-    libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
-    libtcod.sys_set_fps(30)
-
-    libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
-    libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
-
-    mouse = libtcod.Mouse()
-    key = libtcod.Key()  
-elif data.GRAPHICSMODE == 'curses':
-    world.con.nodelay(1)
-    print('cursing!')
-else:
-    print('Error in setup. wrong GRAPHICSMODE')
-
-#initialize population
-
-#enter game loop and check for user input
-while not isgameover():
     if data.GRAPHICSMODE == 'libtcod':
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-        thekey = key.vk
+        libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+        libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
+        libtcod.sys_set_fps(30)
+
+        libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
+        libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
+
+        mouse = libtcod.Mouse()
+        key = libtcod.Key()  
     elif data.GRAPHICSMODE == 'curses':
-        thekey = world.con.getch()
+        world.con.nodelay(1)
+        print('cursing!')
     else:
-        print('Error in isgameover(). wrong GRAPHICSMODE')
+        print('Error in setup. wrong GRAPHICSMODE')
 
-#TODO add some enums here or find ones that work
-    if (thekey == libtcod.KEY_ESCAPE) or (thekey == 27):
-        break
-    if thekey == libtcod.KEY_TAB:
-        world.init_world()
-    if thekey == libtcod.KEY_UP:
-        speed-=inc
-    if thekey ==libtcod.KEY_DOWN:
-        speed+=inc
-    if thekey == libtcod.KEY_RIGHT:
-        inc+=.01
-    if thekey ==libtcod.KEY_LEFT:
-        inc-=.01
+    #initialize population
 
-    if speed <0:
-        speed = .001
-    #display world
+    #enter game loop and check for user input
+    while not isgameover():
+        if data.GRAPHICSMODE == 'libtcod':
+            libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+            thekey = key.vk
+        elif data.GRAPHICSMODE == 'curses':
+            thekey = world.con.getch()
+        else:
+            print('Error in isgameover(). wrong GRAPHICSMODE')
+
+    #TODO add some enums here or find ones that work
+        if (thekey == libtcod.KEY_ESCAPE) or (thekey == 27):
+            if data.GRAPHICSMODE == 'libtcod':
+            #just break
+                break
+            if data.GRAPHICSMODE == 'curses':
+            #take care of properly shutting down curses
+                world.con.addstr(1,0,'Bye!')
+                curses.nocbreak()
+                world.con.keypad(0)
+                curses.echo()
+                curses.endwin()
+        if thekey == libtcod.KEY_TAB:
+            world.init_world()
+        if thekey == libtcod.KEY_UP:
+            speed-=inc
+        if thekey ==libtcod.KEY_DOWN:
+            speed+=inc
+        if thekey == libtcod.KEY_RIGHT:
+            inc+=.01
+        if thekey ==libtcod.KEY_LEFT:
+            inc-=.01
+
+        if speed <0:
+            speed = .001
+        #display world
+        if data.GRAPHICSMODE == 'libtcod':
+            con_world = world.get_world()
+            libtcod.console_blit(con_world, 0, 0, nwidth, nheight, 0, 0, 0)
+            libtcod.console_flush()
+        elif data.GRAPHICSMODE == 'curses':
+            world.con.addstr(0, 0, 'Hello World!')
+            world.con.refresh()
+
+        #waitkey = libtcod.console_wait_for_keypress(True)
+        
+        #check rules and create new population
+        #replace old population with new one
+        time.sleep(speed)
+        world.update()
+        world.check_stable()
+
+if __name__ == '__main__':
     if data.GRAPHICSMODE == 'libtcod':
-        con_world = world.get_world()
-        libtcod.console_blit(con_world, 0, 0, nwidth, nheight, 0, 0, 0)
-        libtcod.console_flush()
+        main()
     elif data.GRAPHICSMODE == 'curses':
-        world.con.addstr(0, 0, 'Hello World!')
-        world.con.refresh()
-
-    #waitkey = libtcod.console_wait_for_keypress(True)
-    
-    #check rules and create new population
-    #replace old population with new one
-    time.sleep(speed)
-    world.update()
-    world.check_stable()
+        curses.wrapper(main)
+    else:
+        print('Error in __name__. wrong GRAPHICSMODE')
 
