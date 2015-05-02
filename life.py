@@ -255,6 +255,7 @@ if data.GRAPHICSMODE == 'libtcod':
     mouse = libtcod.Mouse()
     key = libtcod.Key()  
 elif data.GRAPHICSMODE == 'curses':
+    world.con.nodelay(1)
     print('cursing!')
 else:
     print('Error in setup. wrong GRAPHICSMODE')
@@ -267,11 +268,12 @@ while not isgameover():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
         thekey = key.vk
     elif data.GRAPHICSMODE == 'curses':
-        thekey = 'curses'
+        thekey = world.con.getch()
     else:
         print('Error in isgameover(). wrong GRAPHICSMODE')
 
-    if thekey == libtcod.KEY_ESCAPE:
+#TODO add some enums here or find ones that work
+    if (thekey == libtcod.KEY_ESCAPE) or (thekey == 27):
         break
     if thekey == libtcod.KEY_TAB:
         world.init_world()
