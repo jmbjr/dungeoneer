@@ -17,7 +17,7 @@ class World(object):
     def __init__(self, nwidth, nheight, alivechar, deadchar,char_option, rndgen):
         
         self.nwidth = nwidth
-        self.nheight = nheight
+        self.nheight = nheight 
         self.alive = alivechar
         self.dead = deadchar
         self.char_option = char_option
@@ -27,10 +27,8 @@ class World(object):
         
         if data.GRAPHICSMODE == 'libtcod':
             self.con = libtcod.console_new(self.nwidth,self.nheight)
-            print('Created libtcod world!')
         elif data.GRAPHICSMODE == 'curses':
             self.con =  curses.newwin(self.nheight, self.nwidth)
-            print('Created curses world!')
         else:
             print('ERROR in world _init_. GRAPHICSMODE incorrect')
 
@@ -63,10 +61,18 @@ class World(object):
 
         for yy in range(self.nheight):        
             for xx in range(self.nwidth):
-                #my_color=self.random_color() 
+                #my_color=self.random_color()
                 my_color = self.get_color(self.population[xx][yy])
-                libtcod.console_set_default_foreground(self.con, my_color)
-                libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, self.get_entity(self.population[xx][yy], self.char_option))
+                if data.GRAPHICSMODE == 'libtcod':
+                    libtcod.console_set_default_foreground(self.con, my_color)
+                    libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, self.get_entity(self.population[xx][yy], self.char_option))
+                elif data.GRAPHICSMODE == 'curses':
+                    try:
+                        self.con.addstr(yy, xx, self.get_entity(self.population[xx][yy], self.char_option))
+                    except curses.error:
+                        pass
+                else:
+                    print('Error in get_world. wrong GRAPHICSMODE')
         return self.con
 
     def get_entity(self, entity, option):
@@ -223,7 +229,7 @@ def main(stdscr):
     print('hi!')
 
     #create world
-    nwidth = 100
+    nwidth = 200 
     nheight = 60
     alivechar = '+'
     deadchar = ' '
@@ -299,7 +305,7 @@ def main(stdscr):
             libtcod.console_blit(con_world, 0, 0, nwidth, nheight, 0, 0, 0)
             libtcod.console_flush()
         elif data.GRAPHICSMODE == 'curses':
-            world.con.addstr(0, 0, 'Hello World!')
+            world.con = world.get_world()
             world.con.refresh()
 
         #waitkey = libtcod.console_wait_for_keypress(True)
