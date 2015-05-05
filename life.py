@@ -4,6 +4,8 @@ from gamestuff import *
 import data
 import entitydata
 import time
+import math
+
 
 def isgameover():
     if data.GRAPHICSMODE == 'libtcod': 
@@ -68,7 +70,7 @@ class World(object):
                     libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, self.get_entity(self.population[xx][yy], self.char_option))
                 elif data.GRAPHICSMODE == 'curses':
                     try:
-                        self.con.addstr(yy, xx, self.get_entity(self.population[xx][yy], self.char_option))
+                        self.con.addstr(yy, xx, self.get_entity(self.population[xx][yy], self.char_option), curses.color_pair(my_color))
                     except curses.error:
                         pass
                 else:
@@ -154,17 +156,28 @@ class World(object):
         self.population = new_population
             
     def get_color(self, code):
-        rr = 8
-        gg = 8 + code*2
-        bb = 8
+        if data.GRAPHICSMODE == 'libtcod':
+	    rr = 8
+	    gg = 8 + code*2
+	    bb = 8
 
-        if gg > 255:
-            rr = 128
-            gg = 255
-            bb = 128
+	    if gg > 255:
+	        rr = 128
+	        gg = 255
+	        bb = 128
 
-        return libtcod.Color(rr,gg,bb)
+	    return libtcod.Color(rr,gg,bb)
+        elif data.GRAPHICSMODE == 'curses':
+            fg = round(code/16) 
+            if fg <=0:
+                fg = 1
+            if fg >=8:
+                fg = 7
+            return int(fg)   
 
+        else: 
+            print('error in get_color. Wrong GRAPHICSMODE')
+       
     def random_color(self):
         rr = libtcod.random_get_int(0,0,255)
         gg = libtcod.random_get_int(0,0,255)
@@ -226,8 +239,10 @@ class World(object):
         return(ret)
 
 def main(stdscr):
-    print('hi!')
-
+    for col in range(1,7):
+        curses.init_pair(col, col, curses.COLOR_BLACK)
+    curses.init_pair(7, curses.COLOR_RED, curses.COLOR_WHITE)
+    
     #create world
     nwidth = 200 
     nheight = 60
