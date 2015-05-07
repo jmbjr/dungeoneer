@@ -70,7 +70,7 @@ class World(object):
                     libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, self.get_entity(self.population[xx][yy], self.char_option))
                 elif data.GRAPHICSMODE == 'curses':
                     try:
-                        self.con.addstr(yy, xx, self.get_entity(self.population[xx][yy], self.char_option), curses.color_pair(my_color))
+                        self.con.addstr(yy, xx, self.get_entity(self.population[xx][yy], self.char_option), my_color)
                     except curses.error:
                         pass
                 else:
@@ -173,7 +173,7 @@ class World(object):
                 fg = 1
             if fg >=8:
                 fg = 7
-            return int(fg)   
+            return curses.color_pair(int(fg))   
 
         else: 
             print('error in get_color. Wrong GRAPHICSMODE')
