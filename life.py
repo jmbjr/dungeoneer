@@ -243,6 +243,9 @@ def main(stdscr):
         curses.init_pair(col, col, curses.COLOR_BLACK)
     curses.init_pair(7, curses.COLOR_RED, curses.COLOR_WHITE)
     
+    class keypress(object):
+        pass
+    
     #create world
     nwidth = 200 
     nheight = 60
@@ -251,6 +254,25 @@ def main(stdscr):
     char_option = 'ascii'
     speed = .1
     inc = 0.01
+
+    #key vars. TODO put this in a module or something
+    if data.GRAPHICSMODE == 'libtcod':
+        keypress.ESC  = libtcod.KEY_ESCAPE
+        keypress.TAB  = libtcod.KEY_TAB
+        keypress.UP   = libtcod.KEY_UP
+        keypress.DOWN = libtcod.KEY_DOWN
+        keypress.RIGHT= libtcod.KEY_RIGHT
+        keypress.LEFT = libtcod.KEY_LEFT
+    elif data.GRAPHICSMODE == 'curses':
+        keypress.ESC  = 27
+        keypress.TAB  = ord('\t')
+        keypress.UP   = curses.KEY_UP
+        keypress.DOWN = curses.KEY_DOWN
+        keypress.RIGHT= curses.KEY_RIGHT
+        keypress.LEFT = curses.KEY_LEFT
+    else:
+        print('Error in key-set. wrong GRAPHICSMODE')
+
 
     # default generator
     default = libtcod.random_get_instance()
@@ -273,6 +295,7 @@ def main(stdscr):
         key = libtcod.Key()  
     elif data.GRAPHICSMODE == 'curses':
         world.con.nodelay(1)
+        world.con.keypad(1)
         print('cursing!')
     else:
         print('Error in setup. wrong GRAPHICSMODE')
@@ -288,29 +311,20 @@ def main(stdscr):
             thekey = world.con.getch()
         else:
             print('Error in isgameover(). wrong GRAPHICSMODE')
-
-    #TODO add some enums here or find ones that work
-        if (thekey == libtcod.KEY_ESCAPE) or (thekey == 27):
-            if data.GRAPHICSMODE == 'libtcod':
-            #just break
-                break
-            elif data.GRAPHICSMODE == 'curses':
-            #take care of properly shutting down curses
-                world.con.addstr(1,0,'Bye!')
-                break
-            else:
-                print('Error in ESC. wrong GRAPHICSMODE')
-                break             
-        if thekey == libtcod.KEY_TAB:
+    
+#TODO add some enums here or find ones that work
+        if thekey == keypress.TAB:
             world.init_world()
-        if thekey == libtcod.KEY_UP:
+        elif thekey == keypress.UP:
             speed-=inc
-        if thekey ==libtcod.KEY_DOWN:
+        elif thekey ==keypress.DOWN:
             speed+=inc
-        if thekey == libtcod.KEY_RIGHT:
+        elif thekey == keypress.RIGHT:
             inc+=.01
-        if thekey ==libtcod.KEY_LEFT:
+        elif thekey ==keypress.LEFT:
             inc-=.01
+        elif thekey == keypress.ESC:
+                break             
 
         if speed <0:
             speed = .001
