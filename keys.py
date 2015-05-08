@@ -4,18 +4,18 @@ import curses
 
 #key vars. TODO put this in a module or something
 if data.GRAPHICSMODE == 'libtcod':
-    keys.ESC  = libtcod.KEY_ESCAPE
-    keys.TAB  = libtcod.KEY_TAB
-    keys.UP   = libtcod.KEY_UP
-    keys.DOWN = libtcod.KEY_DOWN
-    keys.RIGHT= libtcod.KEY_RIGHT
-    keys.LEFT = libtcod.KEY_LEFT
+    ESC  = libtcod.KEY_ESCAPE
+    TAB  = libtcod.KEY_TAB
+    UP   = libtcod.KEY_UP
+    DOWN = libtcod.KEY_DOWN
+    RIGHT= libtcod.KEY_RIGHT
+    LEFT = libtcod.KEY_LEFT
 elif data.GRAPHICSMODE == 'curses':
-    keys.ESC  = 27
-    keys.TAB  = ord('\t')
-    keys.UP   = curses.KEY_UP
-    keys.DOWN = curses.KEY_DOWN
-    keys.RIGHT= curses.KEY_RIGHT
-    keys.LEFT = curses.KEY_LEFT
+    ESC  = 27
+    TAB  = ord('\t')
+    UP   = curses.KEY_UP
+    DOWN = curses.KEY_DOWN
+    RIGHT= curses.KEY_RIGHT
+    LEFT = curses.KEY_LEFT
 else:
     print('Error in key-set. wrong GRAPHICSMODE')
