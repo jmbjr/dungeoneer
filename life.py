@@ -168,13 +168,17 @@ class World(object):
 
 	    return libtcod.Color(rr,gg,bb)
         elif data.GRAPHICSMODE == 'curses':
-            fg = round(code/16) 
+            fg = round(code/16)
+            themod = code%16 
             if fg <=0:
                 fg = 1
-            if fg >=8:
+            elif fg >=7:
                 fg = 7
-            return curses.color_pair(int(fg))   
-
+                return curses.color_pair(int(fg)) | curses.A_STANDOUT            
+            if themod <= 8:
+                return curses.color_pair(int(fg))
+            else:
+                return curses.color_pair(int(fg)) | curses.A_BOLD
         else: 
             print('error in get_color. Wrong GRAPHICSMODE')
        
