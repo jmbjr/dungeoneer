@@ -5,7 +5,7 @@ import data
 import entitydata
 import time
 import math
-
+import keys
 
 def isgameover():
     if data.GRAPHICSMODE == 'libtcod': 
@@ -247,9 +247,6 @@ def main(stdscr):
         curses.init_pair(col, col, curses.COLOR_BLACK)
     curses.init_pair(7, curses.COLOR_RED, curses.COLOR_WHITE)
     
-    class keypress(object):
-        pass
-    
     #create world
     nwidth = 200 
     nheight = 60
@@ -258,25 +255,6 @@ def main(stdscr):
     char_option = 'ascii'
     speed = .1
     inc = 0.01
-
-    #key vars. TODO put this in a module or something
-    if data.GRAPHICSMODE == 'libtcod':
-        keypress.ESC  = libtcod.KEY_ESCAPE
-        keypress.TAB  = libtcod.KEY_TAB
-        keypress.UP   = libtcod.KEY_UP
-        keypress.DOWN = libtcod.KEY_DOWN
-        keypress.RIGHT= libtcod.KEY_RIGHT
-        keypress.LEFT = libtcod.KEY_LEFT
-    elif data.GRAPHICSMODE == 'curses':
-        keypress.ESC  = 27
-        keypress.TAB  = ord('\t')
-        keypress.UP   = curses.KEY_UP
-        keypress.DOWN = curses.KEY_DOWN
-        keypress.RIGHT= curses.KEY_RIGHT
-        keypress.LEFT = curses.KEY_LEFT
-    else:
-        print('Error in key-set. wrong GRAPHICSMODE')
-
 
     # default generator
     default = libtcod.random_get_instance()
@@ -317,17 +295,17 @@ def main(stdscr):
             print('Error in isgameover(). wrong GRAPHICSMODE')
     
 #TODO add some enums here or find ones that work
-        if thekey == keypress.TAB:
+        if thekey == keys.TAB:
             world.init_world()
-        elif thekey == keypress.UP:
+        elif thekey == keys.UP:
             speed-=inc
-        elif thekey ==keypress.DOWN:
+        elif thekey ==keys.DOWN:
             speed+=inc
-        elif thekey == keypress.RIGHT:
+        elif thekey == keys.RIGHT:
             inc+=.01
-        elif thekey ==keypress.LEFT:
+        elif thekey ==keys.LEFT:
             inc-=.01
-        elif thekey == keypress.ESC:
+        elif thekey == keys.ESC:
                 break             
 
         if speed <0:
@@ -341,7 +319,7 @@ def main(stdscr):
             world.con = world.get_world()
             world.con.refresh()
 
-        #waitkey = libtcod.console_wait_for_keypress(True)
+        #waitkey = libtcod.console_wait_for_keys(True)
         
         #check rules and create new population
         #replace old population with new one
