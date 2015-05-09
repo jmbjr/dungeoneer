@@ -6,10 +6,10 @@ import entitydata
 import time
 import math
 import keys
-import graphics
+import guistuff
 
 class World(object):
-    def __init__(self, nwidth, nheight, alivechar, deadchar,char_option, rndgen):
+    def __init__(self, nwidth, nheight, alivechar, deadchar, char_option, rndgen, gui):
         
         self.nwidth = nwidth
         self.nheight = nheight 
@@ -19,13 +19,8 @@ class World(object):
         self.population =[]
         self.generation = 0
         self.rndgen = rndgen
-        
-        if data.GRAPHICSMODE == 'libtcod':
-            self.con = libtcod.console_new(self.nwidth,self.nheight)
-        elif data.GRAPHICSMODE == 'curses':
-            self.con =  curses.newwin(self.nheight, self.nwidth)
-        else:
-            print('ERROR in world _init_. GRAPHICSMODE incorrect')
+        self.gui = gui
+        self.con = self.gui.console(self.nwidth, self.nheight)
 
         self.init_world()
 
@@ -47,27 +42,14 @@ class World(object):
             self.init_world()    
 
     def get_world(self):
-        if data.GRAPHICSMODE == 'libtcod':
-            libtcod.console_clear(self.con)
-        elif data.GRAPHICSMODE == 'curses':
-            self.con.clear()
-        else:
-            print('ERROR in get_world(). GRAPHICSMODE incorrect')
+        self.gui.clear(self.con)
 
         for yy in range(self.nheight):        
             for xx in range(self.nwidth):
                 #my_color=self.random_color()
                 my_color = self.get_color(self.population[xx][yy])
-                if data.GRAPHICSMODE == 'libtcod':
-                    libtcod.console_set_default_foreground(self.con, my_color)
-                    libtcod.console_print_ex(self.con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, self.get_entity(self.population[xx][yy], self.char_option))
-                elif data.GRAPHICSMODE == 'curses':
-                    try:
-                        self.con.addstr(yy, xx, self.get_entity(self.population[xx][yy], self.char_option), my_color)
-                    except curses.error:
-                        pass
-                else:
-                    print('Error in get_world. wrong GRAPHICSMODE')
+                self.gui.printstr(self.con, xx, yy, self.get_entity(self.population[xx][yy], self.char_option), my_color)
+
         return self.con
 
     def get_entity(self, entity, option):
@@ -149,6 +131,11 @@ class World(object):
         self.population = new_population
             
     def get_color(self, code):
+#TODO: set up some graphics options and set them in data
+#TODO: then have an options menu on startup to choose the GRAPHICSMODE and sub-options for that graphics mode
+#TODO: i.e. rgb, 7 color mode, etc
+#TODO: then in this function, just call the guistuff.colorcode(option) or something
+        #left this block of data.GRAPHICSMODE since it's specialized to life.py
         if data.GRAPHICSMODE == 'libtcod':
 	    rr = 8
 	    gg = 8 + code*2
@@ -161,11 +148,11 @@ class World(object):
 
 	    return libtcod.Color(rr,gg,bb)
         elif data.GRAPHICSMODE == 'curses':
-            fg = round(code/16)
+            fg = round(code/16) + 1
             themod = code%16 
             if fg <=0:
-                fg = 1
-            elif fg >=7:
+                fg = 0
+            elif fg >=8:
                 fg = 7
                 return curses.color_pair(int(fg)) | curses.A_STANDOUT            
             if themod <= 8:
@@ -236,14 +223,14 @@ class World(object):
         return(ret)
 
 def main(stdscr):
-    for col in range(1,7):
+    for col in range(1,8):
         curses.init_pair(col, col, curses.COLOR_BLACK)
-    curses.init_pair(7, curses.COLOR_RED, curses.COLOR_WHITE)
    
-    graphics = Graphics(data.GRAPHICSMODE)
+    gui = guistuff.Guistuff(data.GRAPHICSMODE)
  
+#TODO make these settable in an options window
     #create world
-    nwidth = 200 
+    nwidth = 100 
     nheight = 60
     alivechar = '+'
     deadchar = ' '
@@ -258,36 +245,14 @@ def main(stdscr):
     # a random generator with a specific seed
     my_determinist_random = libtcod.random_new_from_seed(0xdeadbeef)
 
-    world = World(nwidth,nheight, alivechar, deadchar, char_option, my_determinist_random)
-
-    if data.GRAPHICSMODE == 'libtcod':
-        libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
-        libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
-        libtcod.sys_set_fps(30)
-
-        libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
-        libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
-
-        mouse = libtcod.Mouse()
-        key = libtcod.Key()  
-    elif data.GRAPHICSMODE == 'curses':
-        world.con.nodelay(1)
-        world.con.keypad(1)
-        print('cursing!')
-    else:
-        print('Error in setup. wrong GRAPHICSMODE')
+    world = World(nwidth,nheight, alivechar, deadchar, char_option, my_determinist_random, gui)
+    mouse,key = gui.prep_console(world.con, world.nwidth, world.nheight)
 
     #initialize population
 
     #enter game loop and check for user input
-    while not graphics.isgameover():
-        if data.GRAPHICSMODE == 'libtcod':
-            libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-            thekey = key.vk
-        elif data.GRAPHICSMODE == 'curses':
-            thekey = world.con.getch()
-        else:
-            print('Error in isgameover(). wrong GRAPHICSMODE')
+    while not gui.isgameover():
+        thekey = gui.getkey(world.con, mouse, key)
     
 #TODO add some enums here or find ones that work
         if thekey == keys.TAB:
@@ -306,16 +271,9 @@ def main(stdscr):
         if speed <0:
             speed = .001
         #display world
-        if data.GRAPHICSMODE == 'libtcod':
-            con_world = world.get_world()
-            libtcod.console_blit(con_world, 0, 0, nwidth, nheight, 0, 0, 0)
-            libtcod.console_flush()
-        elif data.GRAPHICSMODE == 'curses':
-            world.con = world.get_world()
-            world.con.refresh()
-
-        #waitkey = libtcod.console_wait_for_keys(True)
-        
+        current_world = world.get_world()
+        gui.flush(current_world)
+    
         #check rules and create new population
         #replace old population with new one
         time.sleep(speed)
