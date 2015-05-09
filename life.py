@@ -6,14 +6,7 @@ import entitydata
 import time
 import math
 import keys
-
-def isgameover():
-    if data.GRAPHICSMODE == 'libtcod': 
-        return libtcod.console_is_window_closed()
-    elif data.GRAPHICSMODE == 'curses':
-        return False
-    else:
-        print('Error in isgameover. wrong GRAPHICSMODE')
+import graphics
 
 class World(object):
     def __init__(self, nwidth, nheight, alivechar, deadchar,char_option, rndgen):
@@ -246,7 +239,9 @@ def main(stdscr):
     for col in range(1,7):
         curses.init_pair(col, col, curses.COLOR_BLACK)
     curses.init_pair(7, curses.COLOR_RED, curses.COLOR_WHITE)
-    
+   
+    graphics = Graphics(data.GRAPHICSMODE)
+ 
     #create world
     nwidth = 200 
     nheight = 60
@@ -285,7 +280,7 @@ def main(stdscr):
     #initialize population
 
     #enter game loop and check for user input
-    while not isgameover():
+    while not graphics.isgameover():
         if data.GRAPHICSMODE == 'libtcod':
             libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
             thekey = key.vk
