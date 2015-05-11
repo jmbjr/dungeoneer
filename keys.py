@@ -1,7 +1,10 @@
 import libtcodpy as libtcod
 import data
-import curses
-
+try:
+    import curses
+except ImportError:
+    print 'curses not available'
+    
 #key vars. TODO put this in a module or something
 if data.GRAPHICSMODE == 'libtcod':
     ESC  = libtcod.KEY_ESCAPE

@@ -3,6 +3,11 @@ import libtcodpy as libtcod
 from gamestuff import *
 import data
 import entitydata
+try:
+    import curses
+except ImportError:
+    data.GRAPHICSMODE = 'libtcod'
+    print 'curses not available. Using libtcod for graphics'
 
 #specific imports needed for this module
 import shelve #for save and load

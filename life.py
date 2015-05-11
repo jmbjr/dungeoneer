@@ -1,7 +1,11 @@
 import libtcodpy as libtcod
-import curses
-from gamestuff import *
 import data
+try:
+    import curses
+except ImportError:
+    data.GRAPHICSMODE = 'libtcod'
+    print 'curses not available. Using libtcod for graphics'
+from gamestuff import *
 import entitydata
 import time
 import math
@@ -223,9 +227,10 @@ class World(object):
         return(ret)
 
 def main(stdscr):
-    for col in range(1,8):
-        curses.init_pair(col, col, curses.COLOR_BLACK)
-   
+    if data.GRAPHICSMODE == 'curses':
+        for col in range(1,8):
+            curses.init_pair(col, col, curses.COLOR_BLACK)
+       
     gui = guistuff.Guistuff(data.GRAPHICSMODE)
  
 #TODO make these settable in an options window
@@ -272,7 +277,7 @@ def main(stdscr):
             speed = .001
         #display world
         current_world = world.get_world()
-        gui.flush(current_world)
+        gui.flush(current_world, world.nwidth, world.nheight)
     
         #check rules and create new population
         #replace old population with new one
@@ -282,7 +287,7 @@ def main(stdscr):
 
 if __name__ == '__main__':
     if data.GRAPHICSMODE == 'libtcod':
-        main()
+        main(None)
     elif data.GRAPHICSMODE == 'curses':
         curses.wrapper(main)
     else:

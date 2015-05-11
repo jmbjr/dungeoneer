@@ -1,5 +1,8 @@
 import libtcodpy as libtcod
-import curses
+try:
+    import curses
+except ImportError:
+    print 'curses not available'
 
 #TODO replace with select case
 #TODO specifically require con for things that need it. don't save it. could get messy. See the flush() for example.
@@ -48,7 +51,7 @@ class Guistuff(object):
 
     def prep_console(self, con, nwidth, nheight):
         if self.graphicsmode == 'libtcod':
-            libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
+            libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
             libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
             libtcod.sys_set_fps(30)
 
@@ -76,9 +79,9 @@ class Guistuff(object):
             print('Error in guistuff.getkey. wrong GRAPHICSMODE')
         return thekey
 
-    def flush(self,con):
+    def flush(self,con, nwidth, nheight):
         if self.graphicsmode == 'libtcod':
-            libtcod.console_blit(con, 0, 0, self.nwidth, self.nheight, 0, 0, 0)
+            libtcod.console_blit(con, 0, 0, nwidth, nheight, 0, 0, 0)
             libtcod.console_flush()
         elif self.graphicsmode == 'curses':
             con.refresh()
