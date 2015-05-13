@@ -1,56 +1,47 @@
 import gamedata
+import sys
 
 class Jumptable(object):
-    def play_dungeoneer(self):
+    def play_dungeoneer_gfx(self):
         print('Playing Dungeoneer!!!')
+        gamedata.ASCIIMODE = False
+
+    def play_dungeoneer_ascii(self):
+        print('Playing Dungeoneer!!!')
+        gamedata.ASCIIMODE = True
 
     def play_life(self):
         print('Going to play life! Press a key!')
+        gamedata.ASCIIMODE = True
         import life
         life.main()
 
     def jump(self,cmd):
         self.jump_table[cmd](self)
 
-    jump_table = {'1':play_dungeoneer, '2':play_life}
-
+    jump_table = {'1':play_dungeoneer_gfx, '2':play_dungeoneer_ascii, '3':play_life}
 
 goodchoice = False
-graphicsmode  = {'1':'libtcod', '2':'curses'}
-asciimode     = {'1':True,      '2':False}
+
+if sys.platform == 'darwin':
+   gamedata.GRAPHICSMODE = 'libtcod'
+elif sys.platform == 'linux2':
+   gamedata.GRAPHICSMODE = 'curses'
+elif sys.platform == 'win32':
+   gamedata.GRAPHICSMODE = 'libtcod'
+else:
+    raise ImportError('unknown os', sys.platform)
 
 print('Dungoneer! by johnstein')
 print('-----------------------')
 while not goodchoice:
-    print('    Options Setup:     ')
-    print('1. libtcod (graphical)')
-    print('2. curses  (terminal) ')
+    print('    Play!               ')
+    print('1. Dungeoneer (graphics)')
+    print('2. Dungeoneer (ASCII)   ')
+    print('3. Rogue-Life           ')
     choice = raw_input()
 
-    if choice == '1' or choice == '2':
-        goodchoice = True
-        gamedata.GRAPHICSMODE = graphicsmode[choice]
-
-goodchoice = False
-if choice == '1': #libtcod
-    while not goodchoice:
-        print('    libtcod Mode:     ')
-        print('1. ASCII Mode         ')
-        print('2. Graphics Mode      ')
-        choice = raw_input()
-
-        if choice == '1' or choice == '2':
-            goodchoice = True
-            gamedata.ASCIIMODE = asciimode[choice]
-
-goodchoice = False
-while not goodchoice:
-    print('    Play!             ')
-    print('1. Dungeoneer         ')
-    print('2. Rogue-Life         ')
-    choice = raw_input()
-
-    if choice == '1' or choice == '2':
+    if choice in ['1', '2', '3']:
         goodchoice = True
         j = Jumptable()
         j.jump(choice)
