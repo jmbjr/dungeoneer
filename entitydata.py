@@ -1,5 +1,5 @@
 import entities
-import libtcodpy as libtcod
+import libtcod
 import data
 
 #.............................................

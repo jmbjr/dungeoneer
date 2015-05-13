@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import libtcod
 import data
 import gamedata
 try:

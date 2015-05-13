@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import libtcod
 try:
     import curses
 except ImportError:
