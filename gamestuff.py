@@ -1,6 +1,7 @@
 #standard imports
 import libtcodpy as libtcod
 import data
+import gamedata
 
 #specific imports needed for this module
 import math
@@ -228,7 +229,7 @@ def render_all(Game):
                 visible = libtcod.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
                 wall = Game.map[Game.dungeon_levelname].block_sight(map_x, map_y)
 
-                if data.ASCIIMODE:
+                if gamedata.ASCIIMODE:
                     thewallchar  = data.WALL_CHAR
                     thegroundchar = data.GROUND_CHAR
                 else:

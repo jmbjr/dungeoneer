@@ -1,9 +1,10 @@
 import libtcodpy as libtcod
 import data
+import gamedata
 try:
     import curses
 except ImportError:
-    data.GRAPHICSMODE = 'libtcod'
+    gamedata.GRAPHICSMODE = 'libtcod'
     print 'curses not available. Using libtcod for graphics'
 from gamestuff import *
 import entitydata
@@ -139,8 +140,8 @@ class World(object):
 #TODO: then have an options menu on startup to choose the GRAPHICSMODE and sub-options for that graphics mode
 #TODO: i.e. rgb, 7 color mode, etc
 #TODO: then in this function, just call the guistuff.colorcode(option) or something
-        #left this block of data.GRAPHICSMODE since it's specialized to life.py
-        if data.GRAPHICSMODE == 'libtcod':
+        #left this block of gamedata.GRAPHICSMODE since it's specialized to life.py
+        if gamedata.GRAPHICSMODE == 'libtcod':
 	    rr = 8
 	    gg = 8 + code*2
 	    bb = 8
@@ -151,7 +152,7 @@ class World(object):
 	        bb = 128
 
 	    return libtcod.Color(rr,gg,bb)
-        elif data.GRAPHICSMODE == 'curses':
+        elif gamedata.GRAPHICSMODE == 'curses':
             fg = round(code/16) + 1
             themod = code%16 
             if fg <=0:
@@ -227,11 +228,11 @@ class World(object):
         return(ret)
 
 def main(stdscr):
-    if data.GRAPHICSMODE == 'curses':
+    if gamedata.GRAPHICSMODE == 'curses':
         for col in range(1,8):
             curses.init_pair(col, col, curses.COLOR_BLACK)
        
-    gui = guistuff.Guistuff(data.GRAPHICSMODE)
+    gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
  
 #TODO make these settable in an options window
     #create world
@@ -286,9 +287,9 @@ def main(stdscr):
         world.check_stable()
 
 if __name__ == '__main__':
-    if data.GRAPHICSMODE == 'libtcod':
+    if gamedata.GRAPHICSMODE == 'libtcod':
         main(None)
-    elif data.GRAPHICSMODE == 'curses':
+    elif gamedata.GRAPHICSMODE == 'curses':
         curses.wrapper(main)
     else:
         print('Error in __name__. wrong GRAPHICSMODE')

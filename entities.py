@@ -2,7 +2,7 @@
 import libtcodpy as libtcod
 from gamestuff import *
 import data
-
+import gamedata
 
 #Classes:  Object player, enemies, items, etc
 class Object(object):
@@ -83,7 +83,7 @@ class Object(object):
             if x is not None:
                 #set the color then draw the character that represents this object at its position
                 libtcod.console_set_default_foreground(Game.con, self.color)
-                if data.ASCIIMODE:
+                if gamedata.ASCIIMODE:
                     thechar = self.char
                 else:
                     thechar = self.tilechar
