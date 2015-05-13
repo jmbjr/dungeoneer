@@ -227,7 +227,7 @@ class World(object):
             ret= ret + '|\n'
         return(ret)
 
-def main(stdscr):
+def life(stdscr):
     if gamedata.GRAPHICSMODE == 'curses':
         for col in range(1,8):
             curses.init_pair(col, col, curses.COLOR_BLACK)
@@ -286,11 +286,11 @@ def main(stdscr):
         world.update()
         world.check_stable()
 
-if __name__ == '__main__':
+def main():
     if gamedata.GRAPHICSMODE == 'libtcod':
-        main(None)
+        life(None)
     elif gamedata.GRAPHICSMODE == 'curses':
-        curses.wrapper(main)
+        curses.wrapper(life)
     else:
         print('Error in __name__. wrong GRAPHICSMODE')
 
