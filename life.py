@@ -1,11 +1,7 @@
 import libtcod
 import data
 import gamedata
-try:
-    import curses
-except ImportError:
-    gamedata.GRAPHICSMODE = 'libtcod'
-    print 'curses not available. Using libtcod for graphics'
+import cursesx
 from gamestuff import *
 import entitydata
 import time
@@ -159,11 +155,11 @@ class World(object):
                 fg = 0
             elif fg >=8:
                 fg = 7
-                return curses.color_pair(int(fg)) | curses.A_STANDOUT            
+                return cursesx.color_pair(int(fg)) | cursesx.A_STANDOUT            
             if themod <= 8:
-                return curses.color_pair(int(fg))
+                return cursesx.color_pair(int(fg))
             else:
-                return curses.color_pair(int(fg)) | curses.A_BOLD
+                return cursesx.color_pair(int(fg)) | cursesx.A_BOLD
         else: 
             print('error in get_color. Wrong GRAPHICSMODE')
        
@@ -230,7 +226,7 @@ class World(object):
 def life(stdscr):
     if gamedata.GRAPHICSMODE == 'curses':
         for col in range(1,8):
-            curses.init_pair(col, col, curses.COLOR_BLACK)
+            cursesx.init_pair(col, col, cursesx.COLOR_BLACK)
        
     gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
  
@@ -290,7 +286,7 @@ def main():
     if gamedata.GRAPHICSMODE == 'libtcod':
         life(None)
     elif gamedata.GRAPHICSMODE == 'curses':
-        curses.wrapper(life)
+        cursesx.wrapper(life)
     else:
         print('Error in __name__. wrong GRAPHICSMODE')
 
