@@ -4,23 +4,20 @@ dungeoneer
 Simple RogueLike based on great tutorial at:
 http://roguebasin.roguelikedevelopment.org/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod
 
-Uses libtcod
+Uses libtcod.  Currently this repo packages the libtcod python files along with the linux/osx/win libraries.
 
-To use, download this code and follow the instructions in the tutorial for setting up python 2.7 and libtcod 1.5.1
+Location to download the libraries and py files yourself (you can get the source there as well):
+http://roguecentral.org/doryen/libtcod/download/
 
-namely, put SDL.dll and libtcod-mingw.dll in the same directory as the .py and .png files
+To use, download this code and follow the instructions in the tutorial for setting up python 2.7 and libtcod 1.5.1 (shouldn't be any work to do since the repo handles this for you)
 
-on linux, get libtcod 1.5.1 via:
-wget -O libtcod-1.5.1_linux_64bit.tar.gz http://roguecentral.org/doryen/?file_id=28
-tar -vxzf libtcod-1.5.1_linux_64bit.tar.gz
-
-mv libtcodpy.py libtcodpy-win.py
-cp libtcod-1.5.1/libtcodpy.py ./
-cp libtcod-1.5.1/terminal.png ./
+on linux you'll probably need to install libsdl1:
 
 sudo apt-get install libsdl1.2debian
 
-In data.py set ASCIIMODE to True and GRAPHICSMODE to 'libtcod'
+the .so file is the 64bit one by default. you may want to copy over the 32bit one if needed.
+
+You can set some options in data.py to tweak the game.  
 
 To move, use arrow keys, num pad, or hjklyubn
 
