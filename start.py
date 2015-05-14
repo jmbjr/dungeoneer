@@ -3,17 +3,18 @@ import sys
 
 class Jumptable(object):
     def play_dungeoneer_gfx(self):
-        print('Playing Dungeoneer!!!')
+        import Dungeoneer
         gamedata.ASCIIMODE = False
+        Dungeoneer.game_initialize()
 
     def play_dungeoneer_ascii(self):
-        print('Playing Dungeoneer!!!')
+        import Dungeoneer
         gamedata.ASCIIMODE = True
+        Dungeoneer.game_initialize()
 
     def play_life(self):
-        print('Going to play life! Press a key!')
-        gamedata.ASCIIMODE = True
         import life
+        gamedata.ASCIIMODE = True
         life.main()
 
     def jump(self,cmd):
