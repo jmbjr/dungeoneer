@@ -1,14 +1,10 @@
 #standard imports
-import libtcodpy as libtcod
+import libtcod
 from gamestuff import *
 import data
 import gamedata
 import entitydata
-try:
-    import curses
-except ImportError:
-    gamedata.GRAPHICSMODE = 'libtcod'
-    print 'curses not available. Using libtcod for graphics'
+import cursesx
 
 #specific imports needed for this module
 import shelve #for save and load

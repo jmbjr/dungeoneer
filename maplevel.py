@@ -1,5 +1,5 @@
 #standard imports
-import libtcodpy as libtcod
+import libtcod
 from gamestuff import *
 import data
 
