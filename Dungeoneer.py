@@ -11,6 +11,7 @@ import shelve #for save and load
 import entities
 import maplevel
 import logging
+import guistuff
 
 #global class pattern
 class Game(object): 
@@ -18,25 +19,17 @@ class Game(object):
     msg_history = []
 
 def game_initialize():
-    if gamedata.GRAPHICSMODE == 'libtcod':
-        libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
-    else:
-        libtcod.console_set_custom_font("arial10x10.png",libtcod.FONT_LAYOUT_ASCII_INCOL)
+    Game.gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
 
-    libtcod.console_init_root(data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 'MeFightRogues!', False, libtcod.RENDERER_OPENGL )
-    libtcod.sys_set_fps(data.LIMIT_FPS)
-    if gamedata.GRAPHICSMODE == 'libtcod':
-        libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
-        libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
-
-    Game.con = libtcod.console_new(data.MAP_WIDTH,data.MAP_HEIGHT)
+    Game.con = Game.gui.console(data.MAP_WIDTH,data.MAP_HEIGHT)
+    Game.mouse,Game.key = Game.gui.prep_console(Game.con, data.MAP_WIDTH,data.MAP_HEIGHT)
+    #TODO: handle panel in curses.
     Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
 
     main_menu()
 
-
 #MAIN MENU GAME OPTIONS
-def main_menu():
+def main_menu():  #TODO: need a menu class
     img = libtcod.image_load(data.MAIN_MENU_BKG)
 
     while not libtcod.console_is_window_closed():
@@ -156,9 +149,6 @@ def new_game():
 def play_game():
     Game.player_action = None
 
-    #mouse stuff
-    Game.mouse = libtcod.Mouse()
-    Game.key = libtcod.Key()  
     (Game.camera_x, Game.camera_y) = (0, 0)  
 
     if data.AUTOMODE:
@@ -167,17 +157,17 @@ def play_game():
         battleover = False
         Game.fov_recompute = True   
    
-    
-    while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, Game.key, Game.mouse)
+    while not Game.gui.isgameover():
+        thekey = Game.gui.getkey(Game.con, Game.mouse, Game.key)
 
         #check for player death
         if not Game.player.fighter.alive: #this is sorta dumb and probably needs fixed.
             Game.player.fighter.death_function(Game.player, None, Game)
 
         #render the screen
-        render_all(Game)
-        libtcod.console_flush()
+        
+        render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
+        Game.gui.flush(Game.con, data.MAP_WIDTH, data.MAP_HEIGHT)
 
         #erase objects from old position on current map, before they move
         for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
@@ -255,8 +245,8 @@ def play_game():
                     data.AUTOMODE = False
 
                     #render the screen
-                    render_all(Game)
-                    libtcod.console_flush()
+                    render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
+                    Game.gui.flush(Game.con, data.MAP_WIDTH, data.MAP_HEIGHT)
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
                     save_final_sql_csv(Game)
