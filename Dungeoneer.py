@@ -126,7 +126,7 @@ def new_game():
 
     Game.fov_recompute = True
     Game.player.fighter.fov = Game.map[Game.dungeon_levelname].fov_map
-    libtcod.console_clear(Game.con)
+    Game.gui.clear(Game.con)
 
     #initial equipment
     if not data.AUTOMODE:
