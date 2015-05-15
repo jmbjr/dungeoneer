@@ -16,7 +16,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             return False
         else:
-            print('Error in guistuff.isgameover. wrong GRAPHICSMODE')
+            self.err_graphicsmode('isgameover')
             return False
 
     def console(self, nwidth, nheight):
@@ -25,7 +25,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             con = curses.newwin(nheight, nwidth)
         else:
-            print('ERROR in guistuff.console. GRAPHICSMODE incorrect')
+            self.err_graphicsmode('console')
             return False
         return con
 
@@ -35,7 +35,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             con.clear()
         else:
-            print('ERROR in guistuff.sclear. GRAPHICSMODE incorrect')
+            self.err_graphicsmode('clear')
 
     def printstr(self, con, xx, yy, entity, my_color):
         if self.graphicsmode == 'libtcod':
@@ -47,7 +47,7 @@ class Guistuff(object):
             except curses.error:
                 pass
         else:
-            print('Error in guistuff.printstr. wrong GRAPHICSMODE')
+            self.err_graphicsmode('printstr')
 
     def prep_console(self, con, nwidth, nheight):
         if self.graphicsmode == 'libtcod':
@@ -66,7 +66,7 @@ class Guistuff(object):
             mouse = None
             key = None
         else:
-            print('Error in guistuff.prep_console. wrong GRAPHICSMODE')
+            self.err_graphicsmode('prep_console')
         return mouse,key
 
     def getkey(self, con, mouse, key):
@@ -76,7 +76,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             thekey = con.getch()
         else:
-            print('Error in guistuff.getkey. wrong GRAPHICSMODE')
+            self.err_graphicsmode('getkey')
         return thekey
 
     def flush(self,con, nwidth, nheight):
@@ -104,3 +104,5 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('load_image')
 
+    def err_graphicsmode(self, func):
+        print('Error in guistuff.' + func + '. wrong GRAPHICSMODE: ' + self.graphicsmode)
