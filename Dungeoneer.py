@@ -33,7 +33,7 @@ def main_menu():
     while not Game.gui.isgameover():
 
         img = Game.gui.load_image(data.MAIN_MENU_BKG, data.MAIN_MENU_BKG_ASCII)
-        Game.gui.blit2x(img,0,0,0) #display image at 2x
+        Game.gui.img_blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
         Game.gui.printstr(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, 'MeFightRogues!', libtcod.light_yellow)
@@ -164,7 +164,7 @@ def play_game():
         #render the screen
         
         render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
-        Game.gui.flush(Game.con, data.MAP_WIDTH, data.MAP_HEIGHT)
+        Game.gui.flush(Game.con)
 
         #erase objects from old position on current map, before they move
         for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
@@ -243,7 +243,7 @@ def play_game():
 
                     #render the screen
                     render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
-                    Game.gui.flush(Game.con, data.MAP_WIDTH, data.MAP_HEIGHT)
+                    Game.gui.flush(Game.con)
                     chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
                     save_final_sql_csv(Game)

@@ -87,22 +87,29 @@ class Guistuff(object):
             self.err_graphicsmode('getkey')
         return thekey
 
-    def flush(self,con, nwidth, nheight):
+    def flush(self,con):
         if self.graphicsmode == 'libtcod':
-            libtcod.console_blit(con, 0, 0, nwidth, nheight, 0, 0, 0)
             libtcod.console_flush()
         elif self.graphicsmode == 'curses':
             con.refresh()
         else:
             self.err_graphicsmode('flush')
+
+    def con_blit(self, con, xx, yy, nwidth, nheight, dest, dest_xx, dest_yy, ffade=1.0, bfade=1.0): 
+        if self.graphicsmode == 'libtcod':
+            libtcod.console_blit(con, xx, yy, nwidth, nheight, dest, dest_xx, dest_yy, ffade, bfade)
+        elif self.graphicsmode == 'curses':
+            print('curses!') #not sure what the equiv is yet
+        else:
+            self.err_graphicsmode('con_blit')
             
-    def blit2x(self, img, con, xx, yy):
+    def img_blit2x(self, img, con, xx, yy):
         if self.graphicsmode == 'libtcod':
             libtcod.image_blit_2x(img, con, xx, yy)
         elif self.graphicsmode == 'curses':
             print(img) #not sure what the equiv is yet
         else:
-            self.err_graphicsmode('blit2x')
+            self.err_graphicsmode('img_blit2x')
 
     def load_image(self, img, img_ascii):
         if self.graphicsmode == 'libtcod':

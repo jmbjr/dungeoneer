@@ -274,7 +274,8 @@ def life(stdscr):
             speed = .001
         #display world
         current_world = world.get_world()
-        gui.flush(current_world, world.nwidth, world.nheight)
+        gui.con_blit(current_world, 0, 0, world.nwidth, world.nheight, 0, 0, 0)
+        gui.flush(current_world)
     
         #check rules and create new population
         #replace old population with new one
