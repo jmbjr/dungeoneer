@@ -24,7 +24,7 @@ def game_initialize():
     Game.con = Game.gui.console(data.MAP_WIDTH,data.MAP_HEIGHT)
     Game.mouse,Game.key = Game.gui.prep_console(Game.con, data.MAP_WIDTH,data.MAP_HEIGHT)
     #TODO: handle panel in curses.
-    Game.panel = libtcod.console_new(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
+    Game.panel = Game.gui.console(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
 
     main_menu()
 
@@ -432,9 +432,9 @@ def handle_keys():
                         count = 0
 
                 for thepage in range(numpages):
-                    window = libtcod.console_new(width, height)
-                    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, '')
-                    libtcod.console_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
+                    window = Game.gui.console(width, height)
+                    Game.gui.printrect(window, 0, 0, width, height)
+                    Game.gui.con_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
                     menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], data.SCREEN_WIDTH, Game, letterdelim=None)
 
                 Game.fov_recompute = True           

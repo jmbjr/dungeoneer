@@ -37,6 +37,17 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('clear')
 
+    def printrect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val=''):
+        if self.graphicsmode == 'libtcod':
+            libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
+        elif self.graphicsmode == 'curses':
+            try:
+                print('curses!') #not sure how to do this yet
+            except curses.error:
+                pass
+        else:
+            self.err_graphicsmode('printrect')
+
     def printstr(self, con, xx, yy, entity, my_color):
         if self.graphicsmode == 'libtcod':
             libtcod.console_set_default_foreground(con, my_color)
