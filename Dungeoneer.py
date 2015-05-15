@@ -36,8 +36,8 @@ def main_menu():
         Game.gui.img_blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
-        Game.gui.printstr(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, 'MeFightRogues!', libtcod.light_yellow)
-        Game.gui.printstr(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , 'by johnstein!' , libtcod.light_yellow)
+        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', my_color=libtcod.light_yellow)
+        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , val='by johnstein!' , my_color=libtcod.light_yellow)
 
         #show options and wait for the player's choice
         choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')

@@ -37,7 +37,7 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('clear')
 
-    def printrect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val=''):
+    def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val=''):
         if self.graphicsmode == 'libtcod':
             libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
         elif self.graphicsmode == 'curses':
@@ -46,19 +46,19 @@ class Guistuff(object):
             except curses.error:
                 pass
         else:
-            self.err_graphicsmode('printrect')
+            self.err_graphicsmode('print_rect')
 
-    def printstr(self, con, xx, yy, entity, my_color):
+    def print_str(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', my_color=None):
         if self.graphicsmode == 'libtcod':
             libtcod.console_set_default_foreground(con, my_color)
-            libtcod.console_print_ex(con, xx, yy, libtcod.BKGND_NONE, libtcod.LEFT, entity)
+            libtcod.console_print_ex(con, xx, yy, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
-                con.addstr(yy, xx, entity, my_color)
+                con.addstr(yy, xx, val, my_color)
             except curses.error:
                 pass
         else:
-            self.err_graphicsmode('printstr')
+            self.err_graphicsmode('print_str')
 
     def prep_keyboard(self, delay, interval): #can this be combined with prep_console?
         if self.graphicsmode == 'libtcod':
