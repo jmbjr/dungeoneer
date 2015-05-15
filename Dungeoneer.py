@@ -141,7 +141,7 @@ def new_game():
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
-    libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+    Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
 
 def play_game():
     Game.player_action = None
@@ -447,7 +447,7 @@ def handle_keys():
                 reload(entitydata) 
                 #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
-                libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+                Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
 
                 buff_component = entities.Buff('Super Strength', power_bonus=20)
                 Game.player.fighter.add_buff(buff_component)

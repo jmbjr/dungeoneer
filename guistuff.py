@@ -49,6 +49,14 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('printstr')
 
+    def prep_keyboard(self, delay, interval): #can this be combined with prep_console?
+        if self.graphicsmode == 'libtcod':
+            libtcod.console_set_keyboard_repeat(delay, interval)
+        elif self.graphicsmode == 'curses':
+            print('curses keyboard!')
+        else:
+            self.err_graphicsmode('prep_keyboard')      
+
     def prep_console(self, con, nwidth, nheight):
         if self.graphicsmode == 'libtcod':
             libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
