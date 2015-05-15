@@ -114,6 +114,7 @@ MSG_HEIGHT        = PANEL_HEIGHT - 1
 
 #graphics
 MAIN_MENU_BKG     = 'menu_background.png'
+MAIN_MENU_BKG_ASCII = 'menu_background'
 
 #STATE STRINGS (change to enums one day?)
 STATE_PLAYING     = 'playing'

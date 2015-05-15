@@ -29,18 +29,15 @@ def game_initialize():
     main_menu()
 
 #MAIN MENU GAME OPTIONS
-def main_menu():  #TODO: need a menu class
-    img = libtcod.image_load(data.MAIN_MENU_BKG)
+def main_menu():  
+    while not Game.gui.isgameover():
 
-    while not libtcod.console_is_window_closed():
-        #show the background image, at twice the regular console resolution
-        if gamedata.GRAPHICSMODE == 'libtcod':
-            libtcod.image_blit_2x(img, 0, 0, 0)
+        img = Game.gui.load_image(data.MAIN_MENU_BKG, data.MAIN_MENU_BKG_ASCII)
+        Game.gui.blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
-        libtcod.console_set_default_foreground(0, libtcod.light_yellow)
-        libtcod.console_print_ex(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, libtcod.BKGND_NONE, libtcod.CENTER, 'MeFightRogues!')
-        libtcod.console_print_ex(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2, libtcod.BKGND_NONE, libtcod.CENTER, 'by johnstein!')
+        Game.gui.printstr(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, 'MeFightRogues!', libtcod.light_yellow)
+        Game.gui.printstr(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , 'by johnstein!' , libtcod.light_yellow)
 
         #show options and wait for the player's choice
         choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')

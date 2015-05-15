@@ -86,5 +86,21 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             con.refresh()
         else:
-            print('Error in guistuff.flush. wrong GRAPHICSMODE')
+            self.err_graphicsmode('flush')
+            
+    def blit2x(self, img, con, xx, yy):
+        if self.graphicsmode == 'libtcod':
+            libtcod.image_blit_2x(img, con, xx, yy)
+        elif self.graphicsmode == 'curses':
+            print(img) #not sure what the equiv is yet
+        else:
+            self.err_graphicsmode('blit2x')
+
+    def load_image(self, img, img_ascii):
+        if self.graphicsmode == 'libtcod':
+            return libtcod.image_load(img)
+        elif self.graphicsmode == 'curses':
+            return img_ascii #not sure what the equiv is yet
+        else:
+            self.err_graphicsmode('load_image')
 
