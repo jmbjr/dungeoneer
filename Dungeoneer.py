@@ -12,6 +12,7 @@ import entities
 import maplevel
 import logging
 import guistuff
+import keys
 
 #global class pattern
 class Game(object): 
@@ -290,50 +291,50 @@ def check_level_up(Game, user):
 
 #KEYPRESS CHECKS
 def handle_keys(Game):
-    
-    thekey,key_char = Game.gui.getkey(Game.con, Game.mouse, Game.key)
 
-    if thekey == libtcod.KEY_ENTER and Game.key.lalt:
+    thekey = Game.gui.getkey(Game.con, Game.mouse, Game.key)
+
+    if thekey.keycode == keys.ENTER and keycode.lalt:
         #ALT + ENTER: toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-    elif thekey == libtcod.KEY_ESCAPE:
+    elif thekey.keycode == keys.ESC:
         return data.STATE_EXIT #exit game
 
     if Game.game_state == data.STATE_PLAYING:
         #rest
-        if thekey == libtcod.KEY_KPDEC or thekey == libtcod.KEY_KP5:
+        if thekey.keycode == keys.KPDEC or thekey.keycode == keys.KP5:
             player_resting(Game)
             Game.fov_recompute = True
             pass
         #movement keys
-        elif thekey == libtcod.KEY_UP or key_char == 'k' or thekey == libtcod.KEY_KP8 :
+        elif thekey.keycode == keys.UP or thekey.keychar == 'k' or thekey.keycode == keys.KP8 :
             return player_move_or_attack(0, -1, Game)
 
-        elif thekey == libtcod.KEY_DOWN or key_char == 'j' or thekey == libtcod.KEY_KP2 :
+        elif thekey.keycode == keys.DOWN or thekey.keychar == 'j' or thekey.keycode == keys.KP2 :
             return player_move_or_attack(0, 1, Game)
 
-        elif thekey == libtcod.KEY_LEFT or key_char == 'h' or thekey == libtcod.KEY_KP4 :
+        elif thekey.keycode == keys.LEFT or thekey.keychar == 'h' or thekey.keycode == keys.KP4 :
             return player_move_or_attack(-1, 0, Game)
 
-        elif thekey == libtcod.KEY_RIGHT or key_char == 'l' or thekey == libtcod.KEY_KP6 :
+        elif thekey.keycode == keys.RIGHT or thekey.keychar == 'l' or thekey.keycode == keys.KP6 :
             return player_move_or_attack(1, 0, Game)
 
         #handle diagonal. 11 oclock -> clockwise
-        elif key_char == 'y' or thekey == libtcod.KEY_KP7 :
+        elif thekey.keychar == 'y' or thekey.keycode == keys.KP7 :
             return player_move_or_attack(-1, -1, Game)
 
-        elif key_char == 'u' or thekey == libtcod.KEY_KP9 :
+        elif thekey.keychar == 'u' or thekey.keycode == keys.KP9 :
             return player_move_or_attack(1, -1, Game)
 
-        elif key_char == 'n' or thekey == libtcod.KEY_KP3 :
+        elif thekey.keychar == 'n' or thekey.keycode == keys.KP3 :
             return player_move_or_attack(1, 1, Game)
 
-        elif key_char == 'b' or thekey == libtcod.KEY_KP1 :
+        elif thekey.keychar == 'b' or thekey.keycode == keys.KP1 :
             return player_move_or_attack(-1, 1, Game)
 
         else:
             #test for other keys
-            if key_char == 'g':
+            if thekey.keychar == 'g':
                 #pick up an item
                 for object in Game.objects[data.maplist[Game.player.dungeon_level]]: #look for items in the player's title on the same floor of the player
                     if object.x == Game.player.x and object.y == Game.player.y and object.item:
@@ -341,28 +342,28 @@ def handle_keys(Game):
                         return object.item.pick_up(Game, Game.player)
                         #break
 
-            if key_char == 'i':
+            if thekey.keychar == 'i':
                 #show inv. if an item is selected, use it
                 chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game, Game.player)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
                     return chosen_item.use(Game, user=Game.player)
 
-            if key_char == 'd':
+            if thekey.keychar == 'd':
                 #show the inventory. if item is selected, drop it
                 chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game, Game.player)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
                     chosen_item.drop(Game, Game.player)
 
-            if key_char == 'c':
+            if thekey.keychar == 'c':
                 #show character info
                 level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
                 msgbox('Character Information\n\nLevel: ' + str(Game.player.xplevel) + '\nExperience: ' + str(Game.player.fighter.xp) +
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
                     '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, data.CHARACTER_SCREEN_WIDTH)
 
-            if key_char == 'x':
+            if thekey.keychar == 'x':
                 #debug key to automatically level up
                 msgbox('You start to meditate!', Game, data.CHARACTER_SCREEN_WIDTH)
                 level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
@@ -370,40 +371,40 @@ def handle_keys(Game):
                 check_level_up(Game)
                 Game.player.game_turns += 1       
 
-            if key_char == 'a':
+            if thekey.keychar == 'a':
                 #debug key to set all objects to visible
                 msgbox('You can smell them all!', Game, data.CHARACTER_SCREEN_WIDTH)
                 set_objects_visible(Game)
 
-            if key_char == 'q':
+            if thekey.keychar == 'q':
                 #go down stairs, if the player is on them
                 msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, data.CHARACTER_SCREEN_WIDTH)
                 Game.map[Game.dungeon_levelname].set_map_explored()   
                 Game.fov_recompute = True   
 
-            if key_char == 'z':
+            if thekey.keychar == 'z':
                 #debug key to automatically go to next level
                 msgbox('You start digging at your feet!', Game, data.CHARACTER_SCREEN_WIDTH)
                 map.next_level(Game)           
 
-            if key_char == '>':
+            if thekey.keychar == '>':
                 #go down stairs, if the player is on them
                 if Game.downstairs[data.maplist[Game.player.dungeon_level]].x == Game.player.x and Game.downstairs[data.maplist[Game.player.dungeon_level]].y == Game.player.y:
                     Game.player.game_turns +=1
                     map.next_level(Game)
 
-            if key_char == '<':
+            if thekey.keychar == '<':
                 #go up stairs, if the player is on them
                 if Game.upstairs[data.maplist[Game.player.dungeon_level]].x == Game.player.x and Game.upstairs[data.maplist[Game.player.dungeon_level]].y == Game.player.y:
                     Game.player.game_turns +=1
                     map.prev_level(Game)
 
-            if key_char == 's': #general status key
+            if thekey.keychar == 's': #general status key
                 #debug key to automatically go to prev level
                 msgbox('You start digging above your head!', Game, data.CHARACTER_SCREEN_WIDTH)
                 map.prev_level(Game)    
 
-            if key_char == 'p': #display log
+            if thekey.keychar == 'p': #display log
                 width = data.SCREEN_WIDTH
                 height = data.SCREEN_HEIGHT
 
@@ -435,7 +436,7 @@ def handle_keys(Game):
 
 
 
-            if key_char == 'r':
+            if thekey.keychar == 'r':
                 print 'SYSTEM--\t RELOADING GAME DATA'
                 reload(data)
                 reload(entitydata) 
@@ -447,7 +448,7 @@ def handle_keys(Game):
                 Game.player.fighter.add_buff(buff_component)
                 msgbox ('YOU ROAR WITH BERSERKER RAGE!', Game, data.CHARACTER_SCREEN_WIDTH)
 
-            if key_char == 'w':
+            if thekey.keychar == 'w':
                 #give all items
                 msgbox('You fashion some items from the scraps at your feet', Game, data.CHARACTER_SCREEN_WIDTH)
                 give_items(Game)

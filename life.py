@@ -257,17 +257,17 @@ def life(stdscr):
         thekey = gui.getkey(world.con, mouse, key)
     
 #TODO add some enums here or find ones that work
-        if thekey == keys.TAB:
+        if thekey.keycode == keys.TAB:
             world.init_world()
-        elif thekey == keys.UP:
+        elif thekey.keycode == keys.UP:
             speed-=inc
-        elif thekey ==keys.DOWN:
+        elif thekey.keycode ==keys.DOWN:
             speed+=inc
-        elif thekey == keys.RIGHT:
+        elif thekey.keycode == keys.RIGHT:
             inc+=.01
-        elif thekey ==keys.LEFT:
+        elif thekey.keycode ==keys.LEFT:
             inc-=.01
-        elif thekey == keys.ESC:
+        elif thekey.keycode == keys.ESC:
                 break             
 
         if speed <0:

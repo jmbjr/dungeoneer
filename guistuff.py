@@ -6,6 +6,17 @@ except ImportError:
 
 #TODO replace with select case
 #TODO specifically require con for things that need it. don't save it. could get messy. See the flush() for example.
+class Keyobj(object):
+    def __init__(self, keycode, keychar, pressed=False, lalt=False, lctrl=False, ralt=False, rctrl=False, shift=False):
+        self.keycode = keycode
+        self.keychar = keychar
+        self.pressed = pressed
+        self.lalt    = lalt
+        self.lctrl   = lctrl
+        self.ralt    = ralt
+        self.rctrl   = rctrl
+        self.shift   = shift
+
 class Guistuff(object):
     def __init__(self, graphicsmode):
         self.graphicsmode = graphicsmode
@@ -91,14 +102,12 @@ class Guistuff(object):
     def getkey(self, con, mouse, key):
         if self.graphicsmode == 'libtcod':
             libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-            thekey = key.vk
-            key_char = chr(key.c)
+            thekey = Keyobj(key.vk, chr(key.c), key.pressed, key.lalt, key.lctrl, key.ralt, key.rctrl, key.shift)
         elif self.graphicsmode == 'curses':
-            thekey = con.getch()
-            key_char = con.getch()
+            thekey = Keyobj(con.getch(), con.getch())
         else:
             self.err_graphicsmode('getkey')
-        return thekey, key_char
+        return thekey
 
     def flush(self,con):
         if self.graphicsmode == 'libtcod':
