@@ -155,8 +155,6 @@ def play_game():
         Game.fov_recompute = True   
    
     while not Game.gui.isgameover():
-        thekey = Game.gui.getkey(Game.con, Game.mouse, Game.key)
-
         #check for player death
         if not Game.player.fighter.alive: #this is sorta dumb and probably needs fixed.
             Game.player.fighter.death_function(Game.player, None, Game)
@@ -176,7 +174,7 @@ def play_game():
         #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
         if not data.AUTOMODE:    
             if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
-                Game.player_action = handle_keys()
+                Game.player_action = handle_keys(Game)
 
                 if Game.player_action != data.STATE_NOACTION:
                     #player actually did something. we can reset counter
@@ -291,50 +289,46 @@ def check_level_up(Game, user):
             user.fighter.hp = user.fighter.max_hp(Game)
 
 #KEYPRESS CHECKS
-def handle_keys():
-    #for real-time, uncomment
-    #key = libtcod.console_check_for_keypress()
+def handle_keys(Game):
+    
+    thekey,key_char = Game.gui.getkey(Game.con, Game.mouse, Game.key)
 
-    #for turn-based, uncomment
-    #key = libtcod.console_wait_for_keypress(True)
-    key_char = chr(Game.key.c)
-
-    if Game.key.vk == libtcod.KEY_ENTER and Game.key.lalt:
+    if thekey == libtcod.KEY_ENTER and Game.key.lalt:
         #ALT + ENTER: toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-    elif Game.key.vk == libtcod.KEY_ESCAPE:
+    elif thekey == libtcod.KEY_ESCAPE:
         return data.STATE_EXIT #exit game
 
     if Game.game_state == data.STATE_PLAYING:
         #rest
-        if Game.key.vk == libtcod.KEY_KPDEC or Game.key.vk == libtcod.KEY_KP5:
+        if thekey == libtcod.KEY_KPDEC or thekey == libtcod.KEY_KP5:
             player_resting(Game)
             Game.fov_recompute = True
             pass
         #movement keys
-        elif Game.key.vk == libtcod.KEY_UP or key_char == 'k' or Game.key.vk == libtcod.KEY_KP8 :
+        elif thekey == libtcod.KEY_UP or key_char == 'k' or thekey == libtcod.KEY_KP8 :
             return player_move_or_attack(0, -1, Game)
 
-        elif Game.key.vk == libtcod.KEY_DOWN or key_char == 'j' or Game.key.vk == libtcod.KEY_KP2 :
+        elif thekey == libtcod.KEY_DOWN or key_char == 'j' or thekey == libtcod.KEY_KP2 :
             return player_move_or_attack(0, 1, Game)
 
-        elif Game.key.vk == libtcod.KEY_LEFT or key_char == 'h' or Game.key.vk == libtcod.KEY_KP4 :
+        elif thekey == libtcod.KEY_LEFT or key_char == 'h' or thekey == libtcod.KEY_KP4 :
             return player_move_or_attack(-1, 0, Game)
 
-        elif Game.key.vk == libtcod.KEY_RIGHT or key_char == 'l' or Game.key.vk == libtcod.KEY_KP6 :
+        elif thekey == libtcod.KEY_RIGHT or key_char == 'l' or thekey == libtcod.KEY_KP6 :
             return player_move_or_attack(1, 0, Game)
 
         #handle diagonal. 11 oclock -> clockwise
-        elif key_char == 'y' or Game.key.vk == libtcod.KEY_KP7 :
+        elif key_char == 'y' or thekey == libtcod.KEY_KP7 :
             return player_move_or_attack(-1, -1, Game)
 
-        elif key_char == 'u' or Game.key.vk == libtcod.KEY_KP9 :
+        elif key_char == 'u' or thekey == libtcod.KEY_KP9 :
             return player_move_or_attack(1, -1, Game)
 
-        elif key_char == 'n' or Game.key.vk == libtcod.KEY_KP3 :
+        elif key_char == 'n' or thekey == libtcod.KEY_KP3 :
             return player_move_or_attack(1, 1, Game)
 
-        elif key_char == 'b' or Game.key.vk == libtcod.KEY_KP1 :
+        elif key_char == 'b' or thekey == libtcod.KEY_KP1 :
             return player_move_or_attack(-1, 1, Game)
 
         else:

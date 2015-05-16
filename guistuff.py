@@ -92,11 +92,13 @@ class Guistuff(object):
         if self.graphicsmode == 'libtcod':
             libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
             thekey = key.vk
+            key_char = chr(key.c)
         elif self.graphicsmode == 'curses':
             thekey = con.getch()
+            key_char = con.getch()
         else:
             self.err_graphicsmode('getkey')
-        return thekey
+        return thekey, key_char
 
     def flush(self,con):
         if self.graphicsmode == 'libtcod':
