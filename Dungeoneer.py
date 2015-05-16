@@ -294,9 +294,9 @@ def handle_keys(Game):
 
     thekey = Game.gui.getkey(Game.con, Game.mouse, Game.key)
 
-    if thekey.keycode == keys.ENTER and keycode.lalt:
+    if thekey.keycode == keys.ENTER and thekey.lalt:
         #ALT + ENTER: toggle fullscreen
-        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+        Game.gui.toggle_fullscreen()
     elif thekey.keycode == keys.ESC:
         return data.STATE_EXIT #exit game
 

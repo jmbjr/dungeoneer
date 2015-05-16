@@ -141,5 +141,13 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('load_image')
 
+    def toggle_fullscreen(self):
+        if self.graphicsmode == 'libtcod':
+            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+        elif self.graphicsmode == 'curses':
+            return True #not sure what the equiv is yet
+        else:
+            self.err_graphicsmode('toggle_fullscreen')
+
     def err_graphicsmode(self, func):
         print('Error in guistuff.' + func + '. wrong GRAPHICSMODE: ' + self.graphicsmode)
