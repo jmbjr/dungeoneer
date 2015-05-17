@@ -72,7 +72,7 @@ class Object(object):
             return False
 
     def move_random(self, Game):
-        self.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1), Game)
+        self.move(random_int(0, -1, 1), random_int(0, -1, 1), Game)
 
 
     def draw(self, Game):
@@ -466,7 +466,7 @@ class ConfusedMonster(object):
     def take_turn(self, Game):
         if self.num_turns > 0: #still confused
             #move in random direction
-            self.owner.move(libtcod.random_get_int(0, -1, 1), libtcod.random_get_int(0, -1, 1), Game)
+            self.owner.move(random_int(0, -1, 1), random_int(0, -1, 1), Game)
             self.num_turns -= 1
             message(self.owner.name + ' is STILL confused!', Game, libtcod.red)
 
@@ -512,7 +512,7 @@ class BasicMonster(object):
                 #for now, use items or lose them
                 if monster.fighter.inventory:
                     #get random item from inv
-                    index = libtcod.random_get_int(0, 0, len(monster.fighter.inventory)-1)
+                    index = random_int(0, 0, len(monster.fighter.inventory)-1)
                     item = monster.fighter.inventory[index].item
                     if not item.owner.equipment:
                         useditem = item.use(Game, user=monster)
