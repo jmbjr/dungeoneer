@@ -186,6 +186,9 @@ def random_choice(chances_dict):
 
     return strings[random_choice_index(chances)]
 
+def random_int(seed, min, max):
+    return libtcod.random_get_int(seed, min, max)
+
 def random_choice_index(chances): #choose one option from list of chances. return index
     #the dice will land on some number between 1 and sum of the chances
     dice = libtcod.random_get_int(0, 1, sum(chances))

@@ -1,10 +1,8 @@
 #standard imports
-import libtcod
 from gamestuff import *
 import data
 import gamedata
 import entitydata
-import cursesx
 
 #specific imports needed for this module
 import shelve #for save and load
@@ -25,7 +23,6 @@ def game_initialize():
 
     Game.con = Game.gui.console(data.MAP_WIDTH,data.MAP_HEIGHT)
     Game.mouse,Game.key = Game.gui.prep_console(Game.con, data.MAP_WIDTH,data.MAP_HEIGHT)
-    #TODO: handle panel in curses.
     Game.panel = Game.gui.console(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
 
     main_menu()
@@ -279,7 +276,7 @@ def check_level_up(Game, user):
                         Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=colors.RED), 
                         Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=colors.BLUE)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
             else:
-                choice = libtcod.random_get_int(0,0,2)
+                choice = random_int(0, 0, 2) #TODO: variablize this
 
             if choice == 0:
                 user.fighter.base_max_hp += 25
