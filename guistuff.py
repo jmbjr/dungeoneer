@@ -1,8 +1,5 @@
 import libtcod
-try:
-    import curses
-except ImportError:
-    print 'curses not available'
+import cursesx
 
 #TODO replace with select case
 #TODO specifically require con for things that need it. don't save it. could get messy. See the flush() for example.
@@ -34,7 +31,7 @@ class Guistuff(object):
         if self.graphicsmode == 'libtcod':
             con = libtcod.console_new(nwidth, nheight)
         elif self.graphicsmode == 'curses':
-            con = curses.newwin(nheight, nwidth)
+            con = cursesx.newwin(nheight, nwidth)
         else:
             self.err_graphicsmode('console')
             return False
@@ -54,7 +51,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             try:
                 print('curses!') #not sure how to do this yet
-            except curses.error:
+            except cursesx.error:
                 pass
         else:
             self.err_graphicsmode('print_rect')
@@ -66,7 +63,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             try:
                 con.addstr(yy, xx, val, my_color)
-            except curses.error:
+            except cursesx.error:
                 pass
         else:
             self.err_graphicsmode('print_str')
