@@ -4,8 +4,9 @@ import cursesx
 #TODO replace with select case
 #TODO specifically require con for things that need it. don't save it. could get messy. See the flush() for example.
 class Keyobj(object):
-    def __init__(self, keycode, keychar, pressed=False, lalt=False, lctrl=False, ralt=False, rctrl=False, shift=False):
+    def __init__(self, keycode, charcode, keychar, pressed=False, lalt=False, lctrl=False, ralt=False, rctrl=False, shift=False):
         self.keycode = keycode
+        self.charcode= charcode
         self.keychar = keychar
         self.pressed = pressed
         self.lalt    = lalt
@@ -96,10 +97,14 @@ class Guistuff(object):
             self.err_graphicsmode('prep_console')
         return mouse,key
 
-    def getkey(self, con, mouse, key):
+    def getkey(self, con, mouse, key, wait=False):
         if self.graphicsmode == 'libtcod':
-            libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-            thekey = Keyobj(key.vk, chr(key.c), key.pressed, key.lalt, key.lctrl, key.ralt, key.rctrl, key.shift)
+            if wait:
+                print('waiting for key')
+                key = libtcod.console_wait_for_keypress(True)
+            else:
+                libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+            thekey = Keyobj(key.vk, key.c, chr(key.c), key.pressed, key.lalt, key.lctrl, key.ralt, key.rctrl, key.shift)
         elif self.graphicsmode == 'curses':
             thekey = Keyobj(con.getch(), con.getch())
         else:
