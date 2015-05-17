@@ -45,10 +45,14 @@ class Guistuff(object):
             con.clear()
         else:
             self.err_graphicsmode('clear')
-
-    def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', my_color=None):
+#print_rect and print_str need to prompt for fg and bg colors
+    def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
         if self.graphicsmode == 'libtcod':
-            libtcod.console_set_default_foreground(con, my_color)
+            if fg_color:
+                libtcod.console_set_default_foreground(con, fg_color)
+            if bg_color:
+                libtcod.console_set_default_background(con. bg_color)
+
             libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
@@ -58,13 +62,17 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('print_rect')
 
-    def print_str(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', my_color=None):
+    def print_str(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
         if self.graphicsmode == 'libtcod':
-            libtcod.console_set_default_foreground(con, my_color)
+            if fg_color:
+                libtcod.console_set_default_foreground(con, fg_color)
+            if bg_color:
+                libtcod.console_set_default_background(con. bg_color)
+
             libtcod.console_print_ex(con, xx, yy, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
-                con.addstr(yy, xx, val, my_color)
+                con.addstr(yy, xx, val, fg_color)
             except cursesx.error:
                 pass
         else:
