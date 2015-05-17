@@ -13,6 +13,7 @@ import maplevel
 import logging
 import guistuff
 import keys
+import colors
 
 #global class pattern
 class Game(object): 
@@ -37,8 +38,8 @@ def main_menu():
         Game.gui.img_blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
-        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', my_color=libtcod.light_yellow)
-        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , val='by johnstein!' , my_color=libtcod.light_yellow)
+        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', my_color=colors.LIGHT_YELLOW)
+        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , val='by johnstein!' , my_color=colors.LIGHT_YELLOW)
 
         #show options and wait for the player's choice
         choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
@@ -100,7 +101,7 @@ def load_game(filename='savegame'):
 def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=300, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
-    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', libtcod.white, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
+    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', colors.WHITE, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.dungeon_level = 1
     Game.game_state = data.STATE_PLAYING
@@ -132,7 +133,7 @@ def new_game():
     #initial equipment
     if not data.AUTOMODE:
         equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
-        obj = entities.Object(0, 0, '-', 'wristguards of the whale', libtcod.gold, equipment=equipment_component)
+        obj = entities.Object(0, 0, '-', 'wristguards of the whale', colors.LIGHT_RED, equipment=equipment_component)
         obj.always_visible = True
 
         Game.player.fighter.add_item(obj)
@@ -141,7 +142,7 @@ def new_game():
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
     #a warm welcoming message!
-    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, libtcod.blue)
+    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, colors.BLUE)
     Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
 
 def play_game():
@@ -211,7 +212,7 @@ def play_game():
                                     for buff in object.fighter.buffs:
                                         buff.duration -= buff.decay_rate
                                         if buff.duration <= 0:
-                                            message(object.name + ' feels the effects of ' + buff.name + ' wear off!', Game, libtcod.light_red)
+                                            message(object.name + ' feels the effects of ' + buff.name + ' wear off!', Game, colors.LIGHT_RED)
                                             object.fighter.remove_buff(buff)
 
                                 #always check to ensure hp <= max_hp
@@ -236,7 +237,7 @@ def play_game():
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
                 if len(alive_entities) == 1:
-                    message ('BATTLE ROYALE IS OVER! Winner is ', Game, libtcod.blue)
+                    message ('BATTLE ROYALE IS OVER! Winner is ', Game, colors.BLUE)
                     entities.printstats(alive_entities[0], Game)
                     data.AUTOMODE = False
 
@@ -248,7 +249,7 @@ def play_game():
                     save_final_sql_csv(Game)
 
                 if len(alive_entities) <=0:
-                    message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, libtcod.blue)
+                    message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, colors.BLUE)
                     data.AUTOMODE = False  
 
                     save_final_sql_csv(Game)
@@ -265,18 +266,18 @@ def check_level_up(Game, user):
             user.fighter.xp -= level_up_xp
 
             if user is Game.player:
-                message('You have reached level ' + str(user.fighter.xplevel) + '!', Game, libtcod.yellow)
+                message('You have reached level ' + str(user.fighter.xplevel) + '!', Game, colors.YELLOW)
             else:
-                message(user.name + ' has reached level ' + str(user.fighter.xplevel) + '!', Game, libtcod.yellow)
+                message(user.name + ' has reached level ' + str(user.fighter.xplevel) + '!', Game, colors.YELLOW)
 
             choice = None
 
             if user is Game.player:
                 while choice == None: #keep asking till a choice is made
                         choice = menu('Level up! Choose a stat to raise:\n', 
-                        [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=libtcod.green),
-                        Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=libtcod.red), 
-                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=libtcod.blue)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
+                        [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=colors.GREEN),
+                        Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=colors.RED), 
+                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=colors.BLUE)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
             else:
                 choice = libtcod.random_get_int(0,0,2)
 
