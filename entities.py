@@ -1,14 +1,15 @@
 #standard imports
-import libtcod
 from gamestuff import *
 import data
 import gamedata
+import colors
+import guistuff
 
 #Classes:  Object player, enemies, items, etc
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x=0, y=0, char='?', name=None, color=libtcod.white, tilechar = None, blocks = False, id=None,  dungeon_level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=colors.WHITE, tilechar = None, blocks = False, id=None,  dungeon_level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -94,7 +95,7 @@ class Object(object):
         #erase char that represents this object
         (x, y) = to_camera_coordinates(self.x, self.y, Game)
         if x is not None and libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y):
-            libtcod.console_put_char_ex(Game.con, x, y, data.GROUND_CHAR, libtcod.white, data.COLOR_LIGHT_GROUND)
+            libtcod.console_put_char_ex(Game.con, x, y, data.GROUND_CHAR, colors.WHITE, data.COLOR_LIGHT_GROUND)
 
     def move_away(self, target, Game):
         if self.dungeon_level == target.dungeon_level:
@@ -286,16 +287,16 @@ class Fighter(object):
         if damage > 0:
             #make target take some damage
             if self is Game.player:
-                message('You attack ' + target.name  + '!', Game, libtcod.yellow)
+                message('You attack ' + target.name  + '!', Game, colors.YELLOW)
             elif entity_sees(Game.player, self.owner):
-                message(self.owner.name.capitalize() + ' attacks ' + target.name, Game, libtcod.yellow)
+                message(self.owner.name.capitalize() + ' attacks ' + target.name, Game, colors.YELLOW)
             elif entity_sees(Game.player, target):
-                message(target.name + ' has been attacked! ', Game, libtcod.yellow)
+                message(target.name + ' has been attacked! ', Game, colors.YELLOW)
 
             target.fighter.take_damage(self.owner, damage, Game)
         else:
             if self is Game.player:
-                message('You tried to attack ' + target.name + ' but there is no effect.', Game, libtcod.white)
+                message('You tried to attack ' + target.name + ' but there is no effect.', Game, colors.WHITE)
 
 class Ai(object):
     def __init__(self, ai):
@@ -379,7 +380,7 @@ class Item(object):
         #add to the player's inventory and remove from the map
         if len(user.fighter.inventory) >= 26:
             if user is Game.player:
-                message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, libtcod.dark_red)
+                message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, colors.MAGENTA)
             retval = data.STATE_NOACTION
         else:
             user.fighter.add_item(self.owner)
@@ -389,7 +390,7 @@ class Item(object):
             else:
                 name = user.name
 
-            message(name + ' picked up a ' + self.owner.name + '!', Game, libtcod.green, isplayer(user,Game))
+            message(name + ' picked up a ' + self.owner.name + '!', Game, colors.GREEN, isplayer(user,Game))
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
@@ -409,7 +410,7 @@ class Item(object):
         self.owner.dungeon_level = data.maplist.index(Game.dungeon_levelname)
         self.owner.send_to_back(Game)
         if user is Game.player:
-            message('You dropped a ' + self.owner.name + '.', Game, libtcod.yellow)
+            message('You dropped a ' + self.owner.name + '.', Game, colors.YELLOW)
 
         #special case: if the object has the equip component, dequip before dropping it
         if self.owner.equipment:
@@ -444,7 +445,7 @@ class Equipment(object):
             name = 'You '
         else:
             name = user.name
-        message(name + ' equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, libtcod.light_green, isplayer(user, Game))
+        message(name + ' equipped ' + self.owner.name + ' on ' + self.slot + '.', Game, colors.LIGHT_GREEN, isplayer(user, Game))
 
     def dequip(self, Game, user):
         #dequip object and show a message about it
@@ -454,7 +455,7 @@ class Equipment(object):
             name = 'You '
         else:
             name = user.name
-        message(name + ' unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, libtcod.light_green)  
+        message(name + ' unequipped ' + self.owner.name + ' from ' + self.slot + '.', Game, colors.LIGHT_GREEN)  
 
 #AI
 class ConfusedMonster(object):
@@ -468,11 +469,11 @@ class ConfusedMonster(object):
             #move in random direction
             self.owner.move(random_int(0, -1, 1), random_int(0, -1, 1), Game)
             self.num_turns -= 1
-            message(self.owner.name + ' is STILL confused!', Game, libtcod.red)
+            message(self.owner.name + ' is STILL confused!', Game, colors.RED)
 
         else:
             self.owner.ai = self.old_ai
-            message(self.owner.name + ' is no longer confused', Game, libtcod.green)
+            message(self.owner.name + ' is no longer confused', Game, colors.GREEN)
 
         if self.owner.fighter:
             return True
@@ -553,27 +554,27 @@ def entity_sees(entity, target):
 #spells/abilities functions
 def use_red_crystal(Game, user):
     if user is Game.player:
-        message('You become ENRAGED!', Game, libtcod.red)
+        message('You become ENRAGED!', Game, colors.RED)
     else:
-        message('The ' + user.name + ' beomes ENRAGED!', Game, libtcod.red)
+        message('The ' + user.name + ' beomes ENRAGED!', Game, colors.RED)
 
     buff_component = Buff('Super Strength', power_bonus=10)
     user.fighter.add_buff(buff_component)
 
 def use_blue_crystal(Game, user):
     if user is Game.player:
-        message('You feel well-protected!', Game, libtcod.sky)
+        message('You feel well-protected!', Game, colors.CYAN)
     else:
-        message('The ' + user.name + ' looks well protected!', Game, libtcod.red)
+        message('The ' + user.name + ' looks well protected!', Game, colors.RED)
 
     buff_component = Buff('Super Defense', defense_bonus=10)
     user.fighter.add_buff(buff_component)
 
 def use_green_crystal(Game, user):
     if user is Game.player:
-        message('You feel more resilient!', Game, libtcod.green)
+        message('You feel more resilient!', Game, colors.GREEN)
     else:
-        message('The ' + user.name + ' feels more resilient!', Game, libtcod.red)
+        message('The ' + user.name + ' feels more resilient!', Game, colors.RED)
 
     buff_component = Buff('Super Health', max_hp_bonus=50)
     user.fighter.add_buff(buff_component)
@@ -581,18 +582,18 @@ def use_green_crystal(Game, user):
 
 def use_yellow_crystal(Game, user):
     if user is Game.player:
-        message('You feel healthy!', Game, libtcod.yellow)
+        message('You feel healthy!', Game, colors.YELLOW)
     else:
-        message('The ' + user.name + ' looks healthier!', Game, libtcod.red)
+        message('The ' + user.name + ' looks healthier!', Game, colors.RED)
 
     buff_component = Buff('Super Regen', regen_bonus=-20)
     user.fighter.add_buff(buff_component)
 
 def use_orange_crystal(Game, user):
     if user is Game.player:
-        message('You feel speedy!', Game, libtcod.orange)
+        message('You feel speedy!', Game, colors.CYAN)
     else:
-        message('The ' + user.name + ' looks speedy!', Game, libtcod.orange)
+        message('The ' + user.name + ' looks speedy!', Game, colors.CYAN)
 
     buff_component = Buff('Super Speed', speed_bonus=-3)
     user.fighter.add_buff(buff_component)
@@ -605,7 +606,7 @@ def cast_confusion(Game, user):
 
     if user is Game.player:
         #ask player for target to confuse
-        message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, libtcod.light_cyan)
+        message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, colors.LIGHT_CYAN)
         target = target_monster(Game, data.CONFUSE_RANGE)
         name = 'You'
     
@@ -616,9 +617,9 @@ def cast_confusion(Game, user):
     else:
         #target is None:
         if user is Game.player:
-            message('Cancelling confuse', Game, libtcod.red, False)
+            message('Cancelling confuse', Game, colors.RED, False)
         else:
-            message(user.name + ' cancels Confuse', Game, libtcod.red, False)
+            message(user.name + ' cancels Confuse', Game, colors.RED, False)
         return data.STATE_CANCELLED
 
     #replace target's AI with confuse
@@ -630,9 +631,9 @@ def cast_confusion(Game, user):
     target.ai = ConfusedMonster(old_ai)
     target.ai.owner = target #tell the new component who owns it
     if user is Game.player:
-        message('You confused ' + target.name + '!', Game, libtcod.light_green)
+        message('You confused ' + target.name + '!', Game, colors.LIGHT_GREEN)
     else:
-        message(name + ' confused  ' + target.name + '!', Game, libtcod.light_green, isplayer(user, Game))
+        message(name + ' confused  ' + target.name + '!', Game, colors.LIGHT_GREEN, isplayer(user, Game))
 
 
 def cast_fireball(Game, user):
@@ -642,7 +643,7 @@ def cast_fireball(Game, user):
 
     if user is Game.player: 
         #ask the player for a target tile to throw a fireball at
-        message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, libtcod.light_cyan)
+        message('Left-click a target tile for the fireball. Right-Click or ESC to cancel', Game, colors.LIGHT_CYAN)
         (x,y) = target_tile(Game)
         
 
@@ -653,9 +654,9 @@ def cast_fireball(Game, user):
 
     if x is None or y is None:
         if user is Game.player:
-            message('Cancelling fireball', Game, libtcod.red)
+            message('Cancelling fireball', Game, colors.RED)
         else:
-            message(user.name + ' cancels Fireball', Game, libtcod.red, False)
+            message(user.name + ' cancels Fireball', Game, colors.RED, False)
         return data.STATE_CANCELLED
 
     else:
@@ -667,23 +668,23 @@ def cast_fireball(Game, user):
 
         for obj in Game.objects[Game.dungeon_levelname]: #damage all fighters within range
             if libtcod.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
-                message('The fireball explodes', Game, libtcod.orange)
-                message(obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, libtcod.orange)
+                message('The fireball explodes', Game, colors.RED)
+                message(obj.name + ' is burned for '+ str(theDmg) + ' HP', Game, colors.RED)
                 obj.fighter.take_damage(user, theDmg, Game)
         
 def cast_heal(Game, user):
     #heal the player or monster
     if user.fighter.hp == user.fighter.max_hp(Game):
         if user is Game.player:
-            message('You are already at full health.', Game, libtcod.red)
+            message('You are already at full health.', Game, colors.RED)
         else:
-            message(user.name + ' cancels Heal', Game, libtcod.red, False)
+            message(user.name + ' cancels Heal', Game, colors.RED, False)
         return data.STATE_CANCELLED
 
     if user is Game.player:
-        message('You feel better', Game, libtcod.light_violet)
+        message('You feel better', Game, colors.LIGHT_CYAN)
     else:
-        message(user.name + ' looks healthier!', Game, libtcod.red)
+        message(user.name + ' looks healthier!', Game, colors.RED)
     user.fighter.heal(data.HEAL_AMOUNT, Game)
 
 def cast_push(Game, user):
@@ -704,18 +705,18 @@ def push(Game, user, numpushes):
 
     if target is None:
         if user is Game.player:
-            message('No enemy is close enough to push', Game, libtcod.red)
+            message('No enemy is close enough to push', Game, colors.RED)
         else:
-            message(user.name + ' cancels Push', Game, libtcod.red, False)
+            message(user.name + ' cancels Push', Game, colors.RED, False)
         return 'cancelled'
     else:
         dist = user.distance_to(target)
         if dist < 1.5: #adjacent
             #push
             if user is Game.player:
-                message('You pushed the ' + target.name + '!', Game, libtcod.magenta)
+                message('You pushed the ' + target.name + '!', Game, colors.MAGENTA)
             else:
-                message(user.name + ' pushed ' + target.name + '!', Game, libtcod.magenta)
+                message(user.name + ' pushed ' + target.name + '!', Game, colors.MAGENTA)
 
             for times in range(numpushes-1):
                 target.move_away(user, Game)
@@ -724,9 +725,9 @@ def push(Game, user, numpushes):
 
         else:
             if user is Game.player:
-                message(target.name + ' is too far away to push!', Game, libtcod.red)
+                message(target.name + ' is too far away to push!', Game, colors.RED)
             else:
-                message(target.name + ' is too far away for ' + user.name + ' to push!', Game, libtcod.red, False)
+                message(target.name + ' is too far away for ' + user.name + ' to push!', Game, colors.RED, False)
             return 'cancelled'
 
 def cast_lightning(Game, user):
@@ -745,17 +746,17 @@ def cast_lightning(Game, user):
         
     if target is None:
         if user is Game.player:
-            message('No enemy is close enough to strike', Game, libtcod.red)
+            message('No enemy is close enough to strike', Game, colors.RED)
         else:
-            message(user.name + ' cancels Lightning', Game, libtcod.red, False)
+            message(user.name + ' cancels Lightning', Game, colors.RED, False)
         return 'cancelled'
     else:
         theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
         if user is Game.player:
-            message('Your lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+            message('Your lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, colors.LIGHT_BLUE)
         else:
-            message(user.name + '\'s lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, libtcod.light_blue)
+            message(user.name + '\'s lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, colors.LIGHT_BLUE)
 
         target.fighter.take_damage(user, theDmg, Game)
 
@@ -767,11 +768,11 @@ def player_death(player, killer, Game):
     if killer:
         if killer.fighter:
             killer.fighter.xp += player.fighter.xpvalue
-            message(killer.name + ' killed you! New xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')', Game, libtcod.red, isplayer(killer, Game))
+            message(killer.name + ' killed you! New xp = ' + str(killer.fighter.xp)  + '(' + player.name + ')', Game, colors.RED, isplayer(killer, Game))
 
     if not Game.player.fighter.killed:
         Game.player.char = '%'
-        Game.player.color = libtcod.darkest_red
+        Game.player.color = colors.MAGENTA
         Game.player.blocks = False
         Game.player.ai = None
         #Game.player.name = 'remains of ' + Game.player.name
@@ -780,7 +781,7 @@ def player_death(player, killer, Game):
         Game.player.send_to_back(Game)
 
         if not data.AUTOMODE: 
-            message('YOU DIED! YOU SUCK!', Game, libtcod.red)
+            message('YOU DIED! YOU SUCK!', Game, colors.RED)
             Game.game_state = data.STATE_DEAD
 
 def monster_death(monster, killer, Game):
@@ -793,20 +794,20 @@ def monster_death(monster, killer, Game):
         else:
             name = killer.name
 
-        message(monster.name.capitalize() + ' is DEAD! (killed by ' + name + ')', Game, libtcod.orange)
+        message(monster.name.capitalize() + ' is DEAD! (killed by ' + name + ')', Game, colors.YELLOW)
         printstats(monster, Game)
         monster.send_to_back(Game)
         
         if killer.fighter:
             killer.fighter.xp += monster.fighter.xpvalue
 
-        message(name + ' killed ' + monster.name + ' and gains ' + str(monster.fighter.xpvalue) + 'XP', Game, libtcod.orange, isplayer(killer, Game))
+        message(name + ' killed ' + monster.name + ' and gains ' + str(monster.fighter.xpvalue) + 'XP', Game, colors.YELLOW, isplayer(killer, Game))
 
         for equip in monster.fighter.inventory:
             equip.item.drop(Game, monster)
 
         monster.char = '%'
-        monster.color = libtcod.darkest_red
+        monster.color = colors.MAGENTA
         monster.blocks = False
         monster.ai = None
         #monster.name = 'remains of ' + monster.name
@@ -954,12 +955,12 @@ def total_alive_entities(Game):
     return alive_entities
 
 def printstats(entity, Game):
-    message(entity.name, Game, libtcod.white)
-    message('Level =' + str(entity.fighter.xplevel), Game, libtcod.white)
-    message('XP =' + str(entity.fighter.xp), Game, libtcod.white)
-    message('HP =' + str(entity.fighter.hp) + '/' + str(entity.fighter.max_hp(Game)), Game, libtcod.white)
-    message('power =' + str(entity.fighter.power(Game)) + '/' + str(entity.fighter.base_power), Game, libtcod.white)
-    message('defense =' + str(entity.fighter.defense(Game)) + '/' + str(entity.fighter.base_defense), Game, libtcod.white)     
+    message(entity.name, Game, colors.WHITE)
+    message('Level =' + str(entity.fighter.xplevel), Game, colors.WHITE)
+    message('XP =' + str(entity.fighter.xp), Game, colors.WHITE)
+    message('HP =' + str(entity.fighter.hp) + '/' + str(entity.fighter.max_hp(Game)), Game, colors.WHITE)
+    message('power =' + str(entity.fighter.power(Game)) + '/' + str(entity.fighter.base_power), Game, colors.WHITE)
+    message('defense =' + str(entity.fighter.defense(Game)) + '/' + str(entity.fighter.base_defense), Game, colors.WHITE)     
 
 
 def isplayer(entity, Game):
