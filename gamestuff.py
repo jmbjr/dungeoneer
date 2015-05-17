@@ -6,6 +6,7 @@ import gamedata
 #specific imports needed for this module
 import math
 import textwrap
+import colors
 
 #common class objects for shapes and tiles
 class Rect(object):
@@ -49,7 +50,7 @@ def mapname(Game):
     return(data.maplist[Game.player.dungeon_level])
 
 #User Interface routines
-def message(new_msg, Game, color = libtcod.white, displaymsg=True):
+def message(new_msg, Game, color = colors.WHITE, displaymsg=True):
     #split message if necessary
     if data.PRINT_MESSAGES:
         if data.FREE_FOR_ALL_MODE:
@@ -86,7 +87,7 @@ def menu(header, options, width, Game, letterdelim=None):
     window = libtcod.console_new(width, height)
 
     #print the header with auto-wrap
-    libtcod.console_set_default_foreground(window, libtcod.white)
+    libtcod.console_set_default_foreground(window, colors.WHITE)
     libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
 
     #print all the options
@@ -98,7 +99,7 @@ def menu(header, options, width, Game, letterdelim=None):
         color = obj.color
         char = obj.char
 
-        if color is None: color = libtcod.white
+        if color is None: color = colors.WHITE
         if char is None: char = ''
         if letterdelim is None: 
             letterchar = ''
@@ -148,7 +149,7 @@ def inventory_menu(header, Game, user):
         options = []
         #show a menu with each item of the inventory as an option
         if not len(user.fighter.inventory):
-            obj = Menuobj('inventory is empty!', color=libtcod.white, char='?')
+            obj = Menuobj('inventory is empty!', color=colors.WHITE, char='?')
             options.append(obj)
         else:
             #options = [item.name for item in inventory]
@@ -248,7 +249,7 @@ def render_all(Game):
                     else:
                         color_wall_ground = data.COLOR_DARK_GROUND
                         char_wall_ground = thegroundchar
-                    fov_wall_ground = libtcod.grey
+                    fov_wall_ground = colors.DARK_GREY
                 else:
                     #tile is visible
                     Game.map[Game.dungeon_levelname].set_explored(map_x, map_y)
@@ -258,7 +259,7 @@ def render_all(Game):
                     else:
                         color_wall_ground = data.COLOR_LIGHT_GROUND
                         char_wall_ground = thegroundchar
-                    fov_wall_ground = libtcod.white
+                    fov_wall_ground = colors.WHITE
 
                 if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
                     libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
@@ -275,11 +276,11 @@ def render_all(Game):
     libtcod.console_blit(Game.con, 0, 0, data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 0, 0, 0)
 
     #show player's stats via GUI panel
-    libtcod.console_set_default_background(Game.panel, libtcod.black)
+    libtcod.console_set_default_background(Game.panel, colors.BLACK)
     libtcod.console_clear(Game.panel)
 
     #show player stats
-    render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), libtcod.light_red, libtcod.darker_red, Game)
+    render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), colors.LIGHT_RED, colors.RED, Game)
     libtcod.console_print_ex(Game.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, Game.dungeon_levelname)
     libtcod.console_print_ex(Game.panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level: ' + str(Game.player.dungeon_level))
     libtcod.console_print_ex(Game.panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')')
@@ -292,7 +293,7 @@ def render_all(Game):
         y += 1
 
     #display names of objects under the mouse
-    libtcod.console_set_default_foreground(Game.panel, libtcod.light_gray)
+    libtcod.console_set_default_foreground(Game.panel, colors.LIGHT_GREY)
     libtcod.console_print_ex(Game.panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse(Game))
 
     #blit panel to root console
@@ -312,7 +313,7 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
         libtcod.console_rect(Game.panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
 
     #lastly add text
-    libtcod.console_set_default_foreground(Game.panel, libtcod.white)
+    libtcod.console_set_default_foreground(Game.panel, colors.WHITE)
     libtcod.console_print_ex(Game.panel, x + total_width/2, y, libtcod.BKGND_NONE, libtcod.CENTER, name + ': ' + str(value) + '/' + str(maximum))
 
 
@@ -358,7 +359,7 @@ def player_move_or_attack(dx, dy, Game):
 
             for object in Game.objects[data.maplist[Game.player.dungeon_level]]: #look for items in the player's title
                 if object.x == Game.player.x and object.y == Game.player.y and object is not Game.player:
-                    message('* You see ' + object.name + ' at your feet *', Game, libtcod.yellow)
+                    message('* You see ' + object.name + ' at your feet *', Game, colors.YELLOW)
 
         else:
             state = data.STATE_NOACTION
