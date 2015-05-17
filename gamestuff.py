@@ -7,6 +7,7 @@ import gamedata
 import math
 import textwrap
 import colors
+import keys
 
 #common class objects for shapes and tiles
 class Rect(object):
@@ -84,11 +85,8 @@ def menu(header, options, width, Game, letterdelim=None):
     height = len(options) + header_height
 
     #create off-screen console that represents the menu's window
-    window = libtcod.console_new(width, height)
-
-    #print the header with auto-wrap
-    libtcod.console_set_default_foreground(window, colors.WHITE)
-    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    window = Game.gui.console(width, height)
+    Game.gui.print_rect(window, 0, 0, width, height, val=header, fg_color=colors.WHITE)
 
     #print all the options
     y = header_height
@@ -106,39 +104,34 @@ def menu(header, options, width, Game, letterdelim=None):
         else:
             letterchar = chr(letter_index) + letterdelim
 
-        libtcod.console_set_default_foreground(window, color)    
-        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, letterchar + ' ' + char + ' ' + text)
+        Game.gui.print_str(window, 0, y, val=letterchar + ' ' + char + ' ' + text, fg_color=color) 
+
         y += 1
         letter_index += 1
 
     #blit contents of window to root console
     x = data.SCREEN_WIDTH / 2 - width / 2
     y = data.SCREEN_HEIGHT / 2 - height / 2
-    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
-
-    #present the root console to the player and wait for a keypress
-    libtcod.console_flush()
-    libtcod.console_set_keyboard_repeat(0,0) #turn off key repeat
+    Game.gui.con_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
+    Game.gui.flush(0)
+    Game.gui.prep_keyboard(0,0)
 
     goodchoice = False
     while not goodchoice:
-        key = libtcod.console_wait_for_keypress(True)
+        key = Game.gui.getkey(Game.con, Game.mouse, Game.key, wait=True)
         if key.pressed == False: continue
-
-        if key.vk == libtcod.KEY_ENTER and key.lalt: # full screen
-            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())       
-
         #convert ASCII code to an index. if it's valid, return it
-        index = key.c - ord('a')
+
+        index = key.charcode - ord('a')
 
         if index >= 0 and index < len(options):
             goodchoice = True
             retval = index
-        elif key.vk == libtcod.KEY_ESCAPE or key.vk == libtcod.KEY_SPACE:
+        elif key.keycode == keys.ESC or key.keycode == keys.SPACE:
             goodchoice = True
             retval = None
 
-    libtcod.console_set_keyboard_repeat(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+    Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
     return retval
 
 def msgbox(text, Game, width = 50):
@@ -178,7 +171,7 @@ def inventory_menu(header, Game, user):
 def flip_coin(rndgen=False):
     if not rndgen:
         rndgen = 0
-    return (libtcod.random_get_int(rndgen,0,1))
+    return (random_int(rndgen,0,1))
 
 def random_choice(chances_dict):
     #choose one option from dict of chances and return key
@@ -188,11 +181,11 @@ def random_choice(chances_dict):
     return strings[random_choice_index(chances)]
 
 def random_int(seed, min, max):
-    return libtcod.random_get_int(seed, min, max)
+    return libtcod.random_get_int(seed, min, max) #TODO: get rid of this
 
 def random_choice_index(chances): #choose one option from list of chances. return index
     #the dice will land on some number between 1 and sum of the chances
-    dice = libtcod.random_get_int(0, 1, sum(chances))
+    dice = random_int(0, 1, sum(chances))
 
     #go through all chances, keeping the sum so far
     running_sum = 0
@@ -211,7 +204,7 @@ def get_distance(dx, dy):
 def roll_dice(dicelist):
     dice=[]
     for [die_low, die_high] in dicelist:
-        roll = libtcod.random_get_int(0,die_low,die_high)
+        roll = random_int(0,die_low,die_high)
         dice.append(roll)
 
     return [sum(dice), dice]
@@ -225,7 +218,7 @@ def render_all(Game):
         #recompute FOV if needed (if player moved or something else happened)
         Game.fov_recompute = False
         Game.player.fighter.fov_recompute(Game)
-        libtcod.console_clear(Game.con)
+        Game.gui.clear(Game.con)
 
         for y in range(data.CAMERA_HEIGHT):
             for x in range(data.CAMERA_WIDTH):
@@ -273,31 +266,28 @@ def render_all(Game):
     Game.player.draw(Game)
 
     #blit contents of con to root console
-    libtcod.console_blit(Game.con, 0, 0, data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 0, 0, 0)
+    Game.gui.con_blit(Game.con, 0, 0, data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 0, 0, 0)
 
     #show player's stats via GUI panel
-    libtcod.console_set_default_background(Game.panel, colors.BLACK)
-    libtcod.console_clear(Game.panel)
+    Game.gui.clear(Game.panel)
 
     #show player stats
     render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), colors.LIGHT_RED, colors.RED, Game)
-    libtcod.console_print_ex(Game.panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT, Game.dungeon_levelname)
-    libtcod.console_print_ex(Game.panel, 1, 4, libtcod.BKGND_NONE, libtcod.LEFT, 'Dungeon level: ' + str(Game.player.dungeon_level))
-    libtcod.console_print_ex(Game.panel, 1, 5, libtcod.BKGND_NONE, libtcod.LEFT, 'Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')')
+    Game.gui.print_str(Game.panel, 1, 3, val=Game.dungeon_levelname, fg_color=colors.WHITE, bg_color=colors.BLACK)
+    Game.gui.print_str(Game.panel, 1, 4, val='Dungeon level: ' + str(Game.player.dungeon_level), fg_color=colors.WHITE, bg_color=colors.BLACK)
+    Game.gui.print_str(Game.panel, 1, 5, val='Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')', fg_color=colors.WHITE, bg_color=colors.BLACK)
 
     #print the game messages, one line at a time
     y = 1
     for (line, color) in Game.game_msgs:
-        libtcod.console_set_default_foreground(Game.panel, color)
-        libtcod.console_print_ex(Game.panel, data.MSG_X, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
+        Game.gui.print_str(Game.panel, data.MSG_X, y, val=line, fg_color=color)
         y += 1
 
     #display names of objects under the mouse
-    libtcod.console_set_default_foreground(Game.panel, colors.LIGHT_GREY)
-    libtcod.console_print_ex(Game.panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT, get_names_under_mouse(Game))
+    Game.gui.print_str(Game.panel, 1, 0, val=get_names_under_mouse(Game), fg_color=colors.LIGHT_GREY)
 
     #blit panel to root console
-    libtcod.console_blit(Game.panel, 0, 0, data.SCREEN_WIDTH, data.PANEL_HEIGHT, 0, 0, data.PANEL_Y)
+    Game.gui.con_blit(Game.panel, 0, 0, data.SCREEN_WIDTH, data.PANEL_HEIGHT, 0, 0, data.PANEL_Y)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
     #render a bar (HP, exp, etc). first calc the width of the bar
@@ -313,10 +303,7 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
         libtcod.console_rect(Game.panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
 
     #lastly add text
-    libtcod.console_set_default_foreground(Game.panel, colors.WHITE)
-    libtcod.console_print_ex(Game.panel, x + total_width/2, y, libtcod.BKGND_NONE, libtcod.CENTER, name + ': ' + str(value) + '/' + str(maximum))
-
-
+    Game.gui.print_str(Game.panel, x + total_width/2, y, align=libtcod.CENTER, val=name + ': ' + str(value) + '/' + str(maximum), fg_color=colors.WHITE)
 
 #get info from world. check/select tiles. select objects
 def get_names_under_mouse(Game):
