@@ -1,4 +1,4 @@
-import libtcod
+import colors
 
 #DON'T EDIT DATA BETWEEN X's WHILE GAME IS RUNNING, UNLESS YOU WANT THE GAME TO CRASH
 #.............................................
@@ -6,10 +6,10 @@ import libtcod
 WALL_CHAR          = 'X'
 GROUND_CHAR        = ' '
 
-COLOR_DARK_WALL    = libtcod.darker_grey
-COLOR_LIGHT_WALL   = libtcod.light_grey
-COLOR_DARK_GROUND  = libtcod.dark_sepia
-COLOR_LIGHT_GROUND = libtcod.sepia
+COLOR_DARK_WALL    = colors.DARK_GREY
+COLOR_LIGHT_WALL   = colors.LIGHT_GREY
+COLOR_DARK_GROUND  = colors.DARK_SEPIA
+COLOR_LIGHT_GROUND = colors.SEPIA
 
 FOV_ALGO           = 2 #FOV ALGORITHM. values = 0 to 4
 FOV_LIGHT_WALLS    = True
