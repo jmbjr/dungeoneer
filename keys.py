@@ -22,6 +22,7 @@ if gamedata.GRAPHICSMODE == 'libtcod':
     KP9  = libtcod.KEY_KP9
     KPDEC= libtcod.KEY_KPDEC
     ENTER= libtcod.KEY_ENTER
+    SPACE= libtcod.KEY_SPACE
 elif gamedata.GRAPHICSMODE == 'curses':
     ESC  = 27
     TAB  = ord('\t')
