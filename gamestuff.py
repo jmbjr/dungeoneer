@@ -79,7 +79,7 @@ def menu(header, options, width, Game, letterdelim=None):
         message('Cannot have a menu with more than ' + str(data.MAX_NUM_ITEMS) + ' options.', Game)
 
     #calculate total height of the header (after auto-wrap) and one line per option
-    header_height = libtcod.console_get_height_rect(Game.con, 0, 0, width, data.SCREEN_HEIGHT, header)
+    header_height = Game.gui.get_height_rect(Game.con, 0, 0, width, data.SCREEN_HEIGHT, header)
     if header == '':
         header_height = 0
     height = len(options) + header_height

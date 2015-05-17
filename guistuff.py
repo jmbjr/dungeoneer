@@ -78,6 +78,18 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('print_str')
 
+    def get_height_rect(self, con, xx, yy, nwidth, nheight, val):
+        if self.graphicsmode == 'libtcod':
+            return libtcod.console_get_height_rect(con, xx, yy, nwidth, nheight, val)
+        elif self.graphicsmode == 'curses':
+            try:
+                return 0 #not sure what equiv here is
+            except cursesx.error:
+                pass
+        else:
+            self.err_graphicsmode('get_height_rect')
+
+
     def prep_keyboard(self, delay, interval): #can this be combined with prep_console?
         if self.graphicsmode == 'libtcod':
             libtcod.console_set_keyboard_repeat(delay, interval)
