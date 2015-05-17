@@ -67,7 +67,7 @@ class Guistuff(object):
             if fg_color:
                 libtcod.console_set_default_foreground(con, fg_color)
             if bg_color:
-                libtcod.console_set_default_background(con. bg_color)
+                libtcod.console_set_default_background(con, bg_color)
 
             libtcod.console_print_ex(con, xx, yy, bkg, align, val)
         elif self.graphicsmode == 'curses':
