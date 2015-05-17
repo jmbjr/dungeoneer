@@ -135,11 +135,11 @@ def make_map(Game, levelnum, levelname):
 
     for r in range(data.MAX_ROOMS):
         #get random width/height
-        w = libtcod.random_get_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
-        h = libtcod.random_get_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
+        w = random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
+        h = random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         #get random positions, but stay within map
-        x = libtcod.random_get_int(0, data.MAP_PAD_W, data.MAP_WIDTH - w - data.MAP_PAD_W)
-        y = libtcod.random_get_int(0, data.MAP_PAD_H, data.MAP_HEIGHT - h - data.MAP_PAD_H)
+        x = random_int(0, data.MAP_PAD_W, data.MAP_WIDTH - w - data.MAP_PAD_W)
+        y = random_int(0, data.MAP_PAD_H, data.MAP_HEIGHT - h - data.MAP_PAD_H)
 
         new_room = Rect(x, y, w, h)
 
@@ -201,17 +201,17 @@ def place_objects(room, Game):
     #max number monsters per room
     nextid = 1
     max_monsters = from_dungeon_level([[10, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_levelname))
-    num_monsters = libtcod.random_get_int(0, 0, max_monsters)
+    num_monsters = random_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
 
     max_items = from_dungeon_level([[10, 1], [2, 4]], data.maplist.index(Game.dungeon_levelname))
-    num_items = libtcod.random_get_int(0, 0, max_items)
+    num_items = random_int(0, 0, max_items)
     item_chances = get_item_chances(Game)
 
     for i in range(num_monsters):
         #choose random spot for this monster
-        x =  libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
-        y =  libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
+        x =  random_int(0, room.x1 + 1, room.x2 - 1)
+        y =  random_int(0, room.y1 + 1, room.y2 - 1)
 
         if not entities.is_blocked(x, y, Game):
             #create a monster
@@ -243,8 +243,8 @@ def place_objects(room, Game):
 
     for i in range(num_items):
         #choose random spot for this item
-        x = libtcod.random_get_int(0, room.x1 + 1, room.x2 - 1)
-        y = libtcod.random_get_int(0, room.y1 + 1, room.y2 - 1)
+        x = random_int(0, room.x1 + 1, room.x2 - 1)
+        y = random_int(0, room.y1 + 1, room.y2 - 1)
 
         #only place it if the tile is not blocked
         if not entities.is_blocked(x, y,Game):
