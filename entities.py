@@ -88,7 +88,7 @@ class Object(object):
                 else:
                     thechar = self.tilechar
 
-                libtcod.console_put_char(Game.con, x, y, thechar, libtcod.BKGND_NONE)
+                libtcod.console_put_char(Game.con, x, y, thechar, guistuff.BKGND_NONE)
 
     def clear(self, Game):
         #erase char that represents this object
