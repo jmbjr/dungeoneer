@@ -46,8 +46,9 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('clear')
 
-    def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val=''):
+    def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', my_color=None):
         if self.graphicsmode == 'libtcod':
+            libtcod.console_set_default_foreground(con, my_color)
             libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
