@@ -149,10 +149,3 @@ class Guistuff(object):
     def err_graphicsmode(self, func):
         print('Error in guistuff.' + func + '. wrong GRAPHICSMODE: ' + self.graphicsmode)
 
-# RENDERMODES
-    if self.graphicsmode == 'libtcod':
-        BKGND_NONE = libtcod.BKGND_NONE
-    elif self.graphicsmode == 'curses':
-        BKGND_NONE = 0
-    else:
-        self.err_graphicsmode('RENDERMODE')
