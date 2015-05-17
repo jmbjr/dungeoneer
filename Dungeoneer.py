@@ -426,7 +426,7 @@ def handle_keys(Game):
 
                 for thepage in range(numpages):
                     window = Game.gui.console(width, height)
-                    Game.gui.printrect(window, 0, 0, width, height)
+                    Game.gui.print_rect(window, 0, 0, width, height)
                     Game.gui.con_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
                     menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], data.SCREEN_WIDTH, Game, letterdelim=None)
 
