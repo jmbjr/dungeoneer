@@ -63,7 +63,7 @@ class Maplevel(object):
 
         for y in range(self.height):
             for x in range(self.width):
-                self.fov.set_map_properties(self.fov_map, x, y, not self.block_sight(x, y), not self.blocked(x, y))
+                self.fov.map_set_properties(self.fov_map, x, y, not self.block_sight(x, y), not self.blocked(x, y))
 
 
 def next_level(Game):

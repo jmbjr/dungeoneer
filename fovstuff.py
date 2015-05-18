@@ -11,7 +11,7 @@ class Fovstuff(object):
         else:
             self.err_fovmode('fovmap')
 
-    def set_map_properties(self, fovmap, xx, yy, block_sight, blocked):
+    def map_set_properties(self, fovmap, xx, yy, block_sight, blocked):
         if self.fovmode == 'libtcod':
             libtcod.map_set_properties(fovmap, xx, yy, block_sight, blocked)
         else:
@@ -22,6 +22,12 @@ class Fovstuff(object):
             return libtcod.map_is_in_fov(fovmap, xx, yy)
         else:
             self.err_fovmode('map_is_in_fov')
+
+    def map_compute_fov(self, fovmap, xx, yy, radius, light_walls, algo):
+        if self.fovmode == 'libtcod':
+            return libtcod.map_compute_fov(fovmap, xx, yy, radius, light_walls, algo)
+        else:
+            self.err_fovmode('map_compute_fov')
 
 
     def err_fovmode(self, func):

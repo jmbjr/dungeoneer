@@ -210,5 +210,17 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('toggle_fullscreen')
 
+#TODO: generalize this by using it in other routines.
+    def set_default_color(self, con, fg_color=None, bg_color=None):
+        if self.graphicsmode == 'libtcod':
+            if fg_color is not None:
+                libtcod.console_set_default_foreground(con, fg_color)
+            if bg_color is not None:
+                libtcod.console_set_default_background(con, bg_color)
+        elif self.graphicsmode == 'curses':
+            return True #not sure what the equiv is yet
+        else:
+            self.err_graphicsmode('set_default_color')
+
     def err_graphicsmode(self, func):
         print('Error in guistuff.' + func + '. wrong GRAPHICSMODE: ' + self.graphicsmode)
