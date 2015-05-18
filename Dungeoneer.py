@@ -10,6 +10,7 @@ import entities
 import maplevel
 import logging
 import guistuff
+import fovstuff
 import keys
 import colors
 import rng
@@ -21,6 +22,7 @@ class Game(object):
 
 def game_initialize():
     Game.gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
+    Game.fov = fovstuff.Fovstuff(gamedata.FOVMODE)
 
     Game.con = Game.gui.console(data.MAP_WIDTH,data.MAP_HEIGHT)
     Game.mouse,Game.key = Game.gui.prep_console(Game.con, data.MAP_WIDTH,data.MAP_HEIGHT)

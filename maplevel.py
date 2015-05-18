@@ -1,5 +1,4 @@
 #standard imports
-import libtcod
 from gamestuff import *
 import data
 import colors
@@ -10,17 +9,17 @@ import entitydata
 import rng
 
 class Maplevel(object):
-    def __init__(self, height, width, levelnum, levelname):
+    def __init__(self, height, width, levelnum, levelname, fov):
         self.levelnum = levelnum
         self.levelname = levelname
         self.height = height
         self.width = width
-
+        self.fov   = fov
         self.map= [[ Tile(True)
             for y in range(self.height) ]
                 for x in range(self.width) ]     
 
-        self.fov_map = libtcod.map_new(self.width, self.height)
+        self.fov_map = fov.fovmap(self.width, self.height)
         self.fov_recompute = True
 
     #functions to create matp shapes and rooms
@@ -64,7 +63,7 @@ class Maplevel(object):
 
         for y in range(self.height):
             for x in range(self.width):
-                libtcod.map_set_properties(self.fov_map, x, y, not self.block_sight(x, y), not self.blocked(x, y))
+                self.fov.set_map_properties(self.fov_map, x, y, not self.block_sight(x, y), not self.blocked(x, y))
 
 
 def next_level(Game):
@@ -128,13 +127,13 @@ def make_map(Game, levelnum, levelname):
     #fill map with "blocked" tiles
 
     print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating map:' + str(Game.dungeon_levelname)
-    Game.map[Game.dungeon_levelname] = Maplevel(data.MAP_HEIGHT, data.MAP_WIDTH, levelnum, levelname)          
+    Game.map[Game.dungeon_levelname] = Maplevel(data.MAP_HEIGHT, data.MAP_WIDTH, levelnum, levelname, Game.fov)          
 
     rooms = []
     num_rooms = 0
 
     for r in range(data.MAX_ROOMS):
-        #get random width/height
+        #get random width/heightS
         w = rng.random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         h = rng.random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         #get random positions, but stay within map
