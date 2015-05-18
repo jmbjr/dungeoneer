@@ -90,13 +90,13 @@ class Object(object):
                 else:
                     thechar = self.tilechar
 
-                libtcod.console_put_char(Game.con, x, y, thechar, libtcod.BKGND_NONE)
+                Game.gui.print_char(Game.con, x, y, val=thechar, use_defaults=True)
 
     def clear(self, Game):
         #erase char that represents this object
         (x, y) = to_camera_coordinates(self.x, self.y, Game)
         if x is not None and libtcod.map_is_in_fov(Game.player.fighter.fov, self.x, self.y):
-            libtcod.console_put_char_ex(Game.con, x, y, data.GROUND_CHAR, colors.WHITE, data.COLOR_LIGHT_GROUND)
+            Game.gui.print_char(Game.con, x, y, val=data.GROUND_CHAR, fg_color=colors.WHITE, bg_color=data.COLOR_LIGHT_GROUND, use_defaults=False)
 
     def move_away(self, target, Game):
         if self.dungeon_level == target.dungeon_level:
