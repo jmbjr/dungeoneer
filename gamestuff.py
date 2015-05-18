@@ -8,6 +8,7 @@ import math
 import textwrap
 import colors
 import keys
+import guistuff
 
 #common class objects for shapes and tiles
 class Rect(object):
@@ -252,16 +253,14 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
     bar_width = int(float(value) / maximum * total_width)
 
     #render the background first
-    libtcod.console_set_default_background(Game.panel, back_color)
-    libtcod.console_rect(Game.panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+    Game.gui.draw_rect(Game.panel, x, y, total_width, 1, False, bg_color=back_color)
 
     #now render the bar on top
-    libtcod.console_set_default_background(Game.panel, bar_color)
     if bar_width > 0:
-        libtcod.console_rect(Game.panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+        Game.gui.draw_rect(Game.panel, x, y, bar_width, 1, False, bg_color=bar_color)
 
     #lastly add text
-    Game.gui.print_str(Game.panel, x + total_width/2, y, align=libtcod.CENTER, val=name + ': ' + str(value) + '/' + str(maximum), fg_color=colors.WHITE)
+    Game.gui.print_str(Game.panel, x + total_width/2, y, align=guistuff.CENTER, val=name + ': ' + str(value) + '/' + str(maximum), fg_color=colors.WHITE)
 
 #get info from world. check/select tiles. select objects
 def get_names_under_mouse(Game):

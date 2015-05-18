@@ -50,13 +50,30 @@ class Guistuff(object):
             con.clear()
         else:
             self.err_graphicsmode('clear')
+
+    def draw_rect(self, con, xx, yy, nwidth, nheight, clear, bkg=libtcod.BKGND_SCREEN, bg_color=None):
+        if self.graphicsmode == 'libtcod':
+            #libtcod.console_rect only uses default background color
+            if bg_color:
+                libtcod.console_set_default_background(con, bg_color)
+
+            libtcod.console_rect(con, xx, yy, nwidth, nheight, clear, bkg)
+
+        elif self.graphicsmode == 'curses':
+            try:
+                print('curses!') #not sure how to do this yet
+            except cursesx.error:
+                pass
+        else:
+            self.err_graphicsmode('draw_rect')
+
 #print_rect and print_str need to prompt for fg and bg colors... or maybe we should rethink how colors are set
     def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
         if self.graphicsmode == 'libtcod':
             if fg_color:
                 libtcod.console_set_default_foreground(con, fg_color)
             if bg_color:
-                libtcod.console_set_default_background(con. bg_color)
+                libtcod.console_set_default_background(con, bg_color)
 
             libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
         elif self.graphicsmode == 'curses':
@@ -195,4 +212,3 @@ class Guistuff(object):
 
     def err_graphicsmode(self, func):
         print('Error in guistuff.' + func + '. wrong GRAPHICSMODE: ' + self.graphicsmode)
-
