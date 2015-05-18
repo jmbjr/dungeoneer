@@ -1,5 +1,4 @@
 #standard imports
-import libtcod
 import data
 import gamedata
 
@@ -182,7 +181,7 @@ def render_all(Game):
         for y in range(data.CAMERA_HEIGHT):
             for x in range(data.CAMERA_WIDTH):
                 (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
-                visible = libtcod.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
+                visible = Game.fov.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
                 wall = Game.map[Game.dungeon_levelname].block_sight(map_x, map_y)
 
                 if gamedata.ASCIIMODE:
@@ -270,7 +269,7 @@ def get_names_under_mouse(Game):
 
     #create list with the names of all objects at the mouse's coords and in FOV
     names = [obj.name for obj in Game.objects[Game.dungeon_levelname]
-        if obj.x == x and obj.y == y and libtcod.map_is_in_fov(Game.player.fighter.fov, obj.x, obj.y)]
+        if obj.x == x and obj.y == y and Game.fov.map_is_in_fov(Game.player.fighter.fov, obj.x, obj.y)]
     
     names = ', '.join(names) #join names separated by commas
     return names.capitalize()

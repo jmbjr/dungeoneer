@@ -1,4 +1,5 @@
 #standard imports
+import libtcod
 from gamestuff import *
 import data
 import gamedata
