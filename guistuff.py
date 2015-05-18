@@ -78,6 +78,31 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('print_str')
 
+    def print_char(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
+        if fg_color is None and bg_color is None:
+            use_defaults = True
+        else:
+            use_defaults = False
+             
+        if self.graphicsmode == 'libtcod':
+            if not use_defaults:
+                if fg_color:
+                    libtcod.console_set_default_foreground(con, fg_color)
+                if bg_color:
+                    libtcod.console_set_default_background(con, bg_color)
+
+                libtcod.console_put_char_ex(con, xx, yy, val, fg_color, bg_color)
+            else:
+                libtcod.console_put_char(con, xx, yy, val, bkg)
+
+        elif self.graphicsmode == 'curses':
+            try:
+                con.addstr(yy, xx, val, fg_color)
+            except cursesx.error:
+                pass
+        else:
+            self.err_graphicsmode('print_char')
+
     def get_height_rect(self, con, xx, yy, nwidth, nheight, val):
         if self.graphicsmode == 'libtcod':
             return libtcod.console_get_height_rect(con, xx, yy, nwidth, nheight, val)

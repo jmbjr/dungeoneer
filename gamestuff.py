@@ -213,7 +213,7 @@ def render_all(Game):
                     fov_wall_ground = colors.WHITE
 
                 if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
-                    libtcod.console_put_char_ex(Game.con, x, y, char_wall_ground, fov_wall_ground, color_wall_ground)
+                    Game.gui.print_char(Game.con, x, y, val=char_wall_ground, fg_color=fov_wall_ground, bg_color=color_wall_ground)
                 
 
     #draw all objects in the list
