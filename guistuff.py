@@ -1,6 +1,11 @@
 import libtcod
 import cursesx
 
+# alignment
+LEFT=0
+RIGHT=1
+CENTER=2
+
 #TODO replace with select case
 #TODO specifically require con for things that need it. don't save it. could get messy. See the flush() for example.
 class Keyobj(object):
