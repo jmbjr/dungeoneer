@@ -4,6 +4,7 @@ import data
 import gamedata
 import colors
 import guistuff
+import rng
 
 #Classes:  Object player, enemies, items, etc
 class Object(object):
@@ -73,7 +74,7 @@ class Object(object):
             return False
 
     def move_random(self, Game):
-        self.move(random_int(0, -1, 1), random_int(0, -1, 1), Game)
+        self.move(rng.random_int(0, -1, 1), rng.random_int(0, -1, 1), Game)
 
 
     def draw(self, Game):
@@ -467,7 +468,7 @@ class ConfusedMonster(object):
     def take_turn(self, Game):
         if self.num_turns > 0: #still confused
             #move in random direction
-            self.owner.move(random_int(0, -1, 1), random_int(0, -1, 1), Game)
+            self.owner.move(rng.random_int(0, -1, 1), rng.random_int(0, -1, 1), Game)
             self.num_turns -= 1
             message(self.owner.name + ' is STILL confused!', Game, colors.RED)
 
@@ -513,7 +514,7 @@ class BasicMonster(object):
                 #for now, use items or lose them
                 if monster.fighter.inventory:
                     #get random item from inv
-                    index = random_int(0, 0, len(monster.fighter.inventory)-1)
+                    index = rng.random_int(0, 0, len(monster.fighter.inventory)-1)
                     item = monster.fighter.inventory[index].item
                     if not item.owner.equipment:
                         useditem = item.use(Game, user=monster)
@@ -660,7 +661,7 @@ def cast_fireball(Game, user):
         return data.STATE_CANCELLED
 
     else:
-        theDmg = roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
+        theDmg = rng.roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
         
         #create fireball fov based on x,y coords of target
         fov_map_fireball = Game.map[Game.dungeon_levelname].fov_map
@@ -751,7 +752,7 @@ def cast_lightning(Game, user):
             message(user.name + ' cancels Lightning', Game, colors.RED, False)
         return 'cancelled'
     else:
-        theDmg = roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
+        theDmg = rng.roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
 
         if user is Game.player:
             message('Your lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, colors.LIGHT_BLUE)

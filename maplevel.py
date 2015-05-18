@@ -7,7 +7,7 @@ import colors
 #specific imports needed for this module
 import entities
 import entitydata
-
+import rng
 
 class Maplevel(object):
     def __init__(self, height, width, levelnum, levelname):
@@ -135,11 +135,11 @@ def make_map(Game, levelnum, levelname):
 
     for r in range(data.MAX_ROOMS):
         #get random width/height
-        w = random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
-        h = random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
+        w = rng.random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
+        h = rng.random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
         #get random positions, but stay within map
-        x = random_int(0, data.MAP_PAD_W, data.MAP_WIDTH - w - data.MAP_PAD_W)
-        y = random_int(0, data.MAP_PAD_H, data.MAP_HEIGHT - h - data.MAP_PAD_H)
+        x = rng.random_int(0, data.MAP_PAD_W, data.MAP_WIDTH - w - data.MAP_PAD_W)
+        y = rng.random_int(0, data.MAP_PAD_H, data.MAP_HEIGHT - h - data.MAP_PAD_H)
 
         new_room = Rect(x, y, w, h)
 
@@ -201,21 +201,21 @@ def place_objects(room, Game):
     #max number monsters per room
     nextid = 1
     max_monsters = from_dungeon_level([[10, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_levelname))
-    num_monsters = random_int(0, 0, max_monsters)
+    num_monsters = rng.random_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
 
     max_items = from_dungeon_level([[10, 1], [2, 4]], data.maplist.index(Game.dungeon_levelname))
-    num_items = random_int(0, 0, max_items)
+    num_items = rng.random_int(0, 0, max_items)
     item_chances = get_item_chances(Game)
 
     for i in range(num_monsters):
         #choose random spot for this monster
-        x =  random_int(0, room.x1 + 1, room.x2 - 1)
-        y =  random_int(0, room.y1 + 1, room.y2 - 1)
+        x =  rng.random_int(0, room.x1 + 1, room.x2 - 1)
+        y =  rng.random_int(0, room.y1 + 1, room.y2 - 1)
 
         if not entities.is_blocked(x, y, Game):
             #create a monster
-            choice = random_choice(monster_chances)
+            choice = rng.random_choice(monster_chances)
 
             monster             = entities.Object(**entitydata.mobs[choice])
             monster.dungeon_level = data.maplist.index(Game.dungeon_levelname) 
@@ -243,13 +243,13 @@ def place_objects(room, Game):
 
     for i in range(num_items):
         #choose random spot for this item
-        x = random_int(0, room.x1 + 1, room.x2 - 1)
-        y = random_int(0, room.y1 + 1, room.y2 - 1)
+        x = rng.random_int(0, room.x1 + 1, room.x2 - 1)
+        y = rng.random_int(0, room.y1 + 1, room.y2 - 1)
 
         #only place it if the tile is not blocked
         if not entities.is_blocked(x, y,Game):
             #create an item
-            choice = random_choice(item_chances)
+            choice = rng.random_choice(item_chances)
 
             item = entities.Object(**entitydata.items[choice])
             item.always_visible = True

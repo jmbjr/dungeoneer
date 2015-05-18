@@ -12,6 +12,7 @@ import logging
 import guistuff
 import keys
 import colors
+import rng
 
 #global class pattern
 class Game(object): 
@@ -276,7 +277,7 @@ def check_level_up(Game, user):
                         Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=colors.RED), 
                         Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=colors.BLUE)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
             else:
-                choice = random_int(0, 0, 2) #TODO: variablize this
+                choice = rng.random_int(0, 0, 2) #TODO: variablize this
 
             if choice == 0:
                 user.fighter.base_max_hp += 25

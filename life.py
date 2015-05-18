@@ -8,6 +8,7 @@ import time
 import math
 import keys
 import guistuff
+import rng
 
 class World(object):
     def __init__(self, nwidth, nheight, alivechar, deadchar, char_option, rndgen, gui):
@@ -27,7 +28,7 @@ class World(object):
 
     def init_world(self):
         self.generation = 0
-        self.population = [[ flip_coin(self.rndgen)
+        self.population = [[ rng.flip_coin(self.rndgen)
         for yy in range(self.nheight) ]
             for xx in range(self.nwidth) ]
 
