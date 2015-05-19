@@ -51,7 +51,7 @@ def mapname(Game):
     return(data.maplist[Game.player.dungeon_level])
 
 #User Interface routines
-def message(new_msg, Game, color = colors.WHITE, displaymsg=True):
+def message(new_msg, Game, color = Game.col.WHITE, displaymsg=True):
     #split message if necessary
     if data.PRINT_MESSAGES:
         if data.FREE_FOR_ALL_MODE:
@@ -86,7 +86,7 @@ def menu(header, options, width, Game, letterdelim=None):
 
     #create off-screen console that represents the menu's window
     window = Game.gui.console(width, height)
-    Game.gui.print_rect(window, 0, 0, width, height, val=header, fg_color=colors.WHITE)
+    Game.gui.print_rect(window, 0, 0, width, height, val=header, fg_color=Game.col.WHITE)
 
     #print all the options
     y = header_height
@@ -97,7 +97,7 @@ def menu(header, options, width, Game, letterdelim=None):
         color = obj.color
         char = obj.char
 
-        if color is None: color = colors.WHITE
+        if color is None: color = Game.col.WHITE
         if char is None: char = ''
         if letterdelim is None: 
             letterchar = ''
@@ -142,7 +142,7 @@ def inventory_menu(header, Game, user):
         options = []
         #show a menu with each item of the inventory as an option
         if not len(user.fighter.inventory):
-            obj = Menuobj('inventory is empty!', color=colors.WHITE, char='?')
+            obj = Menuobj('inventory is empty!', color=Game.col.WHITE, char='?')
             options.append(obj)
         else:
             #options = [item.name for item in inventory]
@@ -200,7 +200,7 @@ def render_all(Game):
                     else:
                         color_wall_ground = data.COLOR_DARK_GROUND
                         char_wall_ground = thegroundchar
-                    fov_wall_ground = colors.DARK_GREY
+                    fov_wall_ground = Game.col.DARK_GREY
                 else:
                     #tile is visible
                     Game.map[Game.dungeon_levelname].set_explored(map_x, map_y)
@@ -210,7 +210,7 @@ def render_all(Game):
                     else:
                         color_wall_ground = data.COLOR_LIGHT_GROUND
                         char_wall_ground = thegroundchar
-                    fov_wall_ground = colors.WHITE
+                    fov_wall_ground = Game.col.WHITE
 
                 if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
                     Game.gui.print_char(Game.con, x, y, val=char_wall_ground, fg_color=fov_wall_ground, bg_color=color_wall_ground)
@@ -230,10 +230,10 @@ def render_all(Game):
     Game.gui.clear(Game.panel)
 
     #show player stats
-    render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), colors.LIGHT_RED, colors.RED, Game)
-    Game.gui.print_str(Game.panel, 1, 3, val=Game.dungeon_levelname, fg_color=colors.WHITE, bg_color=colors.BLACK)
-    Game.gui.print_str(Game.panel, 1, 4, val='Dungeon level: ' + str(Game.player.dungeon_level), fg_color=colors.WHITE, bg_color=colors.BLACK)
-    Game.gui.print_str(Game.panel, 1, 5, val='Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')', fg_color=colors.WHITE, bg_color=colors.BLACK)
+    render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), Game.col.LIGHT_RED, Game.col.RED, Game)
+    Game.gui.print_str(Game.panel, 1, 3, val=Game.dungeon_levelname, fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
+    Game.gui.print_str(Game.panel, 1, 4, val='Dungeon level: ' + str(Game.player.dungeon_level), fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
+    Game.gui.print_str(Game.panel, 1, 5, val='Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')', fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
 
     #print the game messages, one line at a time
     y = 1
@@ -242,7 +242,7 @@ def render_all(Game):
         y += 1
 
     #display names of objects under the mouse
-    Game.gui.print_str(Game.panel, 1, 0, val=get_names_under_mouse(Game), fg_color=colors.LIGHT_GREY)
+    Game.gui.print_str(Game.panel, 1, 0, val=get_names_under_mouse(Game), fg_color=Game.col.LIGHT_GREY)
 
     #blit panel to root console
     Game.gui.con_blit(Game.panel, 0, 0, data.SCREEN_WIDTH, data.PANEL_HEIGHT, 0, 0, data.PANEL_Y)
@@ -259,7 +259,7 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
         Game.gui.draw_rect(Game.panel, x, y, bar_width, 1, False, bg_color=bar_color)
 
     #lastly add text
-    Game.gui.print_str(Game.panel, x + total_width/2, y, align=guistuff.CENTER, val=name + ': ' + str(value) + '/' + str(maximum), fg_color=colors.WHITE)
+    Game.gui.print_str(Game.panel, x + total_width/2, y, align=guistuff.CENTER, val=name + ': ' + str(value) + '/' + str(maximum), fg_color=Game.col.WHITE)
 
 #get info from world. check/select tiles. select objects
 def get_names_under_mouse(Game):
@@ -302,7 +302,7 @@ def player_move_or_attack(dx, dy, Game):
 
             for object in Game.objects[data.maplist[Game.player.dungeon_level]]: #look for items in the player's title
                 if object.x == Game.player.x and object.y == Game.player.y and object is not Game.player:
-                    message('* You see ' + object.name + ' at your feet *', Game, colors.YELLOW)
+                    message('* You see ' + object.name + ' at your feet *', Game, Game.col.YELLOW)
 
         else:
             state = data.STATE_NOACTION

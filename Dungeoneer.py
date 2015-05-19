@@ -23,10 +23,13 @@ class Game(object):
 def game_initialize():
     Game.gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
     Game.fov = fovstuff.Fovstuff(gamedata.FOVMODE)
+    Game.col = Game.col.Colorstuff(gamedata.GRAPHICSMODE)
+    Game.col.init_colors()
 
     Game.con = Game.gui.console(data.MAP_WIDTH,data.MAP_HEIGHT)
     Game.mouse,Game.key = Game.gui.prep_console(Game.con, data.MAP_WIDTH,data.MAP_HEIGHT)
     Game.panel = Game.gui.console(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
+
 
     main_menu()
 
@@ -38,8 +41,8 @@ def main_menu():
         Game.gui.img_blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
-        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=colors.LIGHT_YELLOW)
-        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=colors.LIGHT_YELLOW)
+        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=Game.col.LIGHT_YELLOW)
 
         #show options and wait for the player's choice
         choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
@@ -101,7 +104,7 @@ def load_game(filename='savegame'):
 def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=300, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
-    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', colors.WHITE, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
+    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', Game.col.WHITE, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.dungeon_level = 1
     Game.game_state = data.STATE_PLAYING
@@ -133,7 +136,7 @@ def new_game():
     #initial equipment
     if not data.AUTOMODE:
         equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
-        obj = entities.Object(0, 0, '-', 'wristguards of the whale', colors.LIGHT_RED, equipment=equipment_component)
+        obj = entities.Object(0, 0, '-', 'wristguards of the whale', Game.col.LIGHT_RED, equipment=equipment_component)
         obj.always_visible = True
 
         Game.player.fighter.add_item(obj)
@@ -142,7 +145,7 @@ def new_game():
         Game.player.fighter.hp = Game.player.fighter.max_hp(Game)
 
     #a warm welcoming message!
-    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, colors.BLUE)
+    message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, Game.col.BLUE)
     Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
 
 def play_game():
@@ -212,7 +215,7 @@ def play_game():
                                     for buff in object.fighter.buffs:
                                         buff.duration -= buff.decay_rate
                                         if buff.duration <= 0:
-                                            message(object.name + ' feels the effects of ' + buff.name + ' wear off!', Game, colors.LIGHT_RED)
+                                            message(object.name + ' feels the effects of ' + buff.name + ' wear off!', Game, Game.col.LIGHT_RED)
                                             object.fighter.remove_buff(buff)
 
                                 #always check to ensure hp <= max_hp
@@ -237,7 +240,7 @@ def play_game():
             if data.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
                 if len(alive_entities) == 1:
-                    message ('BATTLE ROYALE IS OVER! Winner is ', Game, colors.BLUE)
+                    message ('BATTLE ROYALE IS OVER! Winner is ', Game, Game.col.BLUE)
                     entities.printstats(alive_entities[0], Game)
                     data.AUTOMODE = False
 
@@ -249,7 +252,7 @@ def play_game():
                     save_final_sql_csv(Game)
 
                 if len(alive_entities) <=0:
-                    message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, colors.BLUE)
+                    message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, Game.col.BLUE)
                     data.AUTOMODE = False  
 
                     save_final_sql_csv(Game)
@@ -266,18 +269,18 @@ def check_level_up(Game, user):
             user.fighter.xp -= level_up_xp
 
             if user is Game.player:
-                message('You have reached level ' + str(user.fighter.xplevel) + '!', Game, colors.YELLOW)
+                message('You have reached level ' + str(user.fighter.xplevel) + '!', Game, Game.col.YELLOW)
             else:
-                message(user.name + ' has reached level ' + str(user.fighter.xplevel) + '!', Game, colors.YELLOW)
+                message(user.name + ' has reached level ' + str(user.fighter.xplevel) + '!', Game, Game.col.YELLOW)
 
             choice = None
 
             if user is Game.player:
                 while choice == None: #keep asking till a choice is made
                         choice = menu('Level up! Choose a stat to raise:\n', 
-                        [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=colors.GREEN),
-                        Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=colors.RED), 
-                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=colors.BLUE)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
+                        [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=Game.col.GREEN),
+                        Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=Game.col.RED), 
+                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=Game.col.BLUE)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
             else:
                 choice = rng.random_int(0, 0, 2) #TODO: variablize this
 

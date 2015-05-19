@@ -68,7 +68,7 @@ class Maplevel(object):
 
 def next_level(Game):
     #advance to next level
-    message('You head down the stairs', Game, colors.RED)
+    message('You head down the stairs', Game, Game.col.RED)
     Game.player.dungeon_level +=1
     Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
@@ -81,12 +81,12 @@ def next_level(Game):
 
 def prev_level(Game):
     #advance to next level
-    message('You head up the stairs', Game, colors.RED)
+    message('You head up the stairs', Game, Game.col.RED)
     Game.player.dungeon_level -=1
     Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
 
     if Game.player.dungeon_level <= 0: #leave dungeon      
-        message('You\'ve left the dungeon!', Game, colors.RED)
+        message('You\'ve left the dungeon!', Game, Game.col.RED)
         Game.player.dungeon_level =1 #workaround to prevent game from complaining. 
         return data.STATE_EXIT
     else:
@@ -163,7 +163,7 @@ def make_map(Game, levelnum, levelname):
                 Game.player.x = new_x
                 Game.player.y = new_y
                 #create upstairs at the center of the first room
-                Game.upstairs[Game.dungeon_levelname] = entities.Object(new_x, new_y, '<', 'upstairs', colors.WHITE, always_visible = True)
+                Game.upstairs[Game.dungeon_levelname] = entities.Object(new_x, new_y, '<', 'upstairs', Game.col.WHITE, always_visible = True)
                 Game.objects[Game.dungeon_levelname].append(Game.upstairs[Game.dungeon_levelname])
                 Game.upstairs[Game.dungeon_levelname].send_to_back(Game) #so it's drawn below the monsters
 
@@ -188,7 +188,7 @@ def make_map(Game, levelnum, levelname):
             num_rooms +=1
 
     #create stairs at the center of the last room
-    Game.downstairs[Game.dungeon_levelname] = entities.Object(new_x, new_y, '>', 'downstairs', colors.WHITE, always_visible = True)
+    Game.downstairs[Game.dungeon_levelname] = entities.Object(new_x, new_y, '>', 'downstairs', Game.col.WHITE, always_visible = True)
     Game.objects[Game.dungeon_levelname].append(Game.downstairs[Game.dungeon_levelname])
     Game.downstairs[Game.dungeon_levelname].send_to_back(Game) #so it's drawn below the monsters
 

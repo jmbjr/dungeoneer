@@ -6,17 +6,17 @@ import colors
 #EDITABLE MOB DATA
 mobs={}
 mobs = {
- 'johnstein':      {'char':'j', 'color':colors.LIGHT_GREY,  'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':100 , 'defense':0 , 'power':20 , 'xp':0, 'xpvalue':20 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}, 'caster':{'mp':10}}, 
- 'greynaab':       {'char':'g', 'color':colors.LIGHT_BLUE,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':200 , 'defense':1 , 'power':40 , 'xp':0, 'xpvalue':40 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'jerbear':        {'char':'j', 'color':colors.GREEN,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':250 , 'defense':1 , 'power':50 , 'xp':0, 'xpvalue':50 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'zombiesheep':    {'char':'z', 'color':colors.YELLOW,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':300 , 'defense':2 , 'power':60 , 'xp':0, 'xpvalue':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'pushy':          {'char':'p', 'color':colors.MAGENTA,     'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':400 , 'defense':2 , 'power':00 , 'xp':0, 'xpvalue':100, 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'johnstein':      {'char':'j', 'color':Game.col.LIGHT_GREY,  'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':100 , 'defense':0 , 'power':20 , 'xp':0, 'xpvalue':20 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}, 'caster':{'mp':10}}, 
+ 'greynaab':       {'char':'g', 'color':Game.col.LIGHT_BLUE,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':200 , 'defense':1 , 'power':40 , 'xp':0, 'xpvalue':40 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'jerbear':        {'char':'j', 'color':Game.col.GREEN,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':250 , 'defense':1 , 'power':50 , 'xp':0, 'xpvalue':50 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'zombiesheep':    {'char':'z', 'color':Game.col.YELLOW,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':300 , 'defense':2 , 'power':60 , 'xp':0, 'xpvalue':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'pushy':          {'char':'p', 'color':Game.col.MAGENTA,     'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':400 , 'defense':2 , 'power':00 , 'xp':0, 'xpvalue':100, 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
 
- 'JOHNSTEIN':      {'char':'J', 'color':colors.BLACK,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':1000 , 'defense':3, 'power':5 , 'xp':0, 'xpvalue':200 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
- 'GREYNAAB':       {'char':'G', 'color':colors.RED,         'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':2000 , 'defense':6, 'power':10, 'xp':0, 'xpvalue':400 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
- 'JERBEAR':        {'char':'J', 'color':colors.BLUE,        'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':2500 , 'defense':9, 'power':15, 'xp':0, 'xpvalue':500 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'ZOMBIESHEEP':    {'char':'Z', 'color':colors.GREEN,       'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':3000 , 'defense':12,'power':20, 'xp':0, 'xpvalue':600 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':7}}, 
- 'PUSHY':          {'char':'P', 'color':colors.MAGENTA,     'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':5000 , 'defense':20,'power':0 , 'xp':0, 'xpvalue':1000 ,'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
+ 'JOHNSTEIN':      {'char':'J', 'color':Game.col.BLACK,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':1000 , 'defense':3, 'power':5 , 'xp':0, 'xpvalue':200 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
+ 'GREYNAAB':       {'char':'G', 'color':Game.col.RED,         'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':2000 , 'defense':6, 'power':10, 'xp':0, 'xpvalue':400 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
+ 'JERBEAR':        {'char':'J', 'color':Game.col.BLUE,        'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':2500 , 'defense':9, 'power':15, 'xp':0, 'xpvalue':500 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'ZOMBIESHEEP':    {'char':'Z', 'color':Game.col.GREEN,       'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':3000 , 'defense':12,'power':20, 'xp':0, 'xpvalue':600 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':7}}, 
+ 'PUSHY':          {'char':'P', 'color':Game.col.MAGENTA,     'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':5000 , 'defense':20,'power':0 , 'xp':0, 'xpvalue':1000 ,'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
 
 }
 
@@ -56,21 +56,21 @@ mobchances = {
 
 items={}
 items = {
-	'heal':       {'name':'healing potion',           'char':'!', 'color':colors.RED,           'item':{'use_function': entities.cast_heal}}, 
-	'lightning':  {'name':'scroll of lightning bolt', 'char':'?', 'color':colors.YELLOW,        'item':{'use_function': entities.cast_lightning}}, 
-	'fireball':   {'name':'scroll of fireball',       'char':'?', 'color':colors.RED,           'item':{'use_function': entities.cast_fireball}}, 
-	'confuse':    {'name':'scroll of confusion',      'char':'?', 'color':colors.LIGHT_RED,     'item':{'use_function': entities.cast_confusion}}, 
-	'push'   :    {'name':'scroll of push',           'char':'?', 'color':colors.MAGENTA,       'item':{'use_function': entities.cast_push}},
-	'bigpush':    {'name':'scroll of bigpush',        'char':'?', 'color':colors.LIGHT_MAGENTA, 'item':{'use_function': entities.cast_bigpush}},
+	'heal':       {'name':'healing potion',           'char':'!', 'color':Game.col.RED,           'item':{'use_function': entities.cast_heal}}, 
+	'lightning':  {'name':'scroll of lightning bolt', 'char':'?', 'color':Game.col.YELLOW,        'item':{'use_function': entities.cast_lightning}}, 
+	'fireball':   {'name':'scroll of fireball',       'char':'?', 'color':Game.col.RED,           'item':{'use_function': entities.cast_fireball}}, 
+	'confuse':    {'name':'scroll of confusion',      'char':'?', 'color':Game.col.LIGHT_RED,     'item':{'use_function': entities.cast_confusion}}, 
+	'push'   :    {'name':'scroll of push',           'char':'?', 'color':Game.col.MAGENTA,       'item':{'use_function': entities.cast_push}},
+	'bigpush':    {'name':'scroll of bigpush',        'char':'?', 'color':Game.col.LIGHT_MAGENTA, 'item':{'use_function': entities.cast_bigpush}},
 
-	'sword':      {'name':'sword',  'char':'/', 'color':colors.CYAN,           'equipment':{'slot':'right hand' ,   'power_bonus'  :5  }}, 
-	'shield':     {'name':'shield', 'char':'[', 'color':colors.LIGHT_GREEN,    'equipment':{'slot':'left hand'  ,   'defense_bonus':3  }},
+	'sword':      {'name':'sword',  'char':'/', 'color':Game.col.CYAN,           'equipment':{'slot':'right hand' ,   'power_bonus'  :5  }}, 
+	'shield':     {'name':'shield', 'char':'[', 'color':Game.col.LIGHT_GREEN,    'equipment':{'slot':'left hand'  ,   'defense_bonus':3  }},
 
-	'blue_crystal':     {'name':'blue power crystal',    'char':'$', 'color':colors.CYAN,         'item':{'use_function': entities.use_blue_crystal}},
-	'red_crystal':      {'name':'red power crystal',     'char':'$', 'color':colors.RED,          'item':{'use_function': entities.use_red_crystal}},
-	'green_crystal':    {'name':'green power crystal',   'char':'$', 'color':colors.GREEN,        'item':{'use_function': entities.use_green_crystal}},
-	'yellow_crystal':   {'name':'yellow power crystal',  'char':'$', 'color':colors.YELLOW,       'item':{'use_function': entities.use_yellow_crystal}},
-	'orange_crystal':   {'name':'orange power crystal',  'char':'$', 'color':colors.LIGHT_YELLOW, 'item':{'use_function': entities.use_orange_crystal}}
+	'blue_crystal':     {'name':'blue power crystal',    'char':'$', 'color':Game.col.CYAN,         'item':{'use_function': entities.use_blue_crystal}},
+	'red_crystal':      {'name':'red power crystal',     'char':'$', 'color':Game.col.RED,          'item':{'use_function': entities.use_red_crystal}},
+	'green_crystal':    {'name':'green power crystal',   'char':'$', 'color':Game.col.GREEN,        'item':{'use_function': entities.use_green_crystal}},
+	'yellow_crystal':   {'name':'yellow power crystal',  'char':'$', 'color':Game.col.YELLOW,       'item':{'use_function': entities.use_yellow_crystal}},
+	'orange_crystal':   {'name':'orange power crystal',  'char':'$', 'color':Game.col.LIGHT_YELLOW, 'item':{'use_function': entities.use_orange_crystal}}
 
 }
 

@@ -67,7 +67,7 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('draw_rect')
 
-#print_rect and print_str need to prompt for fg and bg colors... or maybe we should rethink how colors are set
+#print_rect and print_str need to prompt for fg and bg Game.col... or maybe we should rethink how colors are set
     def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
         if self.graphicsmode == 'libtcod':
             if fg_color:
