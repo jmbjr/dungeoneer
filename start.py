@@ -5,12 +5,12 @@ class Jumptable(object):
     def play_dungeoneer_gfx(self):
         import Dungeoneer
         gamedata.ASCIIMODE = False
-        Dungeoneer.game_initialize()
+        Dungeoneer.main()
 
     def play_dungeoneer_ascii(self):
         import Dungeoneer
         gamedata.ASCIIMODE = True
-        Dungeoneer.game_initialize()
+        Dungeoneer.main()
 
     def play_life(self):
         import life

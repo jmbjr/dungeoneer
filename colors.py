@@ -29,7 +29,7 @@ class Colorstuff(object):
             self.SEPIA         = libtcod.sepia
 
         elif self.graphicsmode == 'curses':
-            for col in range(0,8):
+            for col in range(1,8):
                 cursesx.init_pair(col, col, cursesx.COLOR_BLACK)
 
             self.BLACK   = cursesx.color_pair(0)
@@ -50,7 +50,7 @@ class Colorstuff(object):
             self.LIGHT_CYAN    = cursesx.color_pair(6) | cursesx.A_BOLD
             self.LIGHT_GREY    = cursesx.color_pair(7) | cursesx.A_BOLD
 
-            self.DARK_SEPIA    = MAGENTA
-            self.SEPIA         = LIGHT_YELLOW
+            self.DARK_SEPIA    = self.MAGENTA
+            self.SEPIA         = self.LIGHT_YELLOW
         else:
             print('Error in Game.col. wrong GRAPHICSMODE')
