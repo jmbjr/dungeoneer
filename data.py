@@ -1,5 +1,5 @@
 import colors
-import gamedata
+import gamedata #TODO move gamedata stuff back into here.
 
 class Datastuff(object):
     def __init__(self):

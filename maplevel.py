@@ -1,11 +1,9 @@
 #standard imports
 from gamestuff import *
-import data
 import colors
 
 #specific imports needed for this module
 import entities
-import entitydata
 import rng
 
 class Maplevel(object):

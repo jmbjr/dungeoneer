@@ -1,5 +1,4 @@
 import libtcod
-import gamedata
 
 class Fovstuff(object):
     def __init__(self, fovmode):

@@ -1,5 +1,4 @@
 import libtcod
-import data
 import gamedata
 import cursesx
     

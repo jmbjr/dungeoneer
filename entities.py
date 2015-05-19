@@ -3,7 +3,6 @@ from gamestuff import *
 import data
 import gamedata
 import colors
-import guistuff
 import rng
 
 #Classes:  Object player, enemies, items, etc
@@ -486,7 +485,7 @@ class ConfusedMonster(object):
         self.old_ai = old_ai
         self.num_turns = num_turns
         self.dat = data.Datastuff()
-        
+
         if self.num_turns is None:
             self.num_turns = self.dat.CONFUSE_NUM_TURNS
 
