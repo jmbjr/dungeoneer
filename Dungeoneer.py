@@ -15,12 +15,22 @@ import keys
 import colors
 import rng
 
+#an unfortunate import:
+import cursesx
 #global class pattern
 class Game(object): 
     game_msgs = []
     msg_history = []
 
-def game_initialize():
+def main():
+    if gamedata.GRAPHICSMODE == 'libtcod':
+        game_intitialize(None)
+    elif gamedata.GRAPHICSMODE == 'curses':
+        cursesx.wrapper(game_initialize)
+    else:
+        print('Error in __name__. wrong GRAPHICSMODE')
+
+def game_initialize(stdscr):
     Game.gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
     Game.fov = fovstuff.Fovstuff(gamedata.FOVMODE)
     Game.col = colors.Colorstuff(gamedata.GRAPHICSMODE)
@@ -31,7 +41,6 @@ def game_initialize():
     Game.con = Game.gui.console(Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
     Game.mouse,Game.key = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
     Game.panel = Game.gui.console(Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
-
 
     main_menu()
 
