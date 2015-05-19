@@ -260,9 +260,9 @@ def life(stdscr):
 #TODO add some enums here or find ones that work
         if thekey.keycode == keys.TAB:
             world.init_world()
-        elif thekey.keycode == keys.UP:
+        elif thekey.keycode == keys.UP or thekey.keychar == 'w':
             speed-=inc
-        elif thekey.keycode ==keys.DOWN:
+        elif thekey.keycode ==keys.DOWN or thekey.keychar == 's':
             speed+=inc
         elif thekey.keycode == keys.RIGHT:
             inc+=.01
