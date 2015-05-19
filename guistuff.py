@@ -165,7 +165,13 @@ class Guistuff(object):
                 libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
             thekey = Keyobj(key.vk, key.c, chr(key.c), key.pressed, key.lalt, key.lctrl, key.ralt, key.rctrl, key.shift)
         elif self.graphicsmode == 'curses':
-            thekey = Keyobj(con.getch(), con.getch())
+            key = con.getch()
+            if key>256 or key<0:
+                keychar=''
+            else:
+                keychar=chr(key)
+
+            thekey = Keyobj(key, key, keychar, False, False, False, False, False, False)
         else:
             self.err_graphicsmode('getkey')
         return thekey
