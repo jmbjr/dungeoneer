@@ -48,24 +48,24 @@ class Menuobj(object):
 
 
 def mapname(Game):
-    return(data.maplist[Game.player.dungeon_level])
+    return(Game.dat..maplist[Game.player.dungeon_level])
 
 #User Interface routines
 def message(new_msg, Game, color = Game.col.WHITE, displaymsg=True):
     #split message if necessary
-    if data.PRINT_MESSAGES:
-        if data.FREE_FOR_ALL_MODE:
+    if Game.dat.PRINT_MESSAGES:
+        if Game.dat.FREE_FOR_ALL_MODE:
             Game.message_sql.log_entity(Game, new_msg)
 
         print 'MSG--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + new_msg
 
     if displaymsg:
         turn = Game.player.game_turns
-        new_msg_lines = textwrap.wrap(new_msg, data.MSG_WIDTH)
+        new_msg_lines = textwrap.wrap(new_msg, Game.dat.MSG_WIDTH)
 
         for line in new_msg_lines:
             #if the buffer is full, remove the first line to make room for the new one
-            if len(Game.game_msgs) == data.MSG_HEIGHT:
+            if len(Game.game_msgs) == Game.dat.MSG_HEIGHT:
                 del Game.game_msgs[0]
 
             #add the new line as a tuple, with the txt and the color
@@ -75,11 +75,11 @@ def message(new_msg, Game, color = Game.col.WHITE, displaymsg=True):
 
 
 def menu(header, options, width, Game, letterdelim=None):
-    if len(options) > data.MAX_NUM_ITEMS: 
-        message('Cannot have a menu with more than ' + str(data.MAX_NUM_ITEMS) + ' options.', Game)
+    if len(options) > Game.dat.MAX_NUM_ITEMS: 
+        message('Cannot have a menu with more than ' + str(Game.dat..MAX_NUM_ITEMS) + ' options.', Game)
 
     #calculate total height of the header (after auto-wrap) and one line per option
-    header_height = Game.gui.get_height_rect(Game.con, 0, 0, width, data.SCREEN_HEIGHT, header)
+    header_height = Game.gui.get_height_rect(Game.con, 0, 0, width, Game.dat.SCREEN_HEIGHT, header)
     if header == '':
         header_height = 0
     height = len(options) + header_height
@@ -110,8 +110,8 @@ def menu(header, options, width, Game, letterdelim=None):
         letter_index += 1
 
     #blit contents of window to root console
-    x = data.SCREEN_WIDTH / 2 - width / 2
-    y = data.SCREEN_HEIGHT / 2 - height / 2
+    x = Game.dat.SCREEN_WIDTH / 2 - width / 2
+    y = Game.dat.SCREEN_HEIGHT / 2 - height / 2
     Game.gui.con_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
     Game.gui.flush(0)
     Game.gui.prep_keyboard(0,0)
@@ -131,7 +131,7 @@ def menu(header, options, width, Game, letterdelim=None):
             goodchoice = True
             retval = None
 
-    Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+    Game.gui.prep_keyboard(Game.dat..KEYS_INITIAL_DELAY,Game.dat..KEYS_INTERVAL)
     return retval
 
 def msgbox(text, Game, width = 50):
@@ -156,7 +156,7 @@ def inventory_menu(header, Game, user):
                 obj = Menuobj(text, color=item.color, char=item.char)    
                 options.append(obj)
 
-        index = menu(header, options, data.INVENTORY_WIDTH, Game, letterdelim='')
+        index = menu(header, options, Game.dat.INVENTORY_WIDTH, Game, letterdelim='')
 
         if (index is None or len(user.fighter.inventory) == 0) or index == 'ESC':
             return None
@@ -178,37 +178,37 @@ def render_all(Game):
         Game.player.fighter.fov_recompute(Game)
         Game.gui.clear(Game.con)
 
-        for y in range(data.CAMERA_HEIGHT):
-            for x in range(data.CAMERA_WIDTH):
+        for y in range(Game.dat..CAMERA_HEIGHT):
+            for x in range(Game.dat..CAMERA_WIDTH):
                 (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
                 visible = Game.fov.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
                 wall = Game.map[Game.dungeon_levelname].block_sight(map_x, map_y)
 
                 if gamedata.ASCIIMODE:
-                    thewallchar  = data.WALL_CHAR
-                    thegroundchar = data.GROUND_CHAR
+                    thewallchar  = Game.dat.WALL_CHAR
+                    thegroundchar = Game.dat.GROUND_CHAR
                 else:
-                    thewallchar  = data.TILE_WALL
-                    thegroundchar = data.TILE_GROUND
+                    thewallchar  = Game.dat.TILE_WALL
+                    thegroundchar = Game.dat.TILE_GROUND
 
-                #thegroundchar = data.GROUND_CHAR
+                #thegroundchar = Game.dat.GROUND_CHAR
                 if not visible:
                     #tile not visible
                     if wall:
-                        color_wall_ground = data.COLOR_DARK_WALL
+                        color_wall_ground = Game.dat.COLOR_DARK_WALL
                         char_wall_ground = thewallchar
                     else:
-                        color_wall_ground = data.COLOR_DARK_GROUND
+                        color_wall_ground = Game.dat.COLOR_DARK_GROUND
                         char_wall_ground = thegroundchar
                     fov_wall_ground = Game.col.DARK_GREY
                 else:
                     #tile is visible
                     Game.map[Game.dungeon_levelname].set_explored(map_x, map_y)
                     if wall:
-                        color_wall_ground = data.COLOR_LIGHT_WALL
+                        color_wall_ground = Game.dat.COLOR_LIGHT_WALL
                         char_wall_ground = thewallchar
                     else:
-                        color_wall_ground = data.COLOR_LIGHT_GROUND
+                        color_wall_ground = Game.dat.COLOR_LIGHT_GROUND
                         char_wall_ground = thegroundchar
                     fov_wall_ground = Game.col.WHITE
 
@@ -224,13 +224,13 @@ def render_all(Game):
     Game.player.draw(Game)
 
     #blit contents of con to root console
-    Game.gui.con_blit(Game.con, 0, 0, data.SCREEN_WIDTH, data.SCREEN_HEIGHT, 0, 0, 0)
+    Game.gui.con_blit(Game.con, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.SCREEN_HEIGHT, 0, 0, 0)
 
     #show player's stats via GUI panel
     Game.gui.clear(Game.panel)
 
     #show player stats
-    render_bar(1, 1, data.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), Game.col.LIGHT_RED, Game.col.RED, Game)
+    render_bar(1, 1, Game.dat.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), Game.col.LIGHT_RED, Game.col.RED, Game)
     Game.gui.print_str(Game.panel, 1, 3, val=Game.dungeon_levelname, fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
     Game.gui.print_str(Game.panel, 1, 4, val='Dungeon level: ' + str(Game.player.dungeon_level), fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
     Game.gui.print_str(Game.panel, 1, 5, val='Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')', fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
@@ -238,14 +238,14 @@ def render_all(Game):
     #print the game messages, one line at a time
     y = 1
     for (line, color) in Game.game_msgs:
-        Game.gui.print_str(Game.panel, data.MSG_X, y, val=line, fg_color=color)
+        Game.gui.print_str(Game.panel, Game.dat.MSG_X, y, val=line, fg_color=color)
         y += 1
 
     #display names of objects under the mouse
     Game.gui.print_str(Game.panel, 1, 0, val=get_names_under_mouse(Game), fg_color=Game.col.LIGHT_GREY)
 
     #blit panel to root console
-    Game.gui.con_blit(Game.panel, 0, 0, data.SCREEN_WIDTH, data.PANEL_HEIGHT, 0, 0, data.PANEL_Y)
+    Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
     #render a bar (HP, exp, etc). first calc the width of the bar
@@ -285,7 +285,7 @@ def player_move_or_attack(dx, dy, Game):
     #try to find attackable object there
     target = None
     #only check objects on the same floor as the player
-    for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
+    for object in Game.objects[Game.dat.maplist[Game.player.dungeon_level]]:
         if object.x == x and object.y == y and object.fighter:
             target = object
             break
@@ -294,18 +294,18 @@ def player_move_or_attack(dx, dy, Game):
     if target is not None:
         Game.player.fighter.attack(target, Game)
         Game.player.game_turns +=1
-        state = data.STATE_PLAYING
+        state = Game.dat.STATE_PLAYING
     else:
         if Game.player.move(dx, dy, Game):
             Game.player.game_turns +=1
-            state = data.STATE_PLAYING
+            state = Game.dat.STATE_PLAYING
 
-            for object in Game.objects[data.maplist[Game.player.dungeon_level]]: #look for items in the player's title
+            for object in Game.objects[Game.dat.maplist[Game.player.dungeon_level]]: #look for items in the player's title
                 if object.x == Game.player.x and object.y == Game.player.y and object is not Game.player:
                     message('* You see ' + object.name + ' at your feet *', Game, Game.col.YELLOW)
 
         else:
-            state = data.STATE_NOACTION
+            state = Game.dat.STATE_NOACTION
 
     Game.fov_recompute = True
     return state
@@ -317,14 +317,14 @@ def player_resting(Game):
 #camera stuff for scrolling
 def move_camera(target_x, target_y, Game):
      #new camera coordinates (top-left corner of the screen relative to the map)
-    x = target_x - data.CAMERA_WIDTH / 2  #coordinates so that the target is at the center of the screen
-    y = target_y - data.CAMERA_HEIGHT / 2
+    x = target_x - Game.dat.CAMERA_WIDTH / 2  #coordinates so that the target is at the center of the screen
+    y = target_y - Game.dat.CAMERA_HEIGHT / 2
  
     #make sure the camera doesn't see outside the map
     if x < 0: x = 0
     if y < 0: y = 0
-    if x > data.MAP_WIDTH - data.CAMERA_WIDTH - 1: x = data.MAP_WIDTH - data.CAMERA_WIDTH - 1
-    if y > data.MAP_HEIGHT - data.CAMERA_HEIGHT - 1: y = data.MAP_HEIGHT - data.CAMERA_HEIGHT - 1
+    if x > Game.dat.MAP_WIDTH - Game.dat.CAMERA_WIDTH - 1: x = Game.dat.MAP_WIDTH - Game.dat.CAMERA_WIDTH - 1
+    if y > Game.dat.MAP_HEIGHT - Game.dat.CAMERA_HEIGHT - 1: y = Game.dat.MAP_HEIGHT - Game.dat.CAMERA_HEIGHT - 1
  
     if x != Game.camera_x or y != Game.camera_y: Game.fov_recompute = True
  
@@ -334,7 +334,7 @@ def to_camera_coordinates(x, y, Game):
     #convert coordinates on the map to coordinates on the screen
     (x, y) = (x - Game.camera_x, y - Game.camera_y)
  
-    if (x < 0 or y < 0 or x >= data.CAMERA_WIDTH or y >= data.CAMERA_HEIGHT):
+    if (x < 0 or y < 0 or x >= Game.dat.CAMERA_WIDTH or y >= Game.dat.CAMERA_HEIGHT):
         return (None, None)  #if it's outside the view, return nothing
  
     return (x, y)

@@ -6,17 +6,17 @@ import colors
 #EDITABLE MOB DATA
 mobs={}
 mobs = {
- 'johnstein':      {'char':'j', 'color':Game.col.LIGHT_GREY,  'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':100 , 'defense':0 , 'power':20 , 'xp':0, 'xpvalue':20 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}, 'caster':{'mp':10}}, 
- 'greynaab':       {'char':'g', 'color':Game.col.LIGHT_BLUE,  'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':200 , 'defense':1 , 'power':40 , 'xp':0, 'xpvalue':40 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'jerbear':        {'char':'j', 'color':Game.col.GREEN,       'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':250 , 'defense':1 , 'power':50 , 'xp':0, 'xpvalue':50 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'zombiesheep':    {'char':'z', 'color':Game.col.YELLOW,      'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':300 , 'defense':2 , 'power':60 , 'xp':0, 'xpvalue':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'pushy':          {'char':'p', 'color':Game.col.MAGENTA,     'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':400 , 'defense':2 , 'power':00 , 'xp':0, 'xpvalue':100, 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'johnstein':      {'char':'j', 'color':Game.col.LIGHT_GREY,  'tilechar':Game.dat.TILE_SKEL_WHITE,   'fighter':{'hp':100 , 'defense':0 , 'power':20 , 'xp':0, 'xpvalue':20 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}, 'caster':{'mp':10}}, 
+ 'greynaab':       {'char':'g', 'color':Game.col.LIGHT_BLUE,  'tilechar':Game.dat.TILE_SKEL_RED  ,   'fighter':{'hp':200 , 'defense':1 , 'power':40 , 'xp':0, 'xpvalue':40 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'jerbear':        {'char':'j', 'color':Game.col.GREEN,       'tilechar':Game.dat.TILE_SKEL_BLUE ,   'fighter':{'hp':250 , 'defense':1 , 'power':50 , 'xp':0, 'xpvalue':50 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'zombiesheep':    {'char':'z', 'color':Game.col.YELLOW,      'tilechar':Game.dat.TILE_SKEL_GREEN,   'fighter':{'hp':300 , 'defense':2 , 'power':60 , 'xp':0, 'xpvalue':60 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'pushy':          {'char':'p', 'color':Game.col.MAGENTA,     'tilechar':Game.dat.TILE_SKEL_MAGENTA, 'fighter':{'hp':400 , 'defense':2 , 'power':00 , 'xp':0, 'xpvalue':100, 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
 
- 'JOHNSTEIN':      {'char':'J', 'color':Game.col.BLACK,       'tilechar':data.TILE_SKEL_WHITE,   'fighter':{'hp':1000 , 'defense':3, 'power':5 , 'xp':0, 'xpvalue':200 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
- 'GREYNAAB':       {'char':'G', 'color':Game.col.RED,         'tilechar':data.TILE_SKEL_RED  ,   'fighter':{'hp':2000 , 'defense':6, 'power':10, 'xp':0, 'xpvalue':400 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
- 'JERBEAR':        {'char':'J', 'color':Game.col.BLUE,        'tilechar':data.TILE_SKEL_BLUE ,   'fighter':{'hp':2500 , 'defense':9, 'power':15, 'xp':0, 'xpvalue':500 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
- 'ZOMBIESHEEP':    {'char':'Z', 'color':Game.col.GREEN,       'tilechar':data.TILE_SKEL_GREEN,   'fighter':{'hp':3000 , 'defense':12,'power':20, 'xp':0, 'xpvalue':600 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':7}}, 
- 'PUSHY':          {'char':'P', 'color':Game.col.MAGENTA,     'tilechar':data.TILE_SKEL_MAGENTA, 'fighter':{'hp':5000 , 'defense':20,'power':0 , 'xp':0, 'xpvalue':1000 ,'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
+ 'JOHNSTEIN':      {'char':'J', 'color':Game.col.BLACK,       'tilechar':Game.dat.TILE_SKEL_WHITE,   'fighter':{'hp':1000 , 'defense':3, 'power':5 , 'xp':0, 'xpvalue':200 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
+ 'GREYNAAB':       {'char':'G', 'color':Game.col.RED,         'tilechar':Game.dat.TILE_SKEL_RED  ,   'fighter':{'hp':2000 , 'defense':6, 'power':10, 'xp':0, 'xpvalue':400 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':3}}, 
+ 'JERBEAR':        {'char':'J', 'color':Game.col.BLUE,        'tilechar':Game.dat.TILE_SKEL_BLUE ,   'fighter':{'hp':2500 , 'defense':9, 'power':15, 'xp':0, 'xpvalue':500 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':5}}, 
+ 'ZOMBIESHEEP':    {'char':'Z', 'color':Game.col.GREEN,       'tilechar':Game.dat.TILE_SKEL_GREEN,   'fighter':{'hp':3000 , 'defense':12,'power':20, 'xp':0, 'xpvalue':600 , 'clan':'monster', 'death_function': entities.monster_death, 'speed':7}}, 
+ 'PUSHY':          {'char':'P', 'color':Game.col.MAGENTA,     'tilechar':Game.dat.TILE_SKEL_MAGENTA, 'fighter':{'hp':5000 , 'defense':20,'power':0 , 'xp':0, 'xpvalue':1000 ,'clan':'monster', 'death_function': entities.monster_death, 'speed':1}}, 
 
 }
 

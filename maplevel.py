@@ -70,7 +70,7 @@ def next_level(Game):
     #advance to next level
     message('You head down the stairs', Game, Game.col.RED)
     Game.player.dungeon_level +=1
-    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = Game.dat.maplist[Game.player.dungeon_level]
 
     if not Game.dungeon_levelname in Game.map:
         make_map(Game, Game.player.dungeon_level, Game.dungeon_levelname) #create fresh new level
@@ -83,12 +83,12 @@ def prev_level(Game):
     #advance to next level
     message('You head up the stairs', Game, Game.col.RED)
     Game.player.dungeon_level -=1
-    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = Game.dat.maplist[Game.player.dungeon_level]
 
     if Game.player.dungeon_level <= 0: #leave dungeon      
         message('You\'ve left the dungeon!', Game, Game.col.RED)
         Game.player.dungeon_level =1 #workaround to prevent game from complaining. 
-        return data.STATE_EXIT
+        return Game.dat.STATE_EXIT
     else:
         #make_map(Game) #create fresh new level
         #assume map already made. bad long-term assumption
@@ -107,7 +107,7 @@ def from_dungeon_level(table, dungeon_level):
         return 0
 
 def make_dungeon(Game):
-    for index,level in enumerate(data.maplist):
+    for index,level in enumerate(Game.dat.maplist):
         if index > 0: #skip intro level
             print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating level ' + level
             Game.player.dungeon_level = index
@@ -115,7 +115,7 @@ def make_dungeon(Game):
             make_map(Game, index, level)
 
     Game.player.dungeon_level = 1
-    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = Game.dat.maplist[Game.player.dungeon_level]
 
     Game.player.x = Game.upstairs[Game.dungeon_levelname].x
     Game.player.y = Game.upstairs[Game.dungeon_levelname].y
@@ -127,18 +127,18 @@ def make_map(Game, levelnum, levelname):
     #fill map with "blocked" tiles
 
     print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' creating map:' + str(Game.dungeon_levelname)
-    Game.map[Game.dungeon_levelname] = Maplevel(data.MAP_HEIGHT, data.MAP_WIDTH, levelnum, levelname, Game.fov)          
+    Game.map[Game.dungeon_levelname] = Maplevel(Game.dat.MAP_HEIGHT, Game.dat.MAP_WIDTH, levelnum, levelname, Game.fov)          
 
     rooms = []
     num_rooms = 0
 
-    for r in range(data.MAX_ROOMS):
+    for r in range(Game.dat.MAX_ROOMS):
         #get random width/heightS
-        w = rng.random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
-        h = rng.random_int(0, data.ROOM_MIN_SIZE, data.ROOM_MAX_SIZE)
+        w = rng.random_int(0, Game.dat.ROOM_MIN_SIZE, Game.dat.ROOM_MAX_SIZE)
+        h = rng.random_int(0, Game.dat.ROOM_MIN_SIZE, Game.dat.ROOM_MAX_SIZE)
         #get random positions, but stay within map
-        x = rng.random_int(0, data.MAP_PAD_W, data.MAP_WIDTH - w - data.MAP_PAD_W)
-        y = rng.random_int(0, data.MAP_PAD_H, data.MAP_HEIGHT - h - data.MAP_PAD_H)
+        x = rng.random_int(0, Game.dat.MAP_PAD_W, Game.dat.MAP_WIDTH - w - Game.dat.MAP_PAD_W)
+        y = rng.random_int(0, Game.dat.MAP_PAD_H, Game.dat.MAP_HEIGHT - h - Game.dat.MAP_PAD_H)
 
         new_room = Rect(x, y, w, h)
 
@@ -199,11 +199,11 @@ def place_objects(room, Game):
     #choose random number of monsters
     #max number monsters per room
     nextid = 1
-    max_monsters = from_dungeon_level([[10, 1], [40, 3], [50, 6], [70, 10]], data.maplist.index(Game.dungeon_levelname))
+    max_monsters = from_dungeon_level([[10, 1], [40, 3], [50, 6], [70, 10]], Game.dat.maplist.index(Game.dungeon_levelname))
     num_monsters = rng.random_int(0, 0, max_monsters)
     monster_chances = get_monster_chances(Game)
 
-    max_items = from_dungeon_level([[10, 1], [2, 4]], data.maplist.index(Game.dungeon_levelname))
+    max_items = from_dungeon_level([[10, 1], [2, 4]], Game.dat.maplist.index(Game.dungeon_levelname))
     num_items = rng.random_int(0, 0, max_items)
     item_chances = get_item_chances(Game)
 
@@ -217,13 +217,13 @@ def place_objects(room, Game):
             choice = rng.random_choice(monster_chances)
 
             monster             = entities.Object(**entitydata.mobs[choice])
-            monster.dungeon_level = data.maplist.index(Game.dungeon_levelname) 
+            monster.dungeon_level = Game.dat.maplist.index(Game.dungeon_levelname) 
             monster.blocks      = True        
             monster.ai          = entities.Ai(entities.BasicMonster())  #how do I set different ai?
             monster.ai.owner    = monster
             monster.id          = str(monster.dungeon_level) + '.' + str(nextid)
             monster.name        = choice + '(' + str(monster.id) + ')'
-            if data.FREE_FOR_ALL_MODE:
+            if Game.dat.FREE_FOR_ALL_MODE:
                 monster.fighter.clan        = monster.name
             nextid+=1
             monster.fighter.fov = Game.map[Game.dungeon_levelname].fov_map
@@ -254,7 +254,7 @@ def place_objects(room, Game):
             item.always_visible = True
 
             item.set_location(x, y, Game)
-            item.dungeon_level = data.maplist.index(Game.dungeon_levelname)
+            item.dungeon_level = Game.dat.maplist.index(Game.dungeon_levelname)
 
             Game.objects[Game.dungeon_levelname].append(item)
             item.send_to_back(Game) #items appear below other objects
@@ -264,7 +264,7 @@ def get_monster_chances(Game):
     monster_chances = {}
 
     for mobname in entitydata.mobchances:
-        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], data.maplist.index(Game.dungeon_levelname))
+        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], Game.dat.maplist.index(Game.dungeon_levelname))
 
     return monster_chances
 
@@ -273,6 +273,6 @@ def get_item_chances(Game):
     item_chances = {}
 
     for itemname in entitydata.itemchances:
-        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], data.maplist.index(Game.dungeon_levelname))
+        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], Game.dat.maplist.index(Game.dungeon_levelname))
 
     return item_chances

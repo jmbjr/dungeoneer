@@ -25,10 +25,11 @@ def game_initialize():
     Game.fov = fovstuff.Fovstuff(gamedata.FOVMODE)
     Game.col = Game.col.Colorstuff(gamedata.GRAPHICSMODE)
     Game.col.init_colors()
+    Game.dat = Game.dat.Datastuff(Game) #for now, gotta call this after Game.col.init_colors()
 
-    Game.con = Game.gui.console(data.MAP_WIDTH,data.MAP_HEIGHT)
-    Game.mouse,Game.key = Game.gui.prep_console(Game.con, data.MAP_WIDTH,data.MAP_HEIGHT)
-    Game.panel = Game.gui.console(data.SCREEN_WIDTH, data.PANEL_HEIGHT)
+    Game.con = Game.gui.console(Game.dat..MAP_WIDTH,Game.dat..MAP_HEIGHT)
+    Game.mouse,Game.key = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat..MAP_HEIGHT)
+    Game.panel = Game.gui.console(Game.dat..SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
 
 
     main_menu()
@@ -37,24 +38,24 @@ def game_initialize():
 def main_menu():  
     while not Game.gui.isgameover():
 
-        img = Game.gui.load_image(data.MAIN_MENU_BKG, data.MAIN_MENU_BKG_ASCII)
+        img = Game.gui.load_image(Game.dat..MAIN_MENU_BKG, Game.dat.MAIN_MENU_BKG_ASCII)
         Game.gui.img_blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
-        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=Game.col.LIGHT_YELLOW)
-        Game.gui.print_str(0, data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.print_str(0, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.print_str(0, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=Game.col.LIGHT_YELLOW)
 
         #show options and wait for the player's choice
         choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
 
         if choice == 0: #new game
-            data.FREE_FOR_ALL_MODE = False
-            data.AUTOMODE = False
+            Game.dat.FREE_FOR_ALL_MODE = False
+            Game.dat.AUTOMODE = False
             new_game()
             play_game()
 
         if choice == 1: #new game
-            data.AUTOMODE = True
+            Game.dat.AUTOMODE = True
             new_game()
             play_game()
 
@@ -104,13 +105,13 @@ def load_game(filename='savegame'):
 def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=300, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
-    Game.player = entities.Object(data.SCREEN_WIDTH/2, data.SCREEN_HEIGHT/2, '@', 'Roguetato', Game.col.WHITE, tilechar=data.TILE_MAGE, blocks=True, fighter=fighter_component)
+    Game.player = entities.Object(Game.dat..SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2, '@', 'Roguetato', Game.col.WHITE, tilechar=Game.dat.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.dungeon_level = 1
-    Game.game_state = data.STATE_PLAYING
+    Game.game_state = Game.dat.STATE_PLAYING
     Game.player.game_turns = 0
 
-    Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+    Game.dungeon_levelname = Game.dat.maplist[Game.player.dungeon_level]
 
     Game.map = {}
     Game.objects = {}
@@ -118,10 +119,10 @@ def new_game():
     Game.downstairs = {}
     Game.tick = 0
 
-    if data.FREE_FOR_ALL_MODE: #turn on SQL junk and kill player.
-        Game.entity_sql = logging.Sqlobj(data.ENTITY_DB)
-        Game.message_sql = logging.Sqlobj(data.MESSAGE_DB)
-        Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
+    if Game.dat.FREE_FOR_ALL_MODE: #turn on SQL junk and kill player.
+        Game.entity_sql = logging.Sqlobj(Game.dat..ENTITY_DB)
+        Game.message_sql = logging.Sqlobj(Game.dat..MESSAGE_DB)
+        Game.sql_commit_counter = Game.dat.SQL_COMMIT_TICK_COUNT
         Game.player.fighter.alive = False
         Game.player.fighter.hp = 0
 
@@ -134,7 +135,7 @@ def new_game():
     Game.gui.clear(Game.con)
 
     #initial equipment
-    if not data.AUTOMODE:
+    if not Game.dat.AUTOMODE:
         equipment_component = entities.Equipment(slot='wrist', max_hp_bonus = 5)
         obj = entities.Object(0, 0, '-', 'wristguards of the whale', Game.col.LIGHT_RED, equipment=equipment_component)
         obj.always_visible = True
@@ -146,14 +147,14 @@ def new_game():
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, Game.col.BLUE)
-    Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+    Game.gui.prep_keyboard(Game.dat..KEYS_INITIAL_DELAY,Game.dat..KEYS_INTERVAL)
 
 def play_game():
     Game.player_action = None
 
     (Game.camera_x, Game.camera_y) = (0, 0)  
 
-    if data.AUTOMODE:
+    if Game.dat.AUTOMODE:
         set_objects_visible(Game)
         Game.map[Game.dungeon_levelname].set_map_explored()  
         battleover = False
@@ -170,30 +171,30 @@ def play_game():
         Game.gui.flush(Game.con)
 
         #erase objects from old position on current map, before they move
-        for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
+        for object in Game.objects[Game.dat.maplist[Game.player.dungeon_level]]:
             object.clear(Game)
 
         #each time we loop, ensure that the Game.dungeon_levelname is equal to the current player dungeon level
-        Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+        Game.dungeon_levelname = Game.dat.maplist[Game.player.dungeon_level]
 
         #only let player move if speed counter is 0 (or dead).  Don't allow player to move if controlled by AI.
-        if not data.AUTOMODE:    
-            if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == data.STATE_DEAD: #player can take a turn-based unless it has an AI         
+        if not Game.dat.AUTOMODE:    
+            if (Game.player.fighter.speed_counter <= 0 and not Game.player.ai) or Game.game_state == Game.dat.STATE_DEAD: #player can take a turn-based unless it has an AI         
                 Game.player_action = handle_keys(Game)
 
-                if Game.player_action != data.STATE_NOACTION:
+                if Game.player_action != Game.dat.STATE_NOACTION:
                     #player actually did something. we can reset counter
                     Game.player.fighter.speed_counter = Game.player.fighter.speed(Game)
 
-        if Game.player_action == data.STATE_EXIT:
+        if Game.player_action == Game.dat.STATE_EXIT:
             break
 
         #handle monsters only if the game is still playing and the player isn't waiting for an action
-        if Game.game_state == data.STATE_PLAYING and Game.player_action != data.STATE_NOACTION:
+        if Game.game_state == Game.dat.STATE_PLAYING and Game.player_action != Game.dat.STATE_NOACTION:
             Game.fov_recompute = True
             
             #loop through all objects on all maps
-            for index,Game.dungeon_levelname in enumerate(data.maplist):
+            for index,Game.dungeon_levelname in enumerate(Game.dat..maplist):
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_levelname]:
                         if object.fighter:
@@ -205,7 +206,7 @@ def play_game():
                             #this is clunky, but have to again check if monster is still alive
                             if object.fighter.alive:
                                 if object.fighter.regen_counter <= 0: #only regen if the counter = 0. 
-                                    object.fighter.hp += int(object.fighter.max_hp(Game) * data.REGEN_MULTIPLIER)
+                                    object.fighter.hp += int(object.fighter.max_hp(Game) * Game.dat.REGEN_MULTIPLIER)
                                     object.fighter.regen_counter = object.fighter.regen(Game)
 
                                 object.fighter.regen_counter -= 1
@@ -224,25 +225,25 @@ def play_game():
                                         
                                 check_level_up(Game, object)
 
-                            if data.FREE_FOR_ALL_MODE:
+                            if Game.dat.FREE_FOR_ALL_MODE:
                                 # log object state
                                 Game.entity_sql.log_entity(Game, object)
 
                         elif object.ai:
                             object.ai.take_turn(Game)
 
-            if data.FREE_FOR_ALL_MODE:
+            if Game.dat.FREE_FOR_ALL_MODE:
                 Game.entity_sql.log_flush(Game)
                 Game.message_sql.log_flush(Game)            
                 Game.tick += 1
                 Game.sql_commit_counter -= 1
 
-            if data.AUTOMODE:
+            if Game.dat.AUTOMODE:
                 alive_entities = entities.total_alive_entities(Game)
                 if len(alive_entities) == 1:
                     message ('BATTLE ROYALE IS OVER! Winner is ', Game, Game.col.BLUE)
                     entities.printstats(alive_entities[0], Game)
-                    data.AUTOMODE = False
+                    Game.dat.AUTOMODE = False
 
                     #render the screen
                     render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
@@ -253,16 +254,16 @@ def play_game():
 
                 if len(alive_entities) <=0:
                     message ('BATTLE ROYALE IS OVER! EVERYONE DIED! YOU ALL SUCK!', Game, Game.col.BLUE)
-                    data.AUTOMODE = False  
+                    Game.dat.AUTOMODE = False  
 
                     save_final_sql_csv(Game)
 
-        Game.dungeon_levelname = data.maplist[Game.player.dungeon_level]
+        Game.dungeon_levelname = Game.dat.maplist[Game.player.dungeon_level]
 
 def check_level_up(Game, user):
     #see if the user's experience is enough to level-up
 
-        level_up_xp = data.LEVEL_UP_BASE + user.fighter.xplevel * data.LEVEL_UP_FACTOR
+        level_up_xp = Game.dat.LEVEL_UP_BASE + user.fighter.xplevel * Game.dat.LEVEL_UP_FACTOR
 
         if user.fighter.xp >= level_up_xp:
             user.fighter.xplevel += 1
@@ -280,7 +281,7 @@ def check_level_up(Game, user):
                         choice = menu('Level up! Choose a stat to raise:\n', 
                         [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=Game.col.GREEN),
                         Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=Game.col.RED), 
-                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=Game.col.BLUE)], data.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
+                        Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=Game.col.BLUE)], Game.dat.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
             else:
                 choice = rng.random_int(0, 0, 2) #TODO: variablize this
 
@@ -302,9 +303,9 @@ def handle_keys(Game):
         #ALT + ENTER: toggle fullscreen
         Game.gui.toggle_fullscreen()
     elif thekey.keycode == keys.ESC:
-        return data.STATE_EXIT #exit game
+        return Game.dat.STATE_EXIT #exit game
 
-    if Game.game_state == data.STATE_PLAYING:
+    if Game.game_state == Game.dat.STATE_PLAYING:
         #rest
         if thekey.keycode == keys.KPDEC or thekey.keycode == keys.KP5:
             player_resting(Game)
@@ -340,7 +341,7 @@ def handle_keys(Game):
             #test for other keys
             if thekey.keychar == 'g':
                 #pick up an item
-                for object in Game.objects[data.maplist[Game.player.dungeon_level]]: #look for items in the player's title on the same floor of the player
+                for object in Game.objects[Game.dat.maplist[Game.player.dungeon_level]]: #look for items in the player's title on the same floor of the player
                     if object.x == Game.player.x and object.y == Game.player.y and object.item:
                         Game.player.game_turns += 1
                         return object.item.pick_up(Game, Game.player)
@@ -362,60 +363,60 @@ def handle_keys(Game):
 
             if thekey.keychar == 'c':
                 #show character info
-                level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
+                level_up_xp = Game.dat.LEVEL_UP_BASE + Game.player.xplevel * Game.dat.LEVEL_UP_FACTOR
                 msgbox('Character Information\n\nLevel: ' + str(Game.player.xplevel) + '\nExperience: ' + str(Game.player.fighter.xp) +
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
-                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, data.CHARACTER_SCREEN_WIDTH)
+                    '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, Game.dat.CHARACTER_SCREEN_WIDTH)
 
             if thekey.keychar == 'x':
                 #debug key to automatically level up
-                msgbox('You start to meditate!', Game, data.CHARACTER_SCREEN_WIDTH)
-                level_up_xp = data.LEVEL_UP_BASE + Game.player.xplevel * data.LEVEL_UP_FACTOR
+                msgbox('You start to meditate!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                level_up_xp = Game.dat.LEVEL_UP_BASE + Game.player.xplevel * Game.dat.LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
                 check_level_up(Game)
                 Game.player.game_turns += 1       
 
             if thekey.keychar == 'a':
                 #debug key to set all objects to visible
-                msgbox('You can smell them all!', Game, data.CHARACTER_SCREEN_WIDTH)
+                msgbox('You can smell them all!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 set_objects_visible(Game)
 
             if thekey.keychar == 'q':
                 #go down stairs, if the player is on them
-                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, data.CHARACTER_SCREEN_WIDTH)
+                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 Game.map[Game.dungeon_levelname].set_map_explored()   
                 Game.fov_recompute = True   
 
             if thekey.keychar == 'z':
                 #debug key to automatically go to next level
-                msgbox('You start digging at your feet!', Game, data.CHARACTER_SCREEN_WIDTH)
+                msgbox('You start digging at your feet!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 map.next_level(Game)           
 
             if thekey.keychar == '>':
                 #go down stairs, if the player is on them
-                if Game.downstairs[data.maplist[Game.player.dungeon_level]].x == Game.player.x and Game.downstairs[data.maplist[Game.player.dungeon_level]].y == Game.player.y:
+                if Game.downstairs[Game.dat.maplist[Game.player.dungeon_level]].x == Game.player.x and Game.downstairs[Game.dat.maplist[Game.player.dungeon_level]].y == Game.player.y:
                     Game.player.game_turns +=1
                     map.next_level(Game)
 
             if thekey.keychar == '<':
                 #go up stairs, if the player is on them
-                if Game.upstairs[data.maplist[Game.player.dungeon_level]].x == Game.player.x and Game.upstairs[data.maplist[Game.player.dungeon_level]].y == Game.player.y:
+                if Game.upstairs[Game.dat.maplist[Game.player.dungeon_level]].x == Game.player.x and Game.upstairs[Game.dat.maplist[Game.player.dungeon_level]].y == Game.player.y:
                     Game.player.game_turns +=1
                     map.prev_level(Game)
 
             if thekey.keychar == 's': #general status key
                 #debug key to automatically go to prev level
-                msgbox('You start digging above your head!', Game, data.CHARACTER_SCREEN_WIDTH)
+                msgbox('You start digging above your head!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 map.prev_level(Game)    
 
             if thekey.keychar == 'p': #display log
-                width = data.SCREEN_WIDTH
-                height = data.SCREEN_HEIGHT
+                width = Game.dat.SCREEN_WIDTH
+                height = Game.dat.SCREEN_HEIGHT
 
                 history = [[]]
                 count = 0
                 page = 1
-                numpages = int(float(len(Game.msg_history))/data.MAX_NUM_ITEMS + 1)
+                numpages = int(float(len(Game.msg_history))/Game.dat.MAX_NUM_ITEMS + 1)
 
                 for thepage in range(numpages):
                     history.append([])
@@ -426,7 +427,7 @@ def handle_keys(Game):
                     history[page].append(Menuobj(line, color = color))
                     count += 1
 
-                    if count >= data.MAX_NUM_ITEMS:
+                    if count >= Game.dat.MAX_NUM_ITEMS:
                         page +=1
                         count = 0
 
@@ -434,7 +435,7 @@ def handle_keys(Game):
                     window = Game.gui.console(width, height)
                     Game.gui.print_rect(window, 0, 0, width, height)
                     Game.gui.con_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
-                    menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], data.SCREEN_WIDTH, Game, letterdelim=None)
+                    menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], Game.dat.SCREEN_WIDTH, Game, letterdelim=None)
 
                 Game.fov_recompute = True           
 
@@ -442,22 +443,22 @@ def handle_keys(Game):
 
             if thekey.keychar == 'r':
                 print 'SYSTEM--\t RELOADING GAME DATA'
-                reload(data)
+                reload(Game.dat.)
                 reload(entitydata) 
                 #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
-                Game.gui.prep_keyboard(data.KEYS_INITIAL_DELAY,data.KEYS_INTERVAL)
+                Game.gui.prep_keyboard(Game.dat..KEYS_INITIAL_DELAY,Game.dat..KEYS_INTERVAL)
 
                 buff_component = entities.Buff('Super Strength', power_bonus=20)
                 Game.player.fighter.add_buff(buff_component)
-                msgbox ('YOU ROAR WITH BERSERKER RAGE!', Game, data.CHARACTER_SCREEN_WIDTH)
+                msgbox ('YOU ROAR WITH BERSERKER RAGE!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
 
             if thekey.keychar == 'w':
                 #give all items
-                msgbox('You fashion some items from the scraps at your feet', Game, data.CHARACTER_SCREEN_WIDTH)
+                msgbox('You fashion some items from the scraps at your feet', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 give_items(Game)
 
-            return data.STATE_NOACTION
+            return Game.dat.STATE_NOACTION
 
 
 #DEBUG FUNCTIONS
@@ -474,12 +475,12 @@ def give_items(Game):
      
 
 def set_objects_visible(Game):
-    for object in Game.objects[data.maplist[Game.player.dungeon_level]]:
+    for object in Game.objects[Game.dat.maplist[Game.player.dungeon_level]]:
         object.always_visible = True
 
 def save_final_sql_csv(Game):
     #save last batch of enemies after final tick
-    if data.FREE_FOR_ALL_MODE:
+    if Game.dat.FREE_FOR_ALL_MODE:
         for object in Game.objects[Game.dungeon_levelname]:
             if object.fighter:
                 # log object state

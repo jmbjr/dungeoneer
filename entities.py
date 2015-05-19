@@ -97,7 +97,7 @@ class Object(object):
         #erase char that represents this object
         (x, y) = to_camera_coordinates(self.x, self.y, Game)
         if x is not None and Game.fov.map_is_in_fov(Game.player.fighter.fov, self.x, self.y):
-            Game.gui.print_char(Game.con, x, y, val=data.GROUND_CHAR, fg_color=Game.col.WHITE, bg_color=data.COLOR_LIGHT_GROUND, use_defaults=False)
+            Game.gui.print_char(Game.con, x, y, val=Game.dat.GROUND_CHAR, fg_color=Game.col.WHITE, bg_color=Game.dat.COLOR_LIGHT_GROUND, use_defaults=False)
 
     def move_away(self, target, Game):
         if self.dungeon_level == target.dungeon_level:
@@ -176,7 +176,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, killed=False, xplevel=1, speed=data.SPEED_DEFAULT, regen=data.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
+    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, killed=False, xplevel=1, speed=Game.dat.SPEED_DEFAULT, regen=Game.dat.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -203,7 +203,7 @@ class Fighter(object):
             self.buffs.owner = self
 
     def fov_recompute(self, Game):
-        Game.fov.map_compute_fov(self.fov, self.owner.x, self.owner.y, data.TORCH_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+        Game.fov.map_compute_fov(self.fov, self.owner.x, self.owner.y, Game.dat.TORCH_RADIUS, Game.dat.FOV_LIGHT_WALLS, Game.dat.FOV_ALGO)
         return self.fov
 
 
@@ -310,7 +310,7 @@ class Ai(object):
 
 
 class Buff(object):
-    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=data.BUFF_DECAYRATE, duration=data.BUFF_DURATION):
+    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=Game.dat.BUFF_DECAYRATE, duration=Game.dat.BUFF_DURATION):
         self.name = name
         self.power_bonus = power_bonus
         self.defense_bonus = defense_bonus
@@ -365,7 +365,7 @@ class Item(object):
         #call the 'use_function' if defined
         if self.use_function is None:
             message('The ' + self.owner.name + ' cannot be used.', Game)
-            return data.STATE_NOACTION
+            return Game.dat.STATE_NOACTION
         else:
             if self.use_function(Game, user) != 'cancelled':
                 #need to remove it from the user's inventory if the user is still alive
@@ -373,9 +373,9 @@ class Item(object):
                     user.fighter.remove_item(self.owner)
 
                 Game.fov_recompute = True
-                return data.STATE_USED
+                return Game.dat.STATE_USED
             else:
-                return data.STATE_NOACTION
+                return Game.dat.STATE_NOACTION
 
     #an item that can be picked up and used
     def pick_up(self, Game, user):
@@ -383,7 +383,7 @@ class Item(object):
         if len(user.fighter.inventory) >= 26:
             if user is Game.player:
                 message('Your inventory is full! Cannot pick up ' + self.owner.name +'.', Game, Game.col.MAGENTA)
-            retval = data.STATE_NOACTION
+            retval = Game.dat.STATE_NOACTION
         else:
             user.fighter.add_item(self.owner)
             Game.objects[Game.dungeon_levelname].remove(self.owner)
@@ -396,10 +396,10 @@ class Item(object):
 
             #special case: auto equip if the slot is unused
             equipment = self.owner.equipment
-            if equipment and get_equipped_in_slot(equipment.slot, Game, user) is None and data.AUTOEQUIP:
+            if equipment and get_equipped_in_slot(equipment.slot, Game, user) is None and Game.dat.AUTOEQUIP:
                 equipment.equip(Game, user)
 
-            retval = data.STATE_PLAYING
+            retval = Game.dat.STATE_PLAYING
 
         return retval
 
@@ -409,7 +409,7 @@ class Item(object):
         user.fighter.remove_item(self.owner)
         self.owner.x = user.x
         self.owner.y = user.y
-        self.owner.dungeon_level = data.maplist.index(Game.dungeon_levelname)
+        self.owner.dungeon_level = Game.dat.maplist.index(Game.dungeon_levelname)
         self.owner.send_to_back(Game)
         if user is Game.player:
             message('You dropped a ' + self.owner.name + '.', Game, Game.col.YELLOW)
@@ -461,7 +461,7 @@ class Equipment(object):
 
 #AI
 class ConfusedMonster(object):
-    def __init__(self, old_ai, num_turns = data.CONFUSE_NUM_TURNS):
+    def __init__(self, old_ai, num_turns = Game.dat.CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
         self.num_turns = num_turns
 
@@ -494,8 +494,8 @@ class BasicMonster(object):
 
         monster = self.owner.owner
         #find nearest non-clan object
-        nearest_nonclan = closest_nonclan(data.TORCH_RADIUS, Game, monster)
-        nearest_item    = closest_item(data.TORCH_RADIUS, Game, monster)
+        nearest_nonclan = closest_nonclan(Game.dat..TORCH_RADIUS, Game, monster)
+        nearest_item    = closest_item(Game.dat..TORCH_RADIUS, Game, monster)
         
         if nearest_nonclan is None:
             fight = False
@@ -521,7 +521,7 @@ class BasicMonster(object):
                         useditem = item.use(Game, user=monster)
 
                 #if monster didn't use item, then move
-                if useditem is not data.STATE_USED:
+                if useditem is not Game.dat.STATE_USED:
                     #move towards Game.player if far enough away
 
                     if monster.distance_to(nearest_nonclan) >= 2:
@@ -604,16 +604,16 @@ def use_orange_crystal(Game, user):
 #spells
 def cast_confusion(Game, user):
     target = None
-    target = closest_nonclan(data.TORCH_RADIUS, Game, user)
+    target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
 
     if user is Game.player:
         #ask player for target to confuse
         message('Left-click an enemy to confuse. Right-click or ESC to cancel', Game, Game.col.LIGHT_CYAN)
-        target = target_monster(Game, data.CONFUSE_RANGE)
+        target = target_monster(Game, Game.dat.CONFUSE_RANGE)
         name = 'You'
     
     elif not target is None:
-        target = closest_nonclan(data.TORCH_RADIUS, Game, user)
+        target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
         name = user.name
 
     else:
@@ -622,7 +622,7 @@ def cast_confusion(Game, user):
             message('Cancelling confuse', Game, Game.col.RED, False)
         else:
             message(user.name + ' cancels Confuse', Game, Game.col.RED, False)
-        return data.STATE_CANCELLED
+        return Game.dat.STATE_CANCELLED
 
     #replace target's AI with confuse
     if target.ai:
@@ -641,7 +641,7 @@ def cast_confusion(Game, user):
 def cast_fireball(Game, user):
     (x,y) = (None, None)
     target = None
-    target = closest_nonclan(data.TORCH_RADIUS, Game, user)
+    target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
 
     if user is Game.player: 
         #ask the player for a target tile to throw a fireball at
@@ -659,14 +659,14 @@ def cast_fireball(Game, user):
             message('Cancelling fireball', Game, Game.col.RED)
         else:
             message(user.name + ' cancels Fireball', Game, Game.col.RED, False)
-        return data.STATE_CANCELLED
+        return Game.dat.STATE_CANCELLED
 
     else:
-        theDmg = rng.roll_dice([[data.FIREBALL_DAMAGE/2, data.FIREBALL_DAMAGE*2]])[0]
+        theDmg = rng.roll_dice([[Game.dat.FIREBALL_DAMAGE/2, Game.dat.FIREBALL_DAMAGE*2]])[0]
         
         #create fireball fov based on x,y coords of target
         fov_map_fireball = Game.map[Game.dungeon_levelname].fov_map
-        Game.fov.map_compute_fov(fov_map_fireball, x, y, data.FIREBALL_RADIUS, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+        Game.fov.map_compute_fov(fov_map_fireball, x, y, Game.dat.FIREBALL_RADIUS, Game.dat.FOV_LIGHT_WALLS, Game.dat.FOV_ALGO)
 
         for obj in Game.objects[Game.dungeon_levelname]: #damage all fighters within range
             if Game.fov.map_is_in_fov(fov_map_fireball, obj.x, obj.y) and obj.fighter:
@@ -681,13 +681,13 @@ def cast_heal(Game, user):
             message('You are already at full health.', Game, Game.col.RED)
         else:
             message(user.name + ' cancels Heal', Game, Game.col.RED, False)
-        return data.STATE_CANCELLED
+        return Game.dat.STATE_CANCELLED
 
     if user is Game.player:
         message('You feel better', Game, Game.col.LIGHT_CYAN)
     else:
         message(user.name + ' looks healthier!', Game, Game.col.RED)
-    user.fighter.heal(data.HEAL_AMOUNT, Game)
+    user.fighter.heal(Game.dat..HEAL_AMOUNT, Game)
 
 def cast_push(Game, user):
     push(Game, user, 3)
@@ -699,11 +699,11 @@ def push(Game, user, numpushes):
     #find nearest enemy (within range) and damage it
     target = None
     if user is Game.player:
-        target = closest_monster(data.TORCH_RADIUS, Game)
+        target = closest_monster(Game.dat..TORCH_RADIUS, Game)
 
     #otherwise, this is a mob
     else:
-        target = closest_nonclan(data.TORCH_RADIUS, Game, user)
+        target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
 
     if target is None:
         if user is Game.player:
@@ -735,10 +735,10 @@ def push(Game, user, numpushes):
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
     target = None
-    target = closest_nonclan(data.LIGHTNING_RANGE, Game, user)
+    target = closest_nonclan(Game.dat..LIGHTNING_RANGE, Game, user)
 
     if user is Game.player:
-        target = closest_monster(data.LIGHTNING_RANGE, Game)
+        target = closest_monster(Game.dat..LIGHTNING_RANGE, Game)
 
     #otherwise, this is a mob
     elif target:
@@ -753,7 +753,7 @@ def cast_lightning(Game, user):
             message(user.name + ' cancels Lightning', Game, Game.col.RED, False)
         return 'cancelled'
     else:
-        theDmg = rng.roll_dice([[data.LIGHTNING_DAMAGE/2, data.LIGHTNING_DAMAGE]])[0]
+        theDmg = rng.roll_dice([[Game.dat.LIGHTNING_DAMAGE/2, Game.dat.LIGHTNING_DAMAGE]])[0]
 
         if user is Game.player:
             message('Your lightning bolt strikes the ' + target.name + '!  DMG = ' + str(theDmg) + ' HP.', Game, Game.col.LIGHT_BLUE)
@@ -782,9 +782,9 @@ def player_death(player, killer, Game):
         Game.player.fighter.killed = False
         Game.player.send_to_back(Game)
 
-        if not data.AUTOMODE: 
+        if not Game.dat.AUTOMODE: 
             message('YOU DIED! YOU SUCK!', Game, Game.col.RED)
-            Game.game_state = data.STATE_DEAD
+            Game.game_state = Game.dat.STATE_DEAD
 
 def monster_death(monster, killer, Game):
     #transform into corpse
@@ -865,12 +865,12 @@ def closest_monster(max_range, Game):
 
 def fov_map(max_range, Game, dude):
     #create fovmap for this dude
-    fov_map_dude = Game.fov.fovmap(data.MAP_WIDTH, data.MAP_HEIGHT)
-    for yy in range(data.MAP_HEIGHT):
-        for xx in range(data.MAP_WIDTH):
+    fov_map_dude = Game.fov.fovmap(Game.dat..MAP_WIDTH, Game.dat.MAP_HEIGHT)
+    for yy in range(Game.dat..MAP_HEIGHT):
+        for xx in range(Game.dat..MAP_WIDTH):
             Game.fov.map_set_properties(fov_map_dude, xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
 
-    Game.fov.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, data.FOV_LIGHT_WALLS, data.FOV_ALGO)
+    Game.fov.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, Game.dat.FOV_LIGHT_WALLS, Game.dat.FOV_ALGO)
     return fov_map_dude
 
 def closest_item(max_range, Game, dude):
@@ -913,9 +913,9 @@ def closest_nonclan(max_range, Game, dude):
 
 
 def get_next_fighter(Game):
-    for index,level in enumerate(data.maplist):
+    for index,level in enumerate(Game.dat..maplist):
         if index > 0:
-            for object in Game.objects[data.maplist[index]]:
+            for object in Game.objects[Game.dat.maplist[index]]:
                 if object.fighter:
                     return object
 
