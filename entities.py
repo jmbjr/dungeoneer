@@ -4,6 +4,7 @@ import data
 import gamedata
 import colors
 import rng
+import fovstuff
 
 #Classes:  Object player, enemies, items, etc
 class Object(object):
@@ -572,7 +573,8 @@ class BasicMonster(object):
             return False
 
 def entity_sees(entity, target):
-    if Game.fov.map_is_in_fov(entity.fighter.fov, target.x, target.y) and entity.dungeon_level == target.dungeon_level:
+    fov = fovstuff.Fovstuff(gamedata.FOVMODE)
+    if fov.map_is_in_fov(entity.fighter.fov, target.x, target.y) and entity.dungeon_level == target.dungeon_level:
         return True
     else:
         return False
