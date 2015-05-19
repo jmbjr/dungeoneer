@@ -27,9 +27,9 @@ def game_initialize():
     Game.col.init_colors()
     Game.dat = Game.dat.Datastuff(Game) #for now, gotta call this after Game.col.init_colors()
 
-    Game.con = Game.gui.console(Game.dat..MAP_WIDTH,Game.dat..MAP_HEIGHT)
-    Game.mouse,Game.key = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat..MAP_HEIGHT)
-    Game.panel = Game.gui.console(Game.dat..SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
+    Game.con = Game.gui.console(Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
+    Game.mouse,Game.key = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
+    Game.panel = Game.gui.console(Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
 
 
     main_menu()
@@ -38,7 +38,7 @@ def game_initialize():
 def main_menu():  
     while not Game.gui.isgameover():
 
-        img = Game.gui.load_image(Game.dat..MAIN_MENU_BKG, Game.dat.MAIN_MENU_BKG_ASCII)
+        img = Game.gui.load_image(Game.dat.MAIN_MENU_BKG, Game.dat.MAIN_MENU_BKG_ASCII)
         Game.gui.img_blit2x(img,0,0,0) #display image at 2x
 
         #show game title and credits
@@ -105,7 +105,7 @@ def load_game(filename='savegame'):
 def new_game():
     #create object representing the player
     fighter_component = entities.Fighter(hp=300, defense=10, power=20, xp=0, xpvalue=0, clan='monster', death_function=entities.player_death, speed = 10)
-    Game.player = entities.Object(Game.dat..SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2, '@', 'Roguetato', Game.col.WHITE, tilechar=Game.dat.TILE_MAGE, blocks=True, fighter=fighter_component)
+    Game.player = entities.Object(Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2, '@', 'Roguetato', Game.col.WHITE, tilechar=Game.dat.TILE_MAGE, blocks=True, fighter=fighter_component)
 
     Game.player.dungeon_level = 1
     Game.game_state = Game.dat.STATE_PLAYING
@@ -120,8 +120,8 @@ def new_game():
     Game.tick = 0
 
     if Game.dat.FREE_FOR_ALL_MODE: #turn on SQL junk and kill player.
-        Game.entity_sql = logging.Sqlobj(Game.dat..ENTITY_DB)
-        Game.message_sql = logging.Sqlobj(Game.dat..MESSAGE_DB)
+        Game.entity_sql = logging.Sqlobj(Game.dat.ENTITY_DB)
+        Game.message_sql = logging.Sqlobj(Game.dat.MESSAGE_DB)
         Game.sql_commit_counter = Game.dat.SQL_COMMIT_TICK_COUNT
         Game.player.fighter.alive = False
         Game.player.fighter.hp = 0
@@ -147,7 +147,7 @@ def new_game():
 
     #a warm welcoming message!
     message('Welcome to MeFightRogues! Good Luck! Don\'t suck!', Game, Game.col.BLUE)
-    Game.gui.prep_keyboard(Game.dat..KEYS_INITIAL_DELAY,Game.dat..KEYS_INTERVAL)
+    Game.gui.prep_keyboard(Game.dat.KEYS_INITIAL_DELAY,Game.dat.KEYS_INTERVAL)
 
 def play_game():
     Game.player_action = None
@@ -194,7 +194,7 @@ def play_game():
             Game.fov_recompute = True
             
             #loop through all objects on all maps
-            for index,Game.dungeon_levelname in enumerate(Game.dat..maplist):
+            for index,Game.dungeon_levelname in enumerate(Game.dat.maplist):
                 if index > 0: #skip intro level
                     for object in Game.objects[Game.dungeon_levelname]:
                         if object.fighter:
@@ -443,11 +443,11 @@ def handle_keys(Game):
 
             if thekey.keychar == 'r':
                 print 'SYSTEM--\t RELOADING GAME DATA'
-                reload(Game.dat.)
+                Game.dat = Game.dat.Datastuff(Game)
                 reload(entitydata) 
                 #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
-                Game.gui.prep_keyboard(Game.dat..KEYS_INITIAL_DELAY,Game.dat..KEYS_INTERVAL)
+                Game.gui.prep_keyboard(Game.dat.KEYS_INITIAL_DELAY,Game.dat.KEYS_INTERVAL)
 
                 buff_component = entities.Buff('Super Strength', power_bonus=20)
                 Game.player.fighter.add_buff(buff_component)

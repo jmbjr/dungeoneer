@@ -48,11 +48,13 @@ class Menuobj(object):
 
 
 def mapname(Game):
-    return(Game.dat..maplist[Game.player.dungeon_level])
+    return(Game.dat.maplist[Game.player.dungeon_level])
 
 #User Interface routines
-def message(new_msg, Game, color = Game.col.WHITE, displaymsg=True):
+def message(new_msg, Game, color = None, displaymsg=True):
     #split message if necessary
+    if color is None:
+        color = Game.col.WHITE
     if Game.dat.PRINT_MESSAGES:
         if Game.dat.FREE_FOR_ALL_MODE:
             Game.message_sql.log_entity(Game, new_msg)
@@ -76,7 +78,7 @@ def message(new_msg, Game, color = Game.col.WHITE, displaymsg=True):
 
 def menu(header, options, width, Game, letterdelim=None):
     if len(options) > Game.dat.MAX_NUM_ITEMS: 
-        message('Cannot have a menu with more than ' + str(Game.dat..MAX_NUM_ITEMS) + ' options.', Game)
+        message('Cannot have a menu with more than ' + str(Game.dat.MAX_NUM_ITEMS) + ' options.', Game)
 
     #calculate total height of the header (after auto-wrap) and one line per option
     header_height = Game.gui.get_height_rect(Game.con, 0, 0, width, Game.dat.SCREEN_HEIGHT, header)
@@ -131,7 +133,7 @@ def menu(header, options, width, Game, letterdelim=None):
             goodchoice = True
             retval = None
 
-    Game.gui.prep_keyboard(Game.dat..KEYS_INITIAL_DELAY,Game.dat..KEYS_INTERVAL)
+    Game.gui.prep_keyboard(Game.dat.KEYS_INITIAL_DELAY,Game.dat.KEYS_INTERVAL)
     return retval
 
 def msgbox(text, Game, width = 50):
@@ -178,8 +180,8 @@ def render_all(Game):
         Game.player.fighter.fov_recompute(Game)
         Game.gui.clear(Game.con)
 
-        for y in range(Game.dat..CAMERA_HEIGHT):
-            for x in range(Game.dat..CAMERA_WIDTH):
+        for y in range(Game.dat.CAMERA_HEIGHT):
+            for x in range(Game.dat.CAMERA_WIDTH):
                 (map_x, map_y) = (Game.camera_x + x, Game.camera_y + y)
                 visible = Game.fov.map_is_in_fov(Game.player.fighter.fov, map_x, map_y)
                 wall = Game.map[Game.dungeon_levelname].block_sight(map_x, map_y)

@@ -494,8 +494,8 @@ class BasicMonster(object):
 
         monster = self.owner.owner
         #find nearest non-clan object
-        nearest_nonclan = closest_nonclan(Game.dat..TORCH_RADIUS, Game, monster)
-        nearest_item    = closest_item(Game.dat..TORCH_RADIUS, Game, monster)
+        nearest_nonclan = closest_nonclan(Game.dat.TORCH_RADIUS, Game, monster)
+        nearest_item    = closest_item(Game.dat.TORCH_RADIUS, Game, monster)
         
         if nearest_nonclan is None:
             fight = False
@@ -604,7 +604,7 @@ def use_orange_crystal(Game, user):
 #spells
 def cast_confusion(Game, user):
     target = None
-    target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
+    target = closest_nonclan(Game.dat.TORCH_RADIUS, Game, user)
 
     if user is Game.player:
         #ask player for target to confuse
@@ -613,7 +613,7 @@ def cast_confusion(Game, user):
         name = 'You'
     
     elif not target is None:
-        target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
+        target = closest_nonclan(Game.dat.TORCH_RADIUS, Game, user)
         name = user.name
 
     else:
@@ -641,7 +641,7 @@ def cast_confusion(Game, user):
 def cast_fireball(Game, user):
     (x,y) = (None, None)
     target = None
-    target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
+    target = closest_nonclan(Game.dat.TORCH_RADIUS, Game, user)
 
     if user is Game.player: 
         #ask the player for a target tile to throw a fireball at
@@ -687,7 +687,7 @@ def cast_heal(Game, user):
         message('You feel better', Game, Game.col.LIGHT_CYAN)
     else:
         message(user.name + ' looks healthier!', Game, Game.col.RED)
-    user.fighter.heal(Game.dat..HEAL_AMOUNT, Game)
+    user.fighter.heal(Game.dat.HEAL_AMOUNT, Game)
 
 def cast_push(Game, user):
     push(Game, user, 3)
@@ -699,11 +699,11 @@ def push(Game, user, numpushes):
     #find nearest enemy (within range) and damage it
     target = None
     if user is Game.player:
-        target = closest_monster(Game.dat..TORCH_RADIUS, Game)
+        target = closest_monster(Game.dat.TORCH_RADIUS, Game)
 
     #otherwise, this is a mob
     else:
-        target = closest_nonclan(Game.dat..TORCH_RADIUS, Game, user)
+        target = closest_nonclan(Game.dat.TORCH_RADIUS, Game, user)
 
     if target is None:
         if user is Game.player:
@@ -735,10 +735,10 @@ def push(Game, user, numpushes):
 def cast_lightning(Game, user):
     #find nearest enemy (within range) and damage it
     target = None
-    target = closest_nonclan(Game.dat..LIGHTNING_RANGE, Game, user)
+    target = closest_nonclan(Game.dat.LIGHTNING_RANGE, Game, user)
 
     if user is Game.player:
-        target = closest_monster(Game.dat..LIGHTNING_RANGE, Game)
+        target = closest_monster(Game.dat.LIGHTNING_RANGE, Game)
 
     #otherwise, this is a mob
     elif target:
@@ -865,9 +865,9 @@ def closest_monster(max_range, Game):
 
 def fov_map(max_range, Game, dude):
     #create fovmap for this dude
-    fov_map_dude = Game.fov.fovmap(Game.dat..MAP_WIDTH, Game.dat.MAP_HEIGHT)
-    for yy in range(Game.dat..MAP_HEIGHT):
-        for xx in range(Game.dat..MAP_WIDTH):
+    fov_map_dude = Game.fov.fovmap(Game.dat.MAP_WIDTH, Game.dat.MAP_HEIGHT)
+    for yy in range(Game.dat.MAP_HEIGHT):
+        for xx in range(Game.dat.MAP_WIDTH):
             Game.fov.map_set_properties(fov_map_dude, xx, yy, not Game.map[Game.dungeon_levelname].block_sight(xx, yy), not Game.map[Game.dungeon_levelname].blocked(xx, yy))
 
     Game.fov.map_compute_fov(fov_map_dude, dude.x, dude.y, max_range, Game.dat.FOV_LIGHT_WALLS, Game.dat.FOV_ALGO)
@@ -913,7 +913,7 @@ def closest_nonclan(max_range, Game, dude):
 
 
 def get_next_fighter(Game):
-    for index,level in enumerate(Game.dat..maplist):
+    for index,level in enumerate(Game.dat.maplist):
         if index > 0:
             for object in Game.objects[Game.dat.maplist[index]]:
                 if object.fighter:
