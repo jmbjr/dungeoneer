@@ -5,12 +5,13 @@ from subprocess import Popen
 
 class Sqlobj(object):
     def __init__(self, dbtype):
+        self.dat = data.Datastuff()
         
         # initialize
         self.index_counter = 0
         self.dbtype = dbtype
 
-        if self.dbtype == data.ENTITY_DB:
+        if self.dbtype == self.dat.ENTITY_DB:
             script="""
             CREATE TABLE IF NOT EXISTS entity_stats (
                 game_id INT,
@@ -36,7 +37,7 @@ class Sqlobj(object):
             CREATE INDEX IF NOT EXISTS game_idx ON entity_stats(game_id);
             CREATE INDEX IF NOT EXISTS entity_idx ON entity_stats(entity_id);
             """
-        elif self.dbtype == data.MESSAGE_DB:
+        elif self.dbtype == self.dat.MESSAGE_DB:
             script="""
             CREATE TABLE IF NOT EXISTS game_log (
                 game_id INT,
@@ -57,20 +58,20 @@ class Sqlobj(object):
 
     def log_entity(self, Game, thing):
 
-        if self.dbtype == data.ENTITY_DB:
+        if self.dbtype == self.dat.ENTITY_DB:
             entity = thing
             if not hasattr(thing, 'entity_id'):
                 self.index_counter += 1
                 entity.entity_id = self.index_counter
             
-        if self.dbtype == data.MESSAGE_DB:
+        if self.dbtype == self.dat.MESSAGE_DB:
             message = thing
             entity = thing
             if not hasattr(thing, 'msg_id'):
                 self.index_counter += 1
                 msg_id = self.index_counter
 
-        if self.dbtype == data.ENTITY_DB:            
+        if self.dbtype == self.dat.ENTITY_DB:            
             the_data = {
                 "game_id": self.game_id,
                 "entity_id": entity.entity_id,
@@ -88,12 +89,12 @@ class Sqlobj(object):
                 "regen_counter": entity.fighter.regen_counter,
                 "alive_or_dead": int(entity.fighter.alive),
                 "dungeon_level": entity.dungeon_level,
-                "dungeon_levelname": data.maplist[entity.dungeon_level],
+                "dungeon_levelname": self.dat.maplist[entity.dungeon_level],
                 "x": entity.x,
                 "y": entity.y
             }
 
-        elif self.dbtype == data.MESSAGE_DB:            
+        elif self.dbtype == self.dat.MESSAGE_DB:            
             the_data = {
                 "game_id": self.game_id,
                 "msg_id": msg_id,
@@ -111,7 +112,7 @@ class Sqlobj(object):
         if Game.sql_commit_counter <= 0 or force_flush:
             self.conn.commit()
             if Game.sql_commit_counter <= 0:
-                Game.sql_commit_counter = data.SQL_COMMIT_TICK_COUNT
+                Game.sql_commit_counter = self.dat.SQL_COMMIT_TICK_COUNT
 
     def export_csv(self):
         p = Popen("export_sql2csv.bat " + self.dbtype + ' ' + self.DB_FILE )
