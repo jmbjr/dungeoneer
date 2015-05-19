@@ -216,7 +216,7 @@ def place_objects(room, Game):
             #create a monster
             choice = rng.random_choice(monster_chances)
 
-            monster             = entities.Object(**entitydata.mobs[choice])
+            monster             = entities.Object(**Game.ent.mobs[choice])
             monster.dungeon_level = Game.dat.maplist.index(Game.dungeon_levelname) 
             monster.blocks      = True        
             monster.ai          = entities.Ai(entities.BasicMonster())  #how do I set different ai?
@@ -232,9 +232,9 @@ def place_objects(room, Game):
             print 'MAPGEN--\t ' + str(Game.tick) + '\t' + Game.dungeon_levelname + '\t' + ' made a ' + monster.name
 
             #give monster items if they have them
-            if entitydata.mobitems[choice]:
-                for itemname in entitydata.mobitems[choice]:
-                    item = entities.Object(**entitydata.items[itemname])
+            if Game.ent.mobitems[choice]:
+                for itemname in Game.ent.mobitems[choice]:
+                    item = entities.Object(**Game.ent.items[itemname])
                     monster.fighter.add_item(item)
 
             monster.set_location(x, y, Game)
@@ -250,7 +250,7 @@ def place_objects(room, Game):
             #create an item
             choice = rng.random_choice(item_chances)
 
-            item = entities.Object(**entitydata.items[choice])
+            item = entities.Object(**Game.ent.items[choice])
             item.always_visible = True
 
             item.set_location(x, y, Game)
@@ -263,8 +263,8 @@ def get_monster_chances(Game):
     #chance of each monster
     monster_chances = {}
 
-    for mobname in entitydata.mobchances:
-        monster_chances[mobname] = from_dungeon_level(entitydata.mobchances[mobname], Game.dat.maplist.index(Game.dungeon_levelname))
+    for mobname in Game.ent.mobchances:
+        monster_chances[mobname] = from_dungeon_level(Game.ent.mobchances[mobname], Game.dat.maplist.index(Game.dungeon_levelname))
 
     return monster_chances
 
@@ -272,7 +272,7 @@ def get_item_chances(Game):
     #chance of each monster
     item_chances = {}
 
-    for itemname in entitydata.itemchances:
-        item_chances[itemname] = from_dungeon_level(entitydata.itemchances[itemname], Game.dat.maplist.index(Game.dungeon_levelname))
+    for itemname in Game.ent.itemchances:
+        item_chances[itemname] = from_dungeon_level(Game.ent.itemchances[itemname], Game.dat.maplist.index(Game.dungeon_levelname))
 
     return item_chances

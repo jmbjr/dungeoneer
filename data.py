@@ -1,17 +1,21 @@
 import colors
+import gamedata
 
 class Datastuff(object):
-    def __init__(self, Game):
+    def __init__(self):
+        self.col = colors.Colorstuff(gamedata.GRAPHICSMODE)
+        self.col.init_colors()
+
         #DON'T EDIT DATA BETWEEN X's WHILE GAME IS RUNNING, UNLESS YOU WANT THE GAME TO CRASH
         #.............................................
         #EDITABLE MAP DATA
         self.WALL_CHAR          = 'X'
         self.GROUND_CHAR        = ' '
 
-        self.COLOR_DARK_WALL    = Game.col.DARK_GREY
-        self.COLOR_LIGHT_WALL   = Game.col.LIGHT_GREY
-        self.COLOR_DARK_GROUND  = Game.col.DARK_SEPIA
-        self.COLOR_LIGHT_GROUND = Game.col.SEPIA
+        self.COLOR_DARK_WALL    = self.col.DARK_GREY
+        self.COLOR_LIGHT_WALL   = self.col.LIGHT_GREY
+        self.COLOR_DARK_GROUND  = self.col.DARK_SEPIA
+        self.COLOR_LIGHT_GROUND = self.col.SEPIA
 
         self.FOV_ALGO           = 2 #FOV ALGORITHM. values = 0 to 4
         self.FOV_LIGHT_WALLS    = True
@@ -50,14 +54,14 @@ class Datastuff(object):
 
         self.MAP_WIDTH          = 100
         self.MAP_HEIGHT         = 60
-        self.MAP_PAD_W          = CAMERA_WIDTH  / 2  #don't allow rooms to touch edges. ideally also don't get close enough to edge of map to stop the scrolling effect
-        self.MAP_PAD_H          = CAMERA_HEIGHT / 2
+        self.MAP_PAD_W          = self.CAMERA_WIDTH  / 2  #don't allow rooms to touch edges. ideally also don't get close enough to edge of map to stop the scrolling effect
+        self.MAP_PAD_H          = self.CAMERA_HEIGHT / 2
 
 
         #room info
         self.ROOM_MAX_SIZE      = 25
         self.ROOM_MIN_SIZE      = 25
-        self.MAX_ROOMS          = ((MAP_WIDTH - CAMERA_WIDTH) + (MAP_HEIGHT - CAMERA_HEIGHT)) / 3
+        self.MAX_ROOMS          = ((self.MAP_WIDTH - self.CAMERA_WIDTH) + (self.MAP_HEIGHT - self.CAMERA_HEIGHT)) / 3
         self.MAX_ROOMS = 2
         #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -106,13 +110,13 @@ class Datastuff(object):
         #probably shouldn't edit these when the game is running
         #GUI rendering
         self.BAR_WIDTH         = 20
-        self.PANEL_HEIGHT      = SCREEN_HEIGHT - CAMERA_HEIGHT
-        self.PANEL_Y           = SCREEN_HEIGHT - PANEL_HEIGHT
+        self.PANEL_HEIGHT      = self.SCREEN_HEIGHT - self.CAMERA_HEIGHT
+        self.PANEL_Y           = self.SCREEN_HEIGHT - self.PANEL_HEIGHT
 
         #combat log
-        self.MSG_X             = BAR_WIDTH + 2
-        self.MSG_WIDTH         = SCREEN_WIDTH - BAR_WIDTH - 2
-        self.MSG_HEIGHT        = PANEL_HEIGHT - 1
+        self.MSG_X             = self.BAR_WIDTH + 2
+        self.MSG_WIDTH         = self.SCREEN_WIDTH - self.BAR_WIDTH - 2
+        self.MSG_HEIGHT        = self.PANEL_HEIGHT - 1
 
         #graphics
         self.MAIN_MENU_BKG     = 'menu_background.png'

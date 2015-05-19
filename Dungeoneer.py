@@ -23,9 +23,10 @@ class Game(object):
 def game_initialize():
     Game.gui = guistuff.Guistuff(gamedata.GRAPHICSMODE)
     Game.fov = fovstuff.Fovstuff(gamedata.FOVMODE)
-    Game.col = Game.col.Colorstuff(gamedata.GRAPHICSMODE)
+    Game.col = colors.Colorstuff(gamedata.GRAPHICSMODE)
     Game.col.init_colors()
-    Game.dat = Game.dat.Datastuff(Game) #for now, gotta call this after Game.col.init_colors()
+    Game.dat = data.Datastuff() #for now, gotta call this after Game.col.init_colors()
+    Game.ent = entitydata.Entitystuff()
 
     Game.con = Game.gui.console(Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
     Game.mouse,Game.key = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
@@ -444,7 +445,7 @@ def handle_keys(Game):
             if thekey.keychar == 'r':
                 print 'SYSTEM--\t RELOADING GAME DATA'
                 Game.dat = Game.dat.Datastuff(Game)
-                reload(entitydata) 
+                reload(Game.ent) 
                 #update_entities()   #need to find a way to update all objects to current data
                 Game.fov_recompute = True
                 Game.gui.prep_keyboard(Game.dat.KEYS_INITIAL_DELAY,Game.dat.KEYS_INTERVAL)
@@ -467,8 +468,8 @@ def give_items(Game):
     x = 0
     y = 0
 
-    for item in entitydata.items:
-        theitem = entities.Object(**entitydata.items[item])
+    for item in Game.ent.items:
+        theitem = entities.Object(**Game.ent.items[item])
         theitem.always_visible = True
         Game.player.fighter.add_item(theitem)
 

@@ -55,6 +55,7 @@ def message(new_msg, Game, color = None, displaymsg=True):
     #split message if necessary
     if color is None:
         color = Game.col.WHITE
+        
     if Game.dat.PRINT_MESSAGES:
         if Game.dat.FREE_FOR_ALL_MODE:
             Game.message_sql.log_entity(Game, new_msg)

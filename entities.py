@@ -10,7 +10,7 @@ import rng
 class Object(object):
     #this is a generic object: Game.player, monster, item, stairs
     #always represented by a character on the screen
-    def __init__(self, x=0, y=0, char='?', name=None, color=Game.col.WHITE, tilechar = None, blocks = False, id=None,  dungeon_level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
+    def __init__(self, x=0, y=0, char='?', name=None, color=None, tilechar = None, blocks = False, id=None,  dungeon_level=None, always_visible = False, fighter = None, caster = None, ai = None, item = None, equipment = None):
         self.name = name
         self.blocks = blocks
         self.x = x
@@ -19,6 +19,13 @@ class Object(object):
         self.color = color
         self.always_visible = always_visible
         self.dungeon_level = dungeon_level
+        self.color = color
+
+        self.dat = data.Datastuff()
+        self.col = colors.Colorstuff(gamedata.GRAPHICSMODE)
+
+        if self.color is None:
+            self.color = self.col.WHITE
 
         self.tilechar = tilechar
         if self.tilechar is None:
@@ -176,7 +183,7 @@ class Object(object):
 #fighters, spells, abilities
 class Fighter(object):
     #combat-related properties and methods (monster, Game.player, NPC, etc)
-    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, killed=False, xplevel=1, speed=Game.dat.SPEED_DEFAULT, regen=Game.dat.REGEN_DEFAULT, death_function=None, buffs=None, inventory=None):
+    def __init__(self, hp, defense, power, xp, clan=None, xpvalue=0, alive=True, killed=False, xplevel=1, speed=None, regen=None, death_function=None, buffs=None, inventory=None):
         self.base_max_hp = hp
         self.hp = hp
         self.xp = xp
@@ -193,6 +200,14 @@ class Fighter(object):
         self.xplevel = xplevel
         self.alive = alive
         self.killed = killed
+        self.dat = data.Datastuff()
+
+        if self.base_regen is None:
+            self.base_regen = self.dat.REGEN_DEFAULT
+            self.regen_counter = self.dat.REGEN_DEFAULT
+
+        if self.base_speed is None:
+            self.base_speed = self.dat.SPEED_DEFAULT
 
         self.inventory = inventory
         if self.inventory:
@@ -310,16 +325,22 @@ class Ai(object):
 
 
 class Buff(object):
-    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=Game.dat.BUFF_DECAYRATE, duration=Game.dat.BUFF_DURATION):
+    def __init__(self, name, power_bonus=0, defense_bonus=0, max_hp_bonus=0, speed_bonus=0, regen_bonus=0, decay_rate=None, duration=None):
         self.name = name
         self.power_bonus = power_bonus
         self.defense_bonus = defense_bonus
         self.max_hp_bonus = max_hp_bonus
         self.speed_bonus = speed_bonus
         self.regen_bonus = regen_bonus
+        self.dat = data.Datastuff()
 
         self.decay_rate = decay_rate #if 0, buff does not decay. use positive numbers to make buffs decrement
+        if self.decay_rate is None:
+            self.decay_rate = self.dat.BUFF_DECAYRATE
+
         self.duration = duration
+        if self.duration is None:
+            self.duration = self.dat.BUFF_DURATION
 
 class Caster(object):
     def __init__(self, mp, spells=None):
@@ -461,9 +482,13 @@ class Equipment(object):
 
 #AI
 class ConfusedMonster(object):
-    def __init__(self, old_ai, num_turns = Game.dat.CONFUSE_NUM_TURNS):
+    def __init__(self, old_ai, num_turns=None):
         self.old_ai = old_ai
         self.num_turns = num_turns
+        self.dat = data.Datastuff()
+        
+        if self.num_turns is None:
+            self.num_turns = self.dat.CONFUSE_NUM_TURNS
 
     #AI for confused monster
     def take_turn(self, Game):
