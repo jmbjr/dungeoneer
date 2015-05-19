@@ -3,7 +3,7 @@ import data
 import gamedata
 import cursesx
 from gamestuff import *
-import Game.ent
+import entitydata
 import time
 import math
 import keys
