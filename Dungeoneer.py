@@ -39,7 +39,7 @@ def game_initialize(stdscr):
     Game.ent = entitydata.Entitystuff()
 
     Game.con = Game.gui.console(Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
-    Game.mouse,Game.key = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
+    Game.mouse,Game.key,Game.rootcon = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
     Game.panel = Game.gui.console(Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
 
     main_menu()
@@ -49,14 +49,14 @@ def main_menu():
     while not Game.gui.isgameover():
 
         img = Game.gui.load_image(Game.dat.MAIN_MENU_BKG, Game.dat.MAIN_MENU_BKG_ASCII)
-        Game.gui.img_blit2x(img,0,0,0) #display image at 2x
+        Game.gui.img_blit2x(img,Game.rootcon,0,0) #display image at 2x
 
         #show game title and credits
-        Game.gui.print_str(0, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=Game.col.LIGHT_YELLOW)
-        Game.gui.print_str(0, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.print_str(Game.rootcon, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.print_str(Game.rootcon, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=Game.col.LIGHT_YELLOW)
 
         #show options and wait for the player's choice
-        choice = menu('', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
+        choice = menu(Game.rootcon,'', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
 
         if choice == 0: #new game
             Game.dat.FREE_FOR_ALL_MODE = False
@@ -258,7 +258,7 @@ def play_game():
                     #render the screen
                     render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
                     Game.gui.flush(Game.con)
-                    chosen_item = inventory_menu('inventory for ' + alive_entities[0].name, Game, alive_entities[0])
+                    chosen_item = inventory_menu(Game.rootcon,'inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
                     save_final_sql_csv(Game)
 
@@ -288,7 +288,7 @@ def check_level_up(Game, user):
 
             if user is Game.player:
                 while choice == None: #keep asking till a choice is made
-                        choice = menu('Level up! Choose a stat to raise:\n', 
+                        choice = menu(Game.rootcon, 'Level up! Choose a stat to raise:\n', 
                         [Menuobj('Constitution (+25 HP, from ' + str(Game.player.fighter.max_hp(Game)) + ')',color=Game.col.GREEN),
                         Menuobj('Strength (+2 attack, from ' + str(Game.player.fighter.power(Game)) + ')', color=Game.col.RED), 
                         Menuobj('Defense (+2 defense, from ' + str(Game.player.fighter.defense(Game)) + ')', color=Game.col.BLUE)], Game.dat.LEVEL_SCREEN_WIDTH, Game, letterdelim=')')
@@ -359,14 +359,14 @@ def handle_keys(Game):
 
             if thekey.keychar == 'i':
                 #show inv. if an item is selected, use it
-                chosen_item = inventory_menu('Press the key next to an item to use it. \nPress ESC to return to game\n', Game, Game.player)
+                chosen_item = inventory_menu(Game.rootcon, 'Press the key next to an item to use it. \nPress ESC to return to game\n', Game, Game.player)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
                     return chosen_item.use(Game, user=Game.player)
 
             if thekey.keychar == 'd':
                 #show the inventory. if item is selected, drop it
-                chosen_item = inventory_menu('Press the key next to the item to drop. \nPress ESC to return to game\n', Game, Game.player)
+                chosen_item = inventory_menu(Game.rootcon, 'Press the key next to the item to drop. \nPress ESC to return to game\n', Game, Game.player)
                 if chosen_item is not None:
                     Game.player.game_turns += 1
                     chosen_item.drop(Game, Game.player)
@@ -445,7 +445,7 @@ def handle_keys(Game):
                     window = Game.gui.console(width, height)
                     Game.gui.print_rect(window, 0, 0, width, height)
                     Game.gui.con_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
-                    menu ('Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], Game.dat.SCREEN_WIDTH, Game, letterdelim=None)
+                    menu (Game.rootcon, 'Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], Game.dat.SCREEN_WIDTH, Game, letterdelim=None)
 
                 Game.fov_recompute = True           
 

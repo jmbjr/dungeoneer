@@ -141,6 +141,7 @@ class Guistuff(object):
             libtcod.console_set_custom_font('oryx_tiles3.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD, 32, 12)
             libtcod.console_init_root(nwidth, nheight, 'johnstein\'s Game of RogueLife!', False, libtcod.RENDERER_SDL)
             libtcod.sys_set_fps(30)
+            rootcon = 0
 
             libtcod.console_map_ascii_codes_to_font(256   , 32, 0, 5)  #map all characters in 1st row
             libtcod.console_map_ascii_codes_to_font(256+32, 32, 0, 6)  #map all characters in 2nd row
@@ -152,9 +153,10 @@ class Guistuff(object):
             con.keypad(1)
             mouse = None
             key = None
+            rootcon = None
         else:
             self.err_graphicsmode('prep_console')
-        return mouse,key
+        return mouse,key,rootcon
 
     def getkey(self, con, mouse, key, wait=False):
         if self.graphicsmode == 'libtcod':

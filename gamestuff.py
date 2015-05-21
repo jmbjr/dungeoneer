@@ -76,7 +76,7 @@ def message(new_msg, Game, color = None, displaymsg=True):
 
 
 
-def menu(header, options, width, Game, letterdelim=None):
+def menu(rootcon, header, options, width, Game, letterdelim=None):
     if len(options) > Game.dat.MAX_NUM_ITEMS: 
         message('Cannot have a menu with more than ' + str(Game.dat.MAX_NUM_ITEMS) + ' options.', Game)
 
@@ -114,8 +114,8 @@ def menu(header, options, width, Game, letterdelim=None):
     #blit contents of window to root console
     x = Game.dat.SCREEN_WIDTH / 2 - width / 2
     y = Game.dat.SCREEN_HEIGHT / 2 - height / 2
-    Game.gui.con_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
-    Game.gui.flush(0)
+    Game.gui.con_blit(window, 0, 0, width, height, rootcon, x, y, 1.0, 0.7)
+    Game.gui.flush(rootcon)
     Game.gui.prep_keyboard(0,0)
 
     goodchoice = False
@@ -137,9 +137,9 @@ def menu(header, options, width, Game, letterdelim=None):
     return retval
 
 def msgbox(text, Game, width = 50):
-    menu(text, [], width, Game) #use menu as a sort-of message box
+    menu(rootcon, text, [], width, Game) #use menu as a sort-of message box
 
-def inventory_menu(header, Game, user):
+def inventory_menu(rootcon, header, Game, user):
     if user.fighter:
         options = []
         #show a menu with each item of the inventory as an option
@@ -158,7 +158,7 @@ def inventory_menu(header, Game, user):
                 obj = Menuobj(text, color=item.color, char=item.char)    
                 options.append(obj)
 
-        index = menu(header, options, Game.dat.INVENTORY_WIDTH, Game, letterdelim='')
+        index = menu(rootcon, header, options, Game.dat.INVENTORY_WIDTH, Game, letterdelim='')
 
         if (index is None or len(user.fighter.inventory) == 0) or index == 'ESC':
             return None
