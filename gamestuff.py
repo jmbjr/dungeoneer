@@ -136,7 +136,7 @@ def menu(rootcon, header, options, width, Game, letterdelim=None):
     Game.gui.prep_keyboard(Game.dat.KEYS_INITIAL_DELAY,Game.dat.KEYS_INTERVAL)
     return retval
 
-def msgbox(text, Game, width = 50):
+def msgbox(rootcon, text, Game, width = 50):
     menu(rootcon, text, [], width, Game) #use menu as a sort-of message box
 
 def inventory_menu(rootcon, header, Game, user):

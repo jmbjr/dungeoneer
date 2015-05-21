@@ -275,6 +275,8 @@ def life(stdscr):
             speed = .001
         #display world
         current_world = world.get_world()
+        #the following line is not needed for curses, but needed for libtcod. 
+        #TODO: refactor it out
         gui.con_blit(current_world, 0, 0, world.nwidth, world.nheight, 0, 0, 0)
         gui.flush(current_world)
     

@@ -73,7 +73,7 @@ def main_menu():
             try:
                 load_game()
             except:
-                msgbox('\n No saved game to load. \n', Game, 24)
+                msgbox(Game.rootcon, '\n No saved game to load. \n', Game, 24)
                 continue
             play_game()
             
@@ -81,7 +81,7 @@ def main_menu():
             try:
                 save_game()
             except:
-                msgbox('Bye!', Game, 24)
+                msgbox(Game.rootcon, 'Bye!', Game, 24)
             break
 
 def save_game(filename='savegame'):
@@ -374,13 +374,13 @@ def handle_keys(Game):
             if thekey.keychar == 'c':
                 #show character info
                 level_up_xp = Game.dat.LEVEL_UP_BASE + Game.player.xplevel * Game.dat.LEVEL_UP_FACTOR
-                msgbox('Character Information\n\nLevel: ' + str(Game.player.xplevel) + '\nExperience: ' + str(Game.player.fighter.xp) +
+                msgbox(Game.rootcon, 'Character Information\n\nLevel: ' + str(Game.player.xplevel) + '\nExperience: ' + str(Game.player.fighter.xp) +
                     '\nExperience to level up: ' + str(level_up_xp) + '\n\nMaximum HP: ' + str(Game.player.fighter.max_hp(Game)) +
                     '\nAttack: ' + str(Game.player.fighter.power(Game)) + '\nDefense: ' + str(Game.player.fighter.defense(Game)), Game, Game.dat.CHARACTER_SCREEN_WIDTH)
 
             if thekey.keychar == 'x':
                 #debug key to automatically level up
-                msgbox('You start to meditate!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                msgbox(Game.rootcon, 'You start to meditate!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 level_up_xp = Game.dat.LEVEL_UP_BASE + Game.player.xplevel * Game.dat.LEVEL_UP_FACTOR
                 Game.player.fighter.xp = level_up_xp
                 check_level_up(Game)
@@ -388,18 +388,18 @@ def handle_keys(Game):
 
             if thekey.keychar == 'a':
                 #debug key to set all objects to visible
-                msgbox('You can smell them all!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                msgbox(Game.rootcon, 'You can smell them all!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 set_objects_visible(Game)
 
             if thekey.keychar == 'q':
                 #go down stairs, if the player is on them
-                msgbox('You feel your inner dwarf admiring the dungeon walls!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                msgbox(Game.rootcon, 'You feel your inner dwarf admiring the dungeon walls!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 Game.map[Game.dungeon_levelname].set_map_explored()   
                 Game.fov_recompute = True   
 
             if thekey.keychar == 'z':
                 #debug key to automatically go to next level
-                msgbox('You start digging at your feet!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                msgbox(Game.rootcon, 'You start digging at your feet!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 map.next_level(Game)           
 
             if thekey.keychar == '>':
@@ -416,7 +416,7 @@ def handle_keys(Game):
 
             if thekey.keychar == 's': #general status key
                 #debug key to automatically go to prev level
-                msgbox('You start digging above your head!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                msgbox(Game.rootcon, 'You start digging above your head!', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 map.prev_level(Game)    
 
             if thekey.keychar == 'p': #display log
@@ -465,7 +465,7 @@ def handle_keys(Game):
 
             if thekey.keychar == 'w':
                 #give all items
-                msgbox('You fashion some items from the scraps at your feet', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
+                msgbox(Game.rootcon, 'You fashion some items from the scraps at your feet', Game, Game.dat.CHARACTER_SCREEN_WIDTH)
                 give_items(Game)
 
             return Game.dat.STATE_NOACTION

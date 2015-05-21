@@ -153,7 +153,7 @@ class Guistuff(object):
             con.keypad(1)
             mouse = None
             key = None
-            rootcon = None
+            rootcon = con
         else:
             self.err_graphicsmode('prep_console')
         return mouse,key,rootcon
