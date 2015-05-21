@@ -24,7 +24,7 @@ class Game(object):
 
 def main():
     if gamedata.GRAPHICSMODE == 'libtcod':
-        game_intitialize(None)
+        game_initialize(None)
     elif gamedata.GRAPHICSMODE == 'curses':
         cursesx.wrapper(game_initialize)
     else:
