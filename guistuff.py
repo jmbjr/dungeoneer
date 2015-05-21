@@ -132,7 +132,7 @@ class Guistuff(object):
         if self.graphicsmode == 'libtcod':
             libtcod.console_set_keyboard_repeat(delay, interval)
         elif self.graphicsmode == 'curses':
-            print('curses keyboard!')
+            self.graphicsmode = 'curses'
         else:
             self.err_graphicsmode('prep_keyboard')      
 
