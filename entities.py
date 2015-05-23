@@ -90,21 +90,18 @@ class Object(object):
             (x, y) = to_camera_coordinates(self.x, self.y, Game)
 
             if x is not None:
-                #set the color then draw the character that represents this object at its position
-                Game.gui.set_default_color(Game.con, self.color)
-                
                 if gamedata.ASCIIMODE:
                     thechar = self.char
                 else:
                     thechar = self.tilechar
 
-                Game.gui.print_char(Game.con, x, y, val=thechar, use_defaults=True)
+                Game.gui.print_char(Game.con, x, y, val=thechar, fg_color=self.color, bg_color=Game.color_ground)
 
     def clear(self, Game):
         #erase char that represents this object
         (x, y) = to_camera_coordinates(self.x, self.y, Game)
         if x is not None and Game.fov.map_is_in_fov(Game.player.fighter.fov, self.x, self.y):
-            Game.gui.print_char(Game.con, x, y, val=Game.dat.GROUND_CHAR, fg_color=Game.col.WHITE, bg_color=Game.dat.COLOR_LIGHT_GROUND, use_defaults=False)
+            Game.gui.print_char(Game.con, x, y, val=Game.dat.GROUND_CHAR, fg_color=Game.col.WHITE, bg_color=Game.dat.COLOR_LIGHT_GROUND)
 
     def move_away(self, target, Game):
         if self.dungeon_level == target.dungeon_level:

@@ -35,6 +35,9 @@ def game_initialize(stdscr):
     Game.fov = fovstuff.Fovstuff(gamedata.FOVMODE)
     Game.col = colors.Colorstuff(gamedata.GRAPHICSMODE)
     Game.col.init_colors()
+    Game.color_wall = None
+    Game.color_ground = None
+    Game.fov_wall_ground = None
     Game.dat = data.Datastuff() #for now, gotta call this after Game.col.init_colors()
     Game.ent = entitydata.Entitystuff()
 

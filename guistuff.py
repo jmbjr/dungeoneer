@@ -101,12 +101,10 @@ class Guistuff(object):
             self.err_graphicsmode('print_str')
 
 #this does colors differently than print_str... this vexes me and probably means I should refactor how this works....
-    def print_char(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None, use_defaults=False):         
+#TODO: remove defaults to None. this screws things up. removing the None will require re-ordering the parameters
+    def print_char(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):         
         if self.graphicsmode == 'libtcod':
-            if use_defaults:
-                libtcod.console_put_char(con, xx, yy, val, bkg)
-            else:
-                libtcod.console_put_char_ex(con, xx, yy, val, fg_color, bg_color)                
+            libtcod.console_put_char_ex(con, xx, yy, val, fg_color, bg_color)                
 
         elif self.graphicsmode == 'curses':
             try:

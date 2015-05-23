@@ -199,9 +199,11 @@ def render_all(Game):
                     if wall:
                         color_wall_ground = Game.dat.COLOR_DARK_WALL
                         char_wall_ground = thewallchar
+                        Game.color_wall = color_wall_ground
                     else:
                         color_wall_ground = Game.dat.COLOR_DARK_GROUND
                         char_wall_ground = thegroundchar
+                        Game.color_ground = color_wall_ground
                     fov_wall_ground = Game.col.DARK_GREY
                 else:
                     #tile is visible
@@ -209,15 +211,18 @@ def render_all(Game):
                     if wall:
                         color_wall_ground = Game.dat.COLOR_LIGHT_WALL
                         char_wall_ground = thewallchar
+                        Game.color_wall = color_wall_ground
                     else:
                         color_wall_ground = Game.dat.COLOR_LIGHT_GROUND
                         char_wall_ground = thegroundchar
+                        Game.color_ground = color_wall_ground
                     fov_wall_ground = Game.col.WHITE
+                
+                Game.fov_wall_ground = fov_wall_ground
 
                 if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
                     Game.gui.print_char(Game.con, x, y, val=char_wall_ground, fg_color=fov_wall_ground, bg_color=color_wall_ground)
                 
-
     #draw all objects in the list
     for object in Game.objects[Game.dungeon_levelname]:
         if object != Game.player:
@@ -225,7 +230,7 @@ def render_all(Game):
     #ensure we draw player last
     Game.player.draw(Game)
 
-    #blit contents of con to root console
+    #blit contents of con to root console #TODO: add Game.rootcon here
     Game.gui.con_blit(Game.con, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.SCREEN_HEIGHT, 0, 0, 0)
 
     #show player's stats via GUI panel
