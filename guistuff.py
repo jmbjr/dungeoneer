@@ -139,6 +139,7 @@ class Guistuff(object):
         elif self.graphicsmode == 'curses':
             con.nodelay(1)
             con.keypad(1)
+            cursesx.curs_set(0)
             mouse = None
             key = None
             rootcon = con
