@@ -88,7 +88,8 @@ def menu(rootcon, header, options, width, Game, letterdelim=None):
 
     #create off-screen console that represents the menu's window
     window = Game.gui.console(width, height)
-    Game.gui.print_rect(window, 0, 0, width, height, val=header, fg_color=Game.col.WHITE)
+    Game.gui.set_default_color(window, fg_color=Game.col.WHITE)
+    Game.gui.print_rect(window, 0, 0, width, height, header)
 
     #print all the options
     y = header_height
@@ -106,7 +107,8 @@ def menu(rootcon, header, options, width, Game, letterdelim=None):
         else:
             letterchar = chr(letter_index) + letterdelim
 
-        Game.gui.print_str(window, 0, y, val=letterchar + ' ' + char + ' ' + text, fg_color=color) 
+        Game.gui.set_default_color(window, fg_color=color)    
+        Game.gui.print_str(window, 0, y, letterchar + ' ' + char + ' ' + text) 
 
         y += 1
         letter_index += 1
@@ -238,18 +240,22 @@ def render_all(Game):
 
     #show player stats
     render_bar(1, 1, Game.dat.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), Game.col.LIGHT_RED, Game.col.RED, Game)
-    Game.gui.print_str(Game.panel, 1, 3, val=Game.dungeon_levelname, fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
-    Game.gui.print_str(Game.panel, 1, 4, val='Dungeon level: ' + str(Game.player.dungeon_level), fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
-    Game.gui.print_str(Game.panel, 1, 5, val='Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')', fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
+
+    Game.gui.set_default_color(Game.panel, fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
+    Game.gui.print_str(Game.panel, 1, 3, Game.dungeon_levelname)
+    Game.gui.print_str(Game.panel, 1, 4, 'Dungeon level: ' + str(Game.player.dungeon_level))
+    Game.gui.print_str(Game.panel, 1, 5, 'Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')')
 
     #print the game messages, one line at a time
     y = 1
     for (line, color) in Game.game_msgs:
-        Game.gui.print_str(Game.panel, Game.dat.MSG_X, y, val=line, fg_color=color)
+        Game.gui.set_default_color(Game.panel, fg_color=color)
+        Game.gui.print_str(Game.panel, Game.dat.MSG_X, y, line)
         y += 1
 
     #display names of objects under the mouse
-    Game.gui.print_str(Game.panel, 1, 0, val=get_names_under_mouse(Game), fg_color=Game.col.LIGHT_GREY)
+    Game.gui.set_default_color(Game.panel, fg_color=Game.col.LIGHT_GREY)
+    Game.gui.print_str(Game.panel, 1, 0, get_names_under_mouse(Game))
 
     #blit panel to root console
     Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
@@ -266,7 +272,8 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
         Game.gui.draw_rect(Game.panel, x, y, bar_width, 1, False, bg_color=bar_color)
 
     #lastly add text
-    Game.gui.print_str(Game.panel, x + total_width/2, y, align=guistuff.CENTER, val=name + ': ' + str(value) + '/' + str(maximum), fg_color=Game.col.WHITE)
+    Game.gui.set_default_color(Game.panel, fg_color=Game.col.WHITE)
+    Game.gui.print_str(Game.panel, x + total_width/2, y, name + ': ' + str(value) + '/' + str(maximum), align=guistuff.CENTER)
 
 #get info from world. check/select tiles. select objects
 def get_names_under_mouse(Game):

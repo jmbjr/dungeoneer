@@ -50,7 +50,8 @@ class World(object):
             for xx in range(self.nwidth):
                 #my_color=self.random_color()
                 my_color = self.get_color(self.population[xx][yy])
-                self.gui.print_str(self.con, xx, yy, val=self.get_entity(self.population[xx][yy],self.char_option), fg_color=my_color)
+                self.gui.set_default_color(self.con, fg_color=my_color)
+                self.gui.print_str(self.con, xx, yy, self.get_entity(self.population[xx][yy],self.char_option))
 
         return self.con
 

@@ -68,13 +68,8 @@ class Guistuff(object):
             self.err_graphicsmode('draw_rect')
 
 #print_rect and print_str need to prompt for fg and bg Game.col... or maybe we should rethink how colors are set
-    def print_rect(self, con, xx, yy, nwidth, nheight, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
+    def print_rect(self, con, xx, yy, nwidth, nheight, val, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT):
         if self.graphicsmode == 'libtcod':
-            if fg_color:
-                libtcod.console_set_default_foreground(con, fg_color)
-            if bg_color:
-                libtcod.console_set_default_background(con, bg_color)
-
             libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
@@ -84,13 +79,8 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('print_rect')
 
-    def print_str(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):
+    def print_str(self, con, xx, yy, val, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT):
         if self.graphicsmode == 'libtcod':
-            if fg_color:
-                libtcod.console_set_default_foreground(con, fg_color)
-            if bg_color:
-                libtcod.console_set_default_background(con, bg_color)
-
             libtcod.console_print_ex(con, xx, yy, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
@@ -102,7 +92,7 @@ class Guistuff(object):
 
 #this does colors differently than print_str... this vexes me and probably means I should refactor how this works....
 #TODO: remove defaults to None. this screws things up. removing the None will require re-ordering the parameters
-    def print_char(self, con, xx, yy, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, val='', fg_color=None, bg_color=None):         
+    def print_char(self, con, xx, yy, val, bkg=libtcod.BKGND_NONE, align=libtcod.LEFT, fg_color=None, bg_color=None):         
         if self.graphicsmode == 'libtcod':
             libtcod.console_put_char_ex(con, xx, yy, val, fg_color, bg_color)                
 

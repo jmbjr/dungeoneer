@@ -55,8 +55,9 @@ def main_menu():
         Game.gui.img_blit2x(img,Game.rootcon,0,0) #display image at 2x
 
         #show game title and credits
-        Game.gui.print_str(Game.rootcon, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2 - 4, val='MeFightRogues!', fg_color=Game.col.LIGHT_YELLOW)
-        Game.gui.print_str(Game.rootcon, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT - 2  , val='by johnstein!' , fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.set_default_color(Game.rootcon, fg_color=Game.col.LIGHT_YELLOW)
+        Game.gui.print_str(Game.rootcon, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT/2 - 4, 'MeFightRogues!')
+        Game.gui.print_str(Game.rootcon, Game.dat.SCREEN_WIDTH/2, Game.dat.SCREEN_HEIGHT - 2 , 'by johnstein!')
 
         #show options and wait for the player's choice
         choice = menu(Game.rootcon,'', [Menuobj('Play a new game'), Menuobj('Battle Royale!'), Menuobj('Continue last game'), Menuobj('Quit')], 24, Game, letterdelim=')')
@@ -446,7 +447,7 @@ def handle_keys(Game):
 
                 for thepage in range(numpages):
                     window = Game.gui.console(width, height)
-                    Game.gui.print_rect(window, 0, 0, width, height)
+                    Game.gui.print_rect(window, 0, 0, width, height, '')
                     Game.gui.con_blit(window, 0, 0, width, height, 0, 0, 0, 1.0, 1)
                     menu (Game.rootcon, 'Message Log: (Sorted by Most Recent Turn) Page ' + str(thepage+1) + '/' + str(numpages), history[thepage+1], Game.dat.SCREEN_WIDTH, Game, letterdelim=None)
 
