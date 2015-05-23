@@ -223,5 +223,23 @@ class Guistuff(object):
         else:
             self.err_graphicsmode('set_default_color')
 
+    #get info from world. check/select tiles. select objects
+    def get_names_under_mouse(self, Game):
+        if self.graphicsmode == 'libtcod':
+            #return a string with the names of all objects under the mouse
+            (x, y) = (Game.mouse.cx, Game.mouse.cy)
+            (x, y) = (Game.camera_x + x, Game.camera_y + y)  #from screen to map coords
+
+            #create list with the names of all objects at the mouse's coords and in FOV
+            names = [obj.name for obj in Game.objects[Game.dungeon_levelname]
+                if obj.x == x and obj.y == y and Game.fov.map_is_in_fov(Game.player.fighter.fov, obj.x, obj.y)]
+            
+            names = ', '.join(names) #join names separated by commas
+            return names.capitalize()
+        elif self.graphicsmode == 'curses':
+            return '' #not sure what the equiv is yet''
+        else:
+            self.err_graphicsmode('get_names_under_mouse')
+
     def err_graphicsmode(self, func):
         print('Error in guistuff.' + func + '. wrong GRAPHICSMODE: ' + self.graphicsmode)
