@@ -255,7 +255,7 @@ def render_all(Game):
 
     #display names of objects under the mouse
     Game.gui.set_default_color(Game.panel, fg_color=Game.col.LIGHT_GREY)
-    Game.gui.print_str(Game.panel, 1, 0, get_names_under_mouse(Game))
+    Game.gui.print_str(Game.panel, 1, 0, Game.gui.get_names_under_mouse(Game))
 
     #blit panel to root console
     Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
@@ -274,21 +274,6 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, G
     #lastly add text
     Game.gui.set_default_color(Game.panel, fg_color=Game.col.WHITE)
     Game.gui.print_str(Game.panel, x + total_width/2, y, name + ': ' + str(value) + '/' + str(maximum), align=guistuff.CENTER)
-
-#get info from world. check/select tiles. select objects
-def get_names_under_mouse(Game):
-    #return a string with the names of all objects under the mouse
-    (x, y) = (Game.mouse.cx, Game.mouse.cy)
-    (x, y) = (Game.camera_x + x, Game.camera_y + y)  #from screen to map coords
-
-    #create list with the names of all objects at the mouse's coords and in FOV
-    names = [obj.name for obj in Game.objects[Game.dungeon_levelname]
-        if obj.x == x and obj.y == y and Game.fov.map_is_in_fov(Game.player.fighter.fov, obj.x, obj.y)]
-    
-    names = ', '.join(names) #join names separated by commas
-    return names.capitalize()
-
-
 
 #player movement routines
 def player_move_or_attack(dx, dy, Game):
