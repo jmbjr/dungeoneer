@@ -29,5 +29,17 @@ elif gamedata.GRAPHICSMODE == 'curses':
     DOWN = cursesx.KEY_DOWN
     RIGHT= cursesx.KEY_RIGHT
     LEFT = cursesx.KEY_LEFT
+    KP1  = cursesx.KEY_C1
+    KP2  = cursesx.KEY_DOWN
+    KP3  = cursesx.KEY_C3    
+    KP4  = cursesx.KEY_LEFT
+    KP5  = cursesx.KEY_B2
+    KP6  = cursesx.KEY_RIGHT
+    KP7  = cursesx.KEY_A1
+    KP8  = cursesx.KEY_UP
+    KP9  = cursesx.KEY_A3
+    KPDEC= cursesx.KEY_DC
+    ENTER= cursesx.KEY_ENTER
+    SPACE= ' '
 else:
     print('Error in key-set. wrong GRAPHICSMODE')
