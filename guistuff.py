@@ -73,7 +73,7 @@ class Guistuff(object):
             libtcod.console_print_rect_ex(con, xx, yy, nwidth, nheight, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
-                print('curses!') #not sure how to do this yet
+                con.addstr(yy, xx, val)
             except cursesx.error:
                 pass
         else:
@@ -84,7 +84,7 @@ class Guistuff(object):
             libtcod.console_print_ex(con, xx, yy, bkg, align, val)
         elif self.graphicsmode == 'curses':
             try:
-                con.addstr(yy, xx, val, fg_color)
+                con.addstr(yy, xx, val)
             except cursesx.error:
                 pass
         else:
