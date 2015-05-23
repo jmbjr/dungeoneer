@@ -120,7 +120,7 @@ class Guistuff(object):
         if self.graphicsmode == 'libtcod':
             libtcod.console_set_keyboard_repeat(delay, interval)
         elif self.graphicsmode == 'curses':
-            print('curses keyboard!')
+            self.graphicsmode = 'curses'
         else:
             self.err_graphicsmode('prep_keyboard')      
 
@@ -155,13 +155,18 @@ class Guistuff(object):
                 libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
             thekey = Keyobj(key.vk, key.c, chr(key.c), key.pressed, key.lalt, key.lctrl, key.ralt, key.rctrl, key.shift)
         elif self.graphicsmode == 'curses':
+            #TODO add support for wait=True/False i.e nodelay(0/1)
+            pressed = False
+            keychar = ''
             key = con.getch()
-            if key>256 or key<0:
-                keychar=''
-            else:
-                keychar=chr(key)
+            if not key == cursesx.ERR:
+                pressed = True
+                if cursesx.ascii.isascii(key):
+                    keychar = chr(key)
+                else:
+                    keychar = ''
 
-            thekey = Keyobj(key, key, keychar, False, False, False, False, False, False)
+            thekey = Keyobj(key, key, keychar, pressed, False, False, False, False, False)
         else:
             self.err_graphicsmode('getkey')
         return thekey
