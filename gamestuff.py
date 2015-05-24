@@ -225,40 +225,40 @@ def render_all(Game):
                 if Game.map[Game.dungeon_levelname].explored(map_x, map_y):
                     Game.gui.print_char(Game.con, x, y, val=char_wall_ground, fg_color=fov_wall_ground, bg_color=color_wall_ground)
                 
-    #draw all objects in the list
-    for object in Game.objects[Game.dungeon_levelname]:
-        if object != Game.player:
-            object.draw(Game)
-    #ensure we draw player last
-    Game.player.draw(Game)
+        #draw all objects in the list
+        for object in Game.objects[Game.dungeon_levelname]:
+            if object != Game.player:
+                object.draw(Game)
+        #ensure we draw player last
+        Game.player.draw(Game)
 
-    #blit contents of con to root console #TODO: add Game.rootcon here
-    Game.gui.con_blit(Game.con, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.SCREEN_HEIGHT, 0, 0, 0)
+        #blit contents of con to root console #TODO: add Game.rootcon here
+        Game.gui.con_blit(Game.con, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.SCREEN_HEIGHT, 0, 0, 0)
 
-    #show player's stats via GUI panel
-    Game.gui.clear(Game.panel)
+        #show player's stats via GUI panel
+        Game.gui.clear(Game.panel)
 
-    #show player stats
-    render_bar(1, 1, Game.dat.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), Game.col.LIGHT_RED, Game.col.RED, Game)
+        #show player stats
+        render_bar(1, 1, Game.dat.BAR_WIDTH, 'HP', Game.player.fighter.hp, Game.player.fighter.max_hp(Game), Game.col.LIGHT_RED, Game.col.RED, Game)
 
-    Game.gui.set_default_color(Game.panel, fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
-    Game.gui.print_str(Game.panel, 1, 3, Game.dungeon_levelname)
-    Game.gui.print_str(Game.panel, 1, 4, 'Dungeon level: ' + str(Game.player.dungeon_level))
-    Game.gui.print_str(Game.panel, 1, 5, 'Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')')
+        Game.gui.set_default_color(Game.panel, fg_color=Game.col.WHITE, bg_color=Game.col.BLACK)
+        Game.gui.print_str(Game.panel, 1, 3, Game.dungeon_levelname)
+        Game.gui.print_str(Game.panel, 1, 4, 'Dungeon level: ' + str(Game.player.dungeon_level))
+        Game.gui.print_str(Game.panel, 1, 5, 'Turn: ' + str(Game.player.game_turns) + ' (' + str(Game.tick) +')')
 
-    #print the game messages, one line at a time
-    y = 1
-    for (line, color) in Game.game_msgs:
-        Game.gui.set_default_color(Game.panel, fg_color=color)
-        Game.gui.print_str(Game.panel, Game.dat.MSG_X, y, line)
-        y += 1
+        #print the game messages, one line at a time
+        y = 1
+        for (line, color) in Game.game_msgs:
+            Game.gui.set_default_color(Game.panel, fg_color=color)
+            Game.gui.print_str(Game.panel, Game.dat.MSG_X, y, line)
+            y += 1
 
-    #display names of objects under the mouse
-    Game.gui.set_default_color(Game.panel, fg_color=Game.col.LIGHT_GREY)
-    Game.gui.print_str(Game.panel, 1, 0, Game.gui.get_names_under_mouse(Game))
+        #display names of objects under the mouse
+        Game.gui.set_default_color(Game.panel, fg_color=Game.col.LIGHT_GREY)
+        Game.gui.print_str(Game.panel, 1, 0, Game.gui.get_names_under_mouse(Game))
 
-    #blit panel to root console
-    Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
+        #blit panel to root console
+        Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
     #render a bar (HP, exp, etc). first calc the width of the bar
