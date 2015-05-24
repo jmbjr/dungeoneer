@@ -259,6 +259,7 @@ def render_all(Game):
 
         #blit panel to root console
         Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
+        Game.gui.flush(Game.con)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
     #render a bar (HP, exp, etc). first calc the width of the bar

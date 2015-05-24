@@ -180,9 +180,8 @@ def play_game():
             Game.player.fighter.death_function(Game.player, None, Game)
 
         #render the screen
-        
         render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
-        Game.gui.flush(Game.con)
+        
 
         #erase objects from old position on current map, before they move
         for object in Game.objects[Game.dat.maplist[Game.player.dungeon_level]]:
@@ -205,6 +204,7 @@ def play_game():
 
         #handle monsters only if the game is still playing and the player isn't waiting for an action
         if Game.game_state == Game.dat.STATE_PLAYING and Game.player_action != Game.dat.STATE_NOACTION:
+            Game.tick += 1
             Game.fov_recompute = True
             
             #loop through all objects on all maps
@@ -249,7 +249,6 @@ def play_game():
             if Game.dat.FREE_FOR_ALL_MODE:
                 Game.entity_sql.log_flush(Game)
                 Game.message_sql.log_flush(Game)            
-                Game.tick += 1
                 Game.sql_commit_counter -= 1
 
             if Game.dat.AUTOMODE:
@@ -261,7 +260,6 @@ def play_game():
 
                     #render the screen
                     render_all(Game) #TODO: probably need to do some surgery in gamestuff.render_all()
-                    Game.gui.flush(Game.con)
                     chosen_item = inventory_menu(Game.rootcon,'inventory for ' + alive_entities[0].name, Game, alive_entities[0])
                     
                     save_final_sql_csv(Game)
