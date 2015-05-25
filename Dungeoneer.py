@@ -43,7 +43,7 @@ def game_initialize(stdscr):
 
     Game.con = Game.gui.console(Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
     Game.mouse,Game.key,Game.rootcon = Game.gui.prep_console(Game.con, Game.dat.MAP_WIDTH,Game.dat.MAP_HEIGHT)
-    Game.panel = Game.gui.console(Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
+    Game.panel = Game.gui.panel(Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT)
 
     main_menu()
 

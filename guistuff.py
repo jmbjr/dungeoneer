@@ -43,6 +43,16 @@ class Guistuff(object):
             return False
         return con
 
+    def panel(self, nwidth, nheight):
+        if self.graphicsmode == 'libtcod':
+            con = libtcod.console_new(nwidth, nheight)
+        elif self.graphicsmode == 'curses':
+            con = cursesx.newwin(nheight, nwidth)
+        else:
+            self.err_graphicsmode('console')
+            return False
+        return con
+
     def clear(self, con):
         if self.graphicsmode == 'libtcod':
             libtcod.console_clear(con)

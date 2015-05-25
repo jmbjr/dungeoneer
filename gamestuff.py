@@ -87,7 +87,7 @@ def menu(rootcon, header, options, width, Game, letterdelim=None):
     height = len(options) + header_height
 
     #create off-screen console that represents the menu's window
-    window = Game.gui.console(width, height)
+    window = Game.gui.panel(width, height)
     Game.gui.set_default_color(window, fg_color=Game.col.WHITE)
     Game.gui.print_rect(window, 0, 0, width, height, header)
 
