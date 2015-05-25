@@ -258,7 +258,8 @@ def render_all(Game):
         Game.gui.print_str(Game.panel, 1, 0, Game.gui.get_names_under_mouse(Game))
 
         #blit panel to root console
-        Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, Game.rootcon, 0, Game.dat.PANEL_Y)
+        if Game.dat.SHOW_PANEL:
+            Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, Game.rootcon, 0, Game.dat.PANEL_Y)
         Game.gui.flush(Game.con)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
