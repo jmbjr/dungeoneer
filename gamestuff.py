@@ -232,8 +232,8 @@ def render_all(Game):
         #ensure we draw player last
         Game.player.draw(Game)
 
-        #blit contents of con to root console #TODO: add Game.rootcon here
-        Game.gui.con_blit(Game.con, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.SCREEN_HEIGHT, 0, 0, 0)
+        #blit contents of con to root console
+        Game.gui.con_blit(Game.con, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.SCREEN_HEIGHT, Game.rootcon, 0, 0)
 
         #show player's stats via GUI panel
         Game.gui.clear(Game.panel)
@@ -258,7 +258,7 @@ def render_all(Game):
         Game.gui.print_str(Game.panel, 1, 0, Game.gui.get_names_under_mouse(Game))
 
         #blit panel to root console
-        Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, 0, 0, Game.dat.PANEL_Y)
+        Game.gui.con_blit(Game.panel, 0, 0, Game.dat.SCREEN_WIDTH, Game.dat.PANEL_HEIGHT, Game.rootcon, 0, Game.dat.PANEL_Y)
         Game.gui.flush(Game.con)
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color, Game):
