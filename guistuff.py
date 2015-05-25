@@ -194,7 +194,7 @@ class Guistuff(object):
         if self.graphicsmode == 'libtcod':
             libtcod.console_blit(con, xx, yy, nwidth, nheight, dest, dest_xx, dest_yy, ffade, bfade)
         elif self.graphicsmode == 'curses':
-            self.graphicsmode = 'curses'
+            con.mvwin(dest_yy, dest_xx)
         else:
             self.err_graphicsmode('con_blit')
             
