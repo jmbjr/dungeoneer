@@ -172,7 +172,7 @@ def make_map(Game, levelnum, levelname):
                 (prev_x, prev_y) = rooms[num_rooms -1].center()
 
                 #flip coin
-                if flip_coin() == 1:
+                if rng.flip_coin() == 1:
                     #move h then v
                     Game.map[Game.dungeon_levelname].create_h_tunnel(prev_x, new_x, prev_y)
                     Game.map[Game.dungeon_levelname].create_v_tunnel(prev_y, new_y, new_x)
